@@ -1,11 +1,13 @@
 "use client";
 import { useState, useEffect } from "react";
-import { Card, Select, Row, Col, Tag, Button, Space } from "antd";
+import { Card, Row, Col, Tag, Button, Space, Tooltip, MenuProps } from "antd";
 import {
   FilePdfOutlined,
   EditOutlined,
   DeleteOutlined,
+  UserOutlined,
 } from "@ant-design/icons";
+import { Dropdown, DropdownItem } from "@/smartspecs/components";
 
 interface Requirement {
   id: string;
@@ -16,21 +18,35 @@ interface Requirement {
   clientRepName: string;
 }
 
-interface Project {
-  id: string;
-  name: string;
-}
+const items: DropdownItem[] = [
+  {
+    value: "1",
+    text: "1st menu item",
+  },
+  {
+    value: "2",
+    text: "2nd menu item",
+  },
+  {
+    value: "3",
+    text: "3rd menu item",
+  },
+  {
+    value: "4",
+    text: "4th menu item",
+  },
+];
 
 export function Home() {
-  const [selectedProject, setSelectedProject] = useState<string>("");
-  const [projects, setProjects] = useState<Project[]>([]);
+  const [selectedProject, setSelectedProject] = useState<DropdownItem | null>(
+    null
+  );
+  const [projects, setProjects] = useState<DropdownItem[]>([]);
   const [requirements, setRequirements] = useState<Requirement[]>([]);
 
   useEffect(() => {
-    setProjects([
-      { id: "1", name: "Project A" },
-      { id: "2", name: "Project B" },
-    ]);
+    setProjects(items);
+    setSelectedProject(items[0]);
   }, []);
 
   useEffect(() => {
@@ -146,28 +162,24 @@ export function Home() {
     // TODO: Implement delete logic
   };
 
+  const handleMenuClick = (item: DropdownItem) => {
+    setSelectedProject(item);
+  };
+
   return (
     <div className="p-4">
       <div className="mb-4">
-        <div className="mb-2">Select Project</div>
-        <Select
-          style={{ width: "100%" }}
-          value={selectedProject}
-          onChange={setSelectedProject}
-          placeholder="Choose a project..."
-        >
-          {projects.map((project) => (
-            <Select.Option key={project.id} value={project.id}>
-              {project.name}
-            </Select.Option>
-          ))}
-        </Select>
+        <Dropdown
+          items={items}
+          onSelect={handleMenuClick}
+          selectedItem={selectedProject}
+        ></Dropdown>
       </div>
 
       <Row gutter={[16, 16]}>
         {requirements.map((requirement) => (
           <Col xs={24} md={12} lg={8} key={requirement.id}>
-            <Card title={requirement.title}>
+            <Card title={requirement.title} className="card">
               <p className="text-gray-500">
                 Created: {requirement.createdAt.toLocaleDateString()}
                 <br />
@@ -175,27 +187,36 @@ export function Home() {
                 <br />
                 Client Rep: {requirement.clientRepName}
               </p>
-              <Tag color={getStatusTagColor(requirement.status)}>
+              <Tag
+                color={getStatusTagColor(requirement.status)}
+                className="rounded-lg"
+              >
                 {requirement.status.replace("_", " ").toUpperCase()}
               </Tag>
               <div className="mt-3">
                 <Space>
-                  <Button
-                    type="default"
-                    icon={<FilePdfOutlined />}
-                    onClick={() => handleOpenPDF(requirement.id)}
-                  />
-                  <Button
-                    type="default"
-                    icon={<EditOutlined />}
-                    onClick={() => handleEdit(requirement.id)}
-                  />
-                  <Button
-                    type="default"
-                    danger
-                    icon={<DeleteOutlined />}
-                    onClick={() => handleDelete(requirement.id)}
-                  />
+                  <Tooltip title="View PDF" arrow={false}>
+                    <Button
+                      type="default"
+                      icon={<FilePdfOutlined />}
+                      onClick={() => handleOpenPDF(requirement.id)}
+                    />
+                  </Tooltip>
+                  <Tooltip title="Edit Requirement" arrow={false}>
+                    <Button
+                      type="default"
+                      icon={<EditOutlined />}
+                      onClick={() => handleEdit(requirement.id)}
+                    />
+                  </Tooltip>
+                  <Tooltip title="Delete Requirement" arrow={false}>
+                    <Button
+                      type="default"
+                      danger
+                      icon={<DeleteOutlined />}
+                      onClick={() => handleDelete(requirement.id)}
+                    />
+                  </Tooltip>
                 </Space>
               </div>
             </Card>
