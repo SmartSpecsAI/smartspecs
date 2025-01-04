@@ -1,13 +1,13 @@
 "use client";
 import { useState, useEffect } from "react";
-import { Card, Row, Col, Tag, Button, Space, Tooltip, MenuProps } from "antd";
+import { Card, Row, Col, Tag, Button, Space, Tooltip } from "antd";
 import {
   FilePdfOutlined,
   EditOutlined,
   DeleteOutlined,
-  UserOutlined,
 } from "@ant-design/icons";
-import { Dropdown, DropdownItem } from "@/smartspecs/components";
+import { Dropdown, DropdownItem } from "@/smartspecs/presentation";
+import { useProjectsData } from "@/smartspecs/presentation";
 
 interface Requirement {
   id: string;
@@ -18,36 +18,12 @@ interface Requirement {
   clientRepName: string;
 }
 
-const items: DropdownItem[] = [
-  {
-    value: "1",
-    text: "1st menu item",
-  },
-  {
-    value: "2",
-    text: "2nd menu item",
-  },
-  {
-    value: "3",
-    text: "3rd menu item",
-  },
-  {
-    value: "4",
-    text: "4th menu item",
-  },
-];
-
 export function Home() {
+  const { projects, isLoading, error } = useProjectsData();
   const [selectedProject, setSelectedProject] = useState<DropdownItem | null>(
     null
   );
-  const [projects, setProjects] = useState<DropdownItem[]>([]);
   const [requirements, setRequirements] = useState<Requirement[]>([]);
-
-  useEffect(() => {
-    setProjects(items);
-    setSelectedProject(items[0]);
-  }, []);
 
   useEffect(() => {
     if (selectedProject) {
@@ -137,6 +113,12 @@ export function Home() {
     }
   }, [selectedProject]);
 
+  const items = projects.map((project) => ({
+    key: project.id,
+    label: project.name,
+    value: project.id,
+  }));
+
   const getStatusTagColor = (status: string) => {
     switch (status) {
       case "in_progress":
@@ -166,14 +148,24 @@ export function Home() {
     setSelectedProject(item);
   };
 
+  useEffect(() => {
+    if (projects[0]) {
+      setSelectedProject({
+        label: projects[0].name,
+        value: projects[0].id,
+      });
+    }
+  }, [projects]);
+
   return (
-    <div className="p-4">
-      <div className="mb-4">
+    <div>
+      <div className="flex justify-between w-100 mb-3">
         <Dropdown
           items={items}
           onSelect={handleMenuClick}
           selectedItem={selectedProject}
-        ></Dropdown>
+        />
+        <Button type="primary">Add Requirement</Button>
       </div>
 
       <Row gutter={[16, 16]}>

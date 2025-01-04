@@ -1,6 +1,11 @@
 import Image from "next/image";
-import { Home as AppHome } from "@/smartspecs/components/pages";
+import { Home as AppHome } from "@/smartspecs/presentation";
+import { ProjectsProvider } from "@/lib/presentation/contexts/ProjectsContext";
 
 export default function Home() {
-  return <AppHome />;
+  return (
+    <ProjectsProvider>
+      <AppHome />
+    </ProjectsProvider>
+  );
 }

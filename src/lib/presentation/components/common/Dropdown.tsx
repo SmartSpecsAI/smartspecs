@@ -10,7 +10,7 @@ import {
 
 export interface DropdownItem {
   value: string;
-  text: string;
+  label: string;
   icon?: ReactNode;
 }
 
@@ -46,7 +46,7 @@ export const Dropdown: React.FC<DropdownProps> = ({
   }, []);
 
   const filteredItems = items.filter((item) =>
-    item.text.toLowerCase().includes(searchText.toLowerCase())
+    item.label.toLowerCase().includes(searchText.toLowerCase())
   );
 
   return (
@@ -61,7 +61,7 @@ export const Dropdown: React.FC<DropdownProps> = ({
         }`}
         onClick={() => setIsOpen(!isOpen)}
       >
-        {selectedItem && selectedItem.text}
+        {selectedItem && selectedItem.label}
         <CaretDownFilled style={{ fontSize: "12px" }} size={2} />
       </a>
 
@@ -115,7 +115,7 @@ export const Dropdown: React.FC<DropdownProps> = ({
               )}
 
               <span className="d-inline-block text-truncate align-middle ms-2">
-                {item.text}
+                {item.label}
               </span>
 
               {item.value == selectedItem?.value && (
