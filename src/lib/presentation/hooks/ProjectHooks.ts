@@ -4,7 +4,8 @@ import { useProjects } from "../contexts/ProjectsContext";
 import { getInjection } from "@/di/container";
 
 export function useProjectsData() {
-  const { projects, setProjects, setSelectedProject } = useProjects();
+  const { projects, setProjects, setSelectedProject, selectedProject } =
+    useProjects();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const getAllProjectsUseCase = getInjection("IGetAllProjectsUseCase");
@@ -16,7 +17,6 @@ export function useProjectsData() {
       try {
         const projectsData = await getAllProjectsUseCase.execute();
         setProjects(projectsData);
-        console.log("projectsData::", projectsData);
         if (projectsData.length > 0) {
           setSelectedProject(projectsData[0]);
         }
@@ -32,5 +32,5 @@ export function useProjectsData() {
     fetchProjects();
   }, [setProjects, setSelectedProject]);
 
-  return { projects, isLoading, error };
+  return { projects, setSelectedProject, selectedProject, isLoading, error };
 }

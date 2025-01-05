@@ -9,6 +9,8 @@ import {
   deleteDoc,
   doc,
   getDoc,
+  DocumentReference,
+  DocumentData,
 } from "firebase/firestore";
 
 export class FirebaseDatasource implements IFirebaseDatasource {
@@ -18,8 +20,15 @@ export class FirebaseDatasource implements IFirebaseDatasource {
     this.db = getFirestore(firebase);
   }
 
-  async getCollection(collectionName: string) {
-    const querySnapshot = await getDocs(collection(this.db, collectionName));
+  async getCollection(
+    collectionName: string,
+    reference?: DocumentReference<DocumentData>
+  ) {
+    const collectionRef = reference
+      ? collection(reference, collectionName)
+      : collection(this.db, collectionName);
+
+    const querySnapshot = await getDocs(collectionRef);
     return querySnapshot.docs.map((doc) => ({
       id: doc.id,
       ...doc.data(),
@@ -34,6 +43,13 @@ export class FirebaseDatasource implements IFirebaseDatasource {
       id: docSnap.id,
       data: () => docSnap.data(),
     };
+  }
+
+  getDocumentReference(
+    collectionName: string,
+    docId: string
+  ): DocumentReference<DocumentData> {
+    return doc(this.db, collectionName, docId);
   }
 
   async addDocument(collectionName: string, data: any) {

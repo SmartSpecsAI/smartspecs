@@ -1,6 +1,15 @@
+import { DocumentData, DocumentReference } from "firebase/firestore";
+
 export interface IFirebaseDatasource {
-  getCollection(collectionName: string): Promise<any[]>;
+  getCollection(
+    collectionName: string,
+    reference?: DocumentReference<DocumentData>
+  ): Promise<any[]>;
   getDocument(collectionName: string, docId: string): Promise<any>;
+  getDocumentReference(
+    collectionName: string,
+    docId: string
+  ): DocumentReference<DocumentData>;
   addDocument(collectionName: string, data: any): Promise<string>;
   updateDocument(
     collectionName: string,

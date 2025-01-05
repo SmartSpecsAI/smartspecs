@@ -7,7 +7,10 @@ import {
   DeleteOutlined,
 } from "@ant-design/icons";
 import { Dropdown, DropdownItem } from "@/smartspecs/presentation";
-import { useProjectsData } from "@/smartspecs/presentation";
+import {
+  useProjectsData,
+  useRequirementsData,
+} from "@/smartspecs/presentation";
 
 interface Requirement {
   id: string;
@@ -19,105 +22,32 @@ interface Requirement {
 }
 
 export function Home() {
-  const { projects, isLoading, error } = useProjectsData();
-  const [selectedProject, setSelectedProject] = useState<DropdownItem | null>(
-    null
-  );
-  const [requirements, setRequirements] = useState<Requirement[]>([]);
+  const {
+    projects,
+    selectedProject,
+    setSelectedProject,
+    isLoading: projectsLoading,
+    error: projectsError,
+  } = useProjectsData();
 
-  useEffect(() => {
-    if (selectedProject) {
-      // TODO: Fetch requirements for selected project from API
-      setRequirements([
-        {
-          id: "1",
-          title: "Sample Requirement 1",
-          createdAt: new Date(),
-          updatedAt: new Date(),
-          status: "in_progress",
-          clientRepName: "John Doe",
-        },
-        {
-          id: "2",
-          title: "Sample Requirement 2",
-          createdAt: new Date(),
-          updatedAt: new Date(),
-          status: "approved",
-          clientRepName: "Jane Smith",
-        },
-        {
-          id: "3",
-          title: "Sample Requirement 3",
-          createdAt: new Date(),
-          updatedAt: new Date(),
-          status: "rejected",
-          clientRepName: "Bob Wilson",
-        },
-        {
-          id: "4",
-          title: "Sample Requirement 4",
-          createdAt: new Date(),
-          updatedAt: new Date(),
-          status: "in_progress",
-          clientRepName: "Alice Brown",
-        },
-        {
-          id: "5",
-          title: "Sample Requirement 5",
-          createdAt: new Date(),
-          updatedAt: new Date(),
-          status: "approved",
-          clientRepName: "Charlie Davis",
-        },
-        {
-          id: "6",
-          title: "Sample Requirement 6",
-          createdAt: new Date(),
-          updatedAt: new Date(),
-          status: "in_progress",
-          clientRepName: "Eve Martin",
-        },
-        {
-          id: "7",
-          title: "Sample Requirement 7",
-          createdAt: new Date(),
-          updatedAt: new Date(),
-          status: "rejected",
-          clientRepName: "Frank Johnson",
-        },
-        {
-          id: "8",
-          title: "Sample Requirement 8",
-          createdAt: new Date(),
-          updatedAt: new Date(),
-          status: "approved",
-          clientRepName: "Grace Lee",
-        },
-        {
-          id: "9",
-          title: "Sample Requirement 9",
-          createdAt: new Date(),
-          updatedAt: new Date(),
-          status: "in_progress",
-          clientRepName: "Henry Taylor",
-        },
-        {
-          id: "10",
-          title: "Sample Requirement 10",
-          createdAt: new Date(),
-          updatedAt: new Date(),
-          status: "approved",
-          clientRepName: "Ivy Clark",
-        },
-      ]);
-    }
-  }, [selectedProject]);
+  const {
+    requirements,
+    isLoading: requirementsLoading,
+    error: requirementsError,
+  } = useRequirementsData();
 
   const items = projects.map((project) => ({
     key: project.id,
     label: project.name,
     value: project.id,
   }));
+
+  const selectedProjectToDropdown = selectedProject
+    ? {
+        value: selectedProject.id,
+        label: selectedProject.name,
+      }
+    : null;
 
   const getStatusTagColor = (status: string) => {
     switch (status) {
@@ -145,15 +75,15 @@ export function Home() {
   };
 
   const handleMenuClick = (item: DropdownItem) => {
-    setSelectedProject(item);
+    const project = projects.find((p) => p.id === item.value);
+    if (project) {
+      setSelectedProject(project);
+    }
   };
 
   useEffect(() => {
     if (projects[0]) {
-      setSelectedProject({
-        label: projects[0].name,
-        value: projects[0].id,
-      });
+      setSelectedProject(projects[0]);
     }
   }, [projects]);
 
@@ -163,7 +93,7 @@ export function Home() {
         <Dropdown
           items={items}
           onSelect={handleMenuClick}
-          selectedItem={selectedProject}
+          selectedItem={selectedProjectToDropdown}
         />
         <Button type="primary">Add Requirement</Button>
       </div>
@@ -172,12 +102,12 @@ export function Home() {
         {requirements.map((requirement) => (
           <Col xs={24} md={12} lg={8} key={requirement.id}>
             <Card title={requirement.title} className="card">
-              <p className="text-gray-500">
-                Created: {requirement.createdAt.toLocaleDateString()}
+              <p className="text-gray-700">
+                Created: {requirement.createdAt.toDate().toLocaleString()}
                 <br />
-                Updated: {requirement.updatedAt.toLocaleDateString()}
+                Updated: {requirement.updatedAt.toDate().toLocaleString()}
                 <br />
-                Client Rep: {requirement.clientRepName}
+                <b>Client Rep:</b> {requirement.clientRepName}
               </p>
               <Tag
                 color={getStatusTagColor(requirement.status)}

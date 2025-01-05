@@ -1,11 +1,11 @@
 import Image from "next/image";
 import { Home as AppHome } from "@/smartspecs/presentation";
-import { ProjectsProvider } from "@/lib/presentation/contexts/ProjectsContext";
+import { MultiProvider } from "@/lib/presentation/contexts";
 
 export default function Home() {
   return (
-    <ProjectsProvider>
+    <MultiProvider>
       <AppHome />
-    </ProjectsProvider>
+    </MultiProvider>
   );
 }

@@ -1,5 +1,8 @@
 import { createModule } from "@evyweb/ioctopus";
-import { GetAllProjectsUseCase } from "@/smartspecs/domain/";
+import {
+  GetAllProjectsUseCase,
+  GetAllRequirementsByProjectUseCase,
+} from "@/smartspecs/domain/";
 import { DI_SYMBOLS } from "@/di/types";
 
 export function createDomainModule() {
@@ -9,6 +12,12 @@ export function createDomainModule() {
     .bind(DI_SYMBOLS.IGetAllProjectsUseCase)
     .toHigherOrderFunction(GetAllProjectsUseCase, [
       DI_SYMBOLS.IProjectsRepository,
+    ]);
+
+  domainModule
+    .bind(DI_SYMBOLS.IGetAllRequirementsByProjectUseCase)
+    .toHigherOrderFunction(GetAllRequirementsByProjectUseCase, [
+      DI_SYMBOLS.IRequirementRepository,
     ]);
 
   return domainModule;

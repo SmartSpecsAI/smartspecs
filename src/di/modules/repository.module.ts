@@ -1,5 +1,8 @@
 import { createModule } from "@evyweb/ioctopus";
-import { ProjectsRepository } from "@/smartspecs/infrastructure/";
+import {
+  ProjectsRepository,
+  RequirementRepository,
+} from "@/smartspecs/infrastructure/";
 import { DI_SYMBOLS } from "@/di/types";
 
 export function createRepositoryModule() {
@@ -8,6 +11,10 @@ export function createRepositoryModule() {
   repositoryModule
     .bind(DI_SYMBOLS.IProjectsRepository)
     .toClass(ProjectsRepository);
+
+  repositoryModule
+    .bind(DI_SYMBOLS.IRequirementRepository)
+    .toClass(RequirementRepository);
 
   return repositoryModule;
 }

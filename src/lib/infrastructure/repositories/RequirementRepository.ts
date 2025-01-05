@@ -1,0 +1,77 @@
+import { Requirement } from "@/lib/domain";
+import { IRequirementRepository } from "@/lib/domain/repositories";
+import { IFirebaseDatasource } from "../datasources";
+import { getInjection } from "@/di/container";
+import { collection } from "firebase/firestore";
+
+export class RequirementRepository implements IRequirementRepository {
+  private readonly collection = "projects";
+  private readonly firebase: IFirebaseDatasource;
+
+  constructor() {
+    this.firebase = getInjection("IFirebaseDatasource");
+  }
+
+  async getAll(): Promise<Requirement[]> {
+    const snapshot = await this.firebase.getCollection(this.collection);
+    const promises = snapshot.map((doc) =>
+      this.firebase.getDocument(this.collection, doc.id)
+    );
+    const docs = await Promise.all(promises);
+    return docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    })) as Requirement[];
+  }
+
+  async getAllById(projectId: string): Promise<Requirement[]> {
+    const docReference = await this.firebase.getDocumentReference(
+      this.collection,
+      projectId
+    );
+
+    const collectionSnapshot = await this.firebase.getCollection(
+      "requirements",
+      docReference
+    );
+
+    return collectionSnapshot.map((doc) => ({
+      id: doc.id,
+      ...doc,
+    })) as Requirement[];
+  }
+
+  async getById(id: string): Promise<Requirement | null> {
+    const doc = await this.firebase.getDocument(this.collection, id);
+    if (!doc.exists) return null;
+    return {
+      id: doc.id,
+      ...doc.data(),
+    } as Requirement;
+  }
+
+  async create(requirement: Omit<Requirement, "id">): Promise<Requirement> {
+    const docId = await this.firebase.addDocument(this.collection, requirement);
+    const newDoc = await this.firebase.getDocument(this.collection, docId);
+    return {
+      id: newDoc.id,
+      ...newDoc.data(),
+    } as Requirement;
+  }
+
+  async update(
+    id: string,
+    requirement: Partial<Requirement>
+  ): Promise<Requirement> {
+    await this.firebase.updateDocument(this.collection, id, requirement);
+    const updatedDoc = await this.firebase.getDocument(this.collection, id);
+    return {
+      id: updatedDoc.id,
+      ...updatedDoc.data(),
+    } as Requirement;
+  }
+
+  async delete(id: string): Promise<void> {
+    await this.firebase.deleteDocument(this.collection, id);
+  }
+}
