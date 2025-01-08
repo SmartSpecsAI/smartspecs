@@ -7,6 +7,7 @@ import {
   IFirebaseDatasource,
   IFilesRepository,
   IUploadFileUseCase,
+  IOpenAIDatasource,
 } from "@/smartspecs/index";
 
 export const DI_SYMBOLS = {
@@ -17,6 +18,7 @@ export const DI_SYMBOLS = {
 
   // Datasources
   IFirebaseDatasource: Symbol.for("IFirebaseDatasource"),
+  IOpenAIDatasource: Symbol.for("IOpenAIDatasource"),
 
   // Use Cases
   IGetAllProjectsUseCase: Symbol.for("IGetAllProjectsUseCase"),
@@ -34,7 +36,8 @@ export interface DI_RETURN_TYPES {
   IFilesRepository: IFilesRepository;
 
   // Datasources
-  IFirebaseDatasource: IFirebaseDatasource; // TODO: Add interface
+  IFirebaseDatasource: IFirebaseDatasource;
+  IOpenAIDatasource: IOpenAIDatasource;
 
   // Use Cases
   IGetAllProjectsUseCase: IGetAllProjectsUseCase;

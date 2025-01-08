@@ -1,5 +1,5 @@
 import { createModule } from "@evyweb/ioctopus";
-import { FirebaseDatasource } from "@/smartspecs/datasource";
+import { FirebaseDatasource, OpenAIDatasource } from "@/smartspecs/datasource";
 import { DI_SYMBOLS } from "@/di/types";
 
 export function createDatasourceModule() {
@@ -8,6 +8,8 @@ export function createDatasourceModule() {
   datasourceModule
     .bind(DI_SYMBOLS.IFirebaseDatasource)
     .toClass(FirebaseDatasource);
+
+  datasourceModule.bind(DI_SYMBOLS.IOpenAIDatasource).toClass(OpenAIDatasource);
 
   return datasourceModule;
 }
