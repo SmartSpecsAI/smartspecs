@@ -1,1 +1,1 @@
-export * from "./RequirementModal";
+export * from "./requirements";

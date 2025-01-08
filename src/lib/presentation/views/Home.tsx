@@ -24,16 +24,8 @@ import {
 import {
   useProjectsData,
   useRequirementsData,
+  useFilesData,
 } from "@/smartspecs/presentation";
-
-interface Requirement {
-  id: string;
-  title: string;
-  createdAt: Date;
-  updatedAt: Date;
-  status: "in_progress" | "approved" | "rejected";
-  clientRepName: string;
-}
 
 export function Home() {
   const {
@@ -49,6 +41,14 @@ export function Home() {
     isLoading: requirementsLoading,
     error: requirementsError,
   } = useRequirementsData();
+
+  const {
+    files,
+    uploadFile,
+    uploadedFiles,
+    loading: filesLoading,
+    error: filesError,
+  } = useFilesData();
 
   const items = projects.map((project) => ({
     key: project.id,
@@ -76,8 +76,17 @@ export function Home() {
     }
   };
 
-  const handleOpenPDF = (id: string) => {
-    // TODO: Implement PDF opening logic
+  const handleOpenPDF = async (id: string) => {
+    if (!selectedProject) return;
+    try {
+      const path = `projects/${selectedProject.id}/requirements/${id}/document.pdf`;
+      const file = files.find((f) => f.name === path);
+      if (file) {
+        window.open(URL.createObjectURL(file));
+      }
+    } catch (error) {
+      console.error("Error opening PDF:", error);
+    }
   };
 
   const handleEdit = (id: string) => {

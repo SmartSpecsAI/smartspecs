@@ -5,13 +5,15 @@ import { getInjection } from "@/di/container";
 import { Requirement } from "@/lib/domain";
 
 export function useRequirementsData() {
-  const { selectedProject } = useProjects();
-  const [requirements, setRequirements] = useState<Requirement[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const getAllRequirementsByProjectUseCase = getInjection(
     "IGetAllRequirementsByProjectUseCase"
   );
+  const createRequirementUseCase = getInjection("ICreateNewRequirementUseCase");
+  const { selectedProject } = useProjects();
+
+  const [requirements, setRequirements] = useState<Requirement[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchRequirements = async () => {
@@ -34,5 +36,23 @@ export function useRequirementsData() {
     fetchRequirements();
   }, [selectedProject]);
 
-  return { requirements, isLoading, error };
+  const createRequirement = async (requirement: Omit<Requirement, "id">) => {
+    if (!selectedProject) return;
+    setIsLoading(true);
+    setError(null);
+    try {
+      const newRequirement = await createRequirementUseCase.execute(
+        requirement
+      );
+      setRequirements((prev) => [...prev, newRequirement]);
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Failed to create requirement"
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return { requirements, isLoading, error, createRequirement };
 }

@@ -2,6 +2,7 @@ import { ReactNode } from "react";
 
 import { ProjectsProvider } from "./ProjectsContext";
 import { RequirementProvider } from "./RequirementContext";
+import { FilesProvider } from "./FilesContext";
 
 interface MultiProviderProps {
   children: ReactNode;
@@ -10,7 +11,9 @@ interface MultiProviderProps {
 export function MultiProvider({ children }: MultiProviderProps) {
   return (
     <ProjectsProvider>
-      <RequirementProvider>{children}</RequirementProvider>
+      <RequirementProvider>
+        <FilesProvider>{children}</FilesProvider>
+      </RequirementProvider>
     </ProjectsProvider>
   );
 }

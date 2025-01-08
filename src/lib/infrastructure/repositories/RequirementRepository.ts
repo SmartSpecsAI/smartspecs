@@ -1,8 +1,7 @@
 import { Requirement } from "@/lib/domain";
-import { IRequirementRepository } from "@/lib/domain/repositories";
-import { IFirebaseDatasource } from "../datasources";
+import { IRequirementRepository } from "@/smartspecs/domain";
+import { IFirebaseDatasource } from "@/smartspecs/infrastructure";
 import { getInjection } from "@/di/container";
-import { collection } from "firebase/firestore";
 
 export class RequirementRepository implements IRequirementRepository {
   private readonly collection = "projects";

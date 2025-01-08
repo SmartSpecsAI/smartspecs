@@ -11,6 +11,9 @@ const firebaseConfig = {
 };
 
 const firebase = initializeApp(firebaseConfig);
-const firestore = getFirestore(firebase);
+const firestore = getFirestore(
+  firebase,
+  "gs://smartspecs57b.firebasestorage.app"
+);
 
 export { firebase, firestore };
