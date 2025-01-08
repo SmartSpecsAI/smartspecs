@@ -42,24 +42,17 @@ export function Home() {
     error: requirementsError,
   } = useRequirementsData();
 
-  const {
-    files,
-    uploadFile,
-    uploadedFiles,
-    loading: filesLoading,
-    error: filesError,
-  } = useFilesData();
+  const { files } = useFilesData();
 
   const items = projects.map((project) => ({
-    key: project.id,
-    label: project.name,
+    label: project.name ?? "",
     value: project.id,
   }));
 
   const selectedProjectToDropdown = selectedProject
     ? {
         value: selectedProject.id,
-        label: selectedProject.name,
+        label: selectedProject.name ?? "",
       }
     : null;
 

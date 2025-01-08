@@ -39,12 +39,14 @@ export const UploadStep: React.FC<UploadStepProps> = ({ uploadProps }) => {
   const [showConfirm, setShowConfirm] = useState(false);
 
   useEffect(() => {
-    if (uploadProps.file) {
-      const url = URL.createObjectURL(uploadProps.file);
-      setAudioUrl(url);
-      handleAudioLoad(uploadProps.file, url);
-      setShowAudio(true);
+    if (!uploadProps.file) {
+      return resetState();
     }
+
+    const url = URL.createObjectURL(uploadProps.file);
+    setAudioUrl(url);
+    handleAudioLoad(uploadProps.file, url);
+    setShowAudio(true);
   }, [uploadProps.file]);
 
   const resetState = useCallback(() => {

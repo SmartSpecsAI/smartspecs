@@ -4,7 +4,7 @@ import { useFilesContext } from "../contexts/FilesContext";
 import { getInjection } from "@/di/container";
 
 export function useFilesData() {
-  const { files } = useFilesContext();
+  const { files, setFiles } = useFilesContext();
   const uploadFileUseCase = getInjection("IUploadFileUseCase");
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const [loading, setLoading] = useState(false);
@@ -25,6 +25,7 @@ export function useFilesData() {
 
   return {
     files,
+    setFiles,
     uploadFile,
     uploadedFiles,
     loading,

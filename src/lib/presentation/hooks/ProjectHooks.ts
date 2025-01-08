@@ -10,27 +10,36 @@ export function useProjectsData() {
   const [error, setError] = useState<string | null>(null);
   const getAllProjectsUseCase = getInjection("IGetAllProjectsUseCase");
 
-  useEffect(() => {
-    const fetchProjects = async () => {
-      setIsLoading(true);
-      setError(null);
-      try {
-        const projectsData = await getAllProjectsUseCase.execute();
-        setProjects(projectsData);
-        if (projectsData.length > 0) {
-          setSelectedProject(projectsData[0]);
-        }
-      } catch (err) {
-        setError(
-          err instanceof Error ? err.message : "Failed to fetch projects"
-        );
-      } finally {
-        setIsLoading(false);
+  const fetchProjects = async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const projectsData = await getAllProjectsUseCase.execute();
+      setProjects(projectsData);
+      if (projectsData.length > 0) {
+        setSelectedProject(projectsData[0]);
       }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to fetch projects");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (isLoading || projects.length > 0) return;
+    const fetch = async () => {
+      await fetchProjects();
     };
+    fetch();
+  }, [isLoading, projects, setProjects, setSelectedProject]);
 
-    fetchProjects();
-  }, [setProjects, setSelectedProject]);
-
-  return { projects, setSelectedProject, selectedProject, isLoading, error };
+  return {
+    projects,
+    setSelectedProject,
+    selectedProject,
+    isLoading,
+    error,
+    refetch: fetchProjects,
+  };
 }

@@ -1,8 +1,8 @@
 "use client";
 import { useState, useEffect } from "react";
-import { Modal, Form, Upload, Button, message, Steps } from "antd";
+import { Modal, Form, Upload, Button, Steps } from "antd";
 import { Requirement } from "@/smartspecs/domain";
-import { useFilesData } from "@/smartspecs/presentation";
+import { useFilesData, useProjectsData } from "@/smartspecs/presentation";
 import { DetailsStep, UploadStep } from "./steps";
 
 interface RequirementModalProps {
@@ -21,7 +21,7 @@ const StepsIndicator = ({
     current={currentStep === "upload" ? 0 : 1}
     items={[
       {
-        title: "Upload Audio",
+        title: currentStep === "upload" ? "Upload Audio" : "Audio Uploaded",
       },
       {
         title: "Add Details",
@@ -37,15 +37,16 @@ export const RequirementModal: React.FC<RequirementModalProps> = ({
   initialData,
   title = initialData ? "Edit Requirement" : "Create Requirement",
 }) => {
-  const [messageApi, contextHolder] = message.useMessage();
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [audioFile, setAudioFile] = useState<File | null>(null);
   const [step, setStep] = useState<"upload" | "details">(
     initialData ? "details" : "upload"
   );
-  const { uploadFile } = useFilesData();
+  const { files, setFiles, uploadFile } = useFilesData();
+  const { selectedProject } = useProjectsData();
+
+  const file = files[0];
 
   useEffect(() => {
     if (isModalOpen && initialData) {
@@ -61,9 +62,9 @@ export const RequirementModal: React.FC<RequirementModalProps> = ({
     try {
       setLoading(true);
       const values = await form.validateFields();
-      onSubmit(values, audioFile || undefined);
+      onSubmit(values, file || undefined);
       form.resetFields();
-      setAudioFile(null);
+      setFiles([]);
       setStep("upload");
       setIsModalOpen(false);
     } catch (error) {
@@ -75,7 +76,7 @@ export const RequirementModal: React.FC<RequirementModalProps> = ({
 
   const handleCancel = () => {
     setIsModalOpen(false);
-    setAudioFile(null);
+    setFiles([]);
     setStep("upload");
     form.resetFields();
   };
@@ -83,8 +84,8 @@ export const RequirementModal: React.FC<RequirementModalProps> = ({
   const handleOpen = () => setIsModalOpen(true);
 
   const handleContinue = () => {
-    if (!audioFile) {
-      message.error("Please upload an audio file");
+    if (!file) {
+      console.error("Please upload an audio file");
       return;
     }
     setStep("details");
@@ -98,14 +99,12 @@ export const RequirementModal: React.FC<RequirementModalProps> = ({
     if (info.file.status === "done") {
       try {
         const uploadedFile = info.file.originFileObj;
-        await uploadFile(uploadedFile, `requirements/audios/${info.file.uid}`);
-        setAudioFile(uploadedFile);
-        messageApi.success(`${info.file.name} uploaded successfully`);
+        setFiles([uploadedFile]);
       } catch (error) {
-        messageApi.error(`Failed to upload ${info.file.name}`);
+        console.error(`Failed to upload ${info.file.name}`);
       }
     } else if (info.file.status === "error") {
-      messageApi.error(`${info.file.name} upload failed`);
+      console.error(`${info.file.name} upload failed`);
     }
   };
 
@@ -113,14 +112,14 @@ export const RequirementModal: React.FC<RequirementModalProps> = ({
     beforeUpload: (file: File) => {
       const isAudio = file.type.startsWith("audio/");
       if (!isAudio) {
-        messageApi.error("You can only upload audio files!");
+        console.error("You can only upload audio files!");
         return Upload.LIST_IGNORE;
       }
       return true;
     },
     onChange: handleFileChange,
     maxCount: 1,
-    file: audioFile,
+    file: file,
     accept: "audio/*",
   };
 
@@ -132,8 +131,8 @@ export const RequirementModal: React.FC<RequirementModalProps> = ({
       <Modal
         title={title}
         open={isModalOpen}
+        closable={false}
         onCancel={handleCancel}
-        closeIcon={null}
         footer={[
           <Button key="cancel" style={{ float: "left" }} onClick={handleCancel}>
             Cancel
@@ -163,7 +162,7 @@ export const RequirementModal: React.FC<RequirementModalProps> = ({
         {!initialData && step === "upload" ? (
           <UploadStep uploadProps={uploadProps} />
         ) : (
-          <DetailsStep form={form} />
+          <DetailsStep form={form} project={selectedProject} />
         )}
       </Modal>
     </>
