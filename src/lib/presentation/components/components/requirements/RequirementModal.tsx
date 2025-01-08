@@ -53,7 +53,7 @@ export const RequirementModal: React.FC<RequirementModalProps> = ({
       form.setFieldsValue({
         title: initialData.title,
         description: initialData.description,
-        clientRepName: initialData.clientRepName,
+        clientRep: initialData.clientRepName,
       });
     }
   }, [isModalOpen, initialData, form]);

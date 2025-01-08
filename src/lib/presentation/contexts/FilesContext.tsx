@@ -1,6 +1,5 @@
 "use client";
 import { createContext, useContext, useState, ReactNode } from "react";
-import { getInjection } from "@/di/container";
 
 interface FilesContextType {
   files: File[];

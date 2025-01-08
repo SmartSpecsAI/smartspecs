@@ -25,7 +25,7 @@ export const DetailsStep: React.FC<DetailsStepProps> = ({ form, project }) => (
     </Form.Item>
 
     <Form.Item
-      name="clientRepId"
+      name="clientRep"
       label="Client Representative"
       rules={[
         {
@@ -38,6 +38,7 @@ export const DetailsStep: React.FC<DetailsStepProps> = ({ form, project }) => (
         placeholder="Select a representative"
         options={project?.representatives?.map((rep) => ({
           label: rep.name,
+          value: rep.name,
         }))}
       />
     </Form.Item>
