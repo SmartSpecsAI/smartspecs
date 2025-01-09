@@ -1,5 +1,5 @@
 "use client";
-import { Requirement } from "@/lib/domain";
+import { Requirement } from "@/smartspecs/lib/domain";
 import { createContext, useContext, useState, ReactNode } from "react";
 
 interface RequirementContextType {

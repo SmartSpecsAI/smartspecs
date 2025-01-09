@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 import { ReactNode } from "react";
-import { AppLayout } from "@/smartspecs/presentation";
+import { AppLayout } from "@/smartspecs/lib/presentation";
 
 export const metadata: Metadata = {
   title: "Create Next App",

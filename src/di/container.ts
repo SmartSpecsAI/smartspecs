@@ -1,10 +1,10 @@
 import { createContainer } from "@evyweb/ioctopus";
-import { DI_RETURN_TYPES, DI_SYMBOLS } from "@/di/types";
+import { DI_RETURN_TYPES, DI_SYMBOLS } from "@/smartspecs/di/types";
 import {
   createDomainModule,
   createDatasourceModule,
   createRepositoryModule,
-} from "@/di/modules";
+} from "@/smartspecs/di/modules";
 
 const ApplicationContainer = createContainer();
 

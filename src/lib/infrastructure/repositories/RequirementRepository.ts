@@ -1,7 +1,7 @@
-import { Requirement } from "@/lib/domain";
-import { IRequirementRepository } from "@/smartspecs/domain";
-import { IFirebaseDatasource } from "@/smartspecs/infrastructure";
-import { getInjection } from "@/di/container";
+import { Requirement } from "@/smartspecs/lib/domain";
+import { IRequirementRepository } from "@/smartspecs/lib/domain";
+import { IFirebaseDatasource } from "@/smartspecs/lib/infrastructure";
+import { getInjection } from "@/smartspecs/di/container";
 
 export class RequirementRepository implements IRequirementRepository {
   private readonly collection = "projects";

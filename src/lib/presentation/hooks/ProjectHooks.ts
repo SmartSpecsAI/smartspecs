@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useProjects } from "../contexts/ProjectsContext";
-import { getInjection } from "@/di/container";
+import { getInjection } from "@/smartspecs/di/container";
 
 export function useProjectsData() {
   const { projects, setProjects, setSelectedProject, selectedProject } =

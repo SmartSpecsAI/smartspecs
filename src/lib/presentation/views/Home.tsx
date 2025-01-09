@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import {
   Card,
   Row,
@@ -20,12 +20,10 @@ import {
   Dropdown,
   DropdownItem,
   RequirementModal,
-} from "@/smartspecs/presentation";
-import {
   useProjectsData,
   useRequirementsData,
   useFilesData,
-} from "@/smartspecs/presentation";
+} from "@/smartspecs/lib/presentation";
 
 export function Home() {
   const {

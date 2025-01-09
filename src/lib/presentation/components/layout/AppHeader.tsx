@@ -1,6 +1,6 @@
 import React from "react";
 import { Layout } from "antd";
-import ReactLogo from "@/assets/images/57blocks-logo.svg";
+import ReactLogo from "@/smartspecs/assets/images/57blocks-logo.svg";
 import Image from "next/image";
 
 const { Header } = Layout;

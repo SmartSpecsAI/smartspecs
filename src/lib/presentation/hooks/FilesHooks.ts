@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { useFilesContext } from "../contexts/FilesContext";
-import { getInjection } from "@/di/container";
+import { getInjection } from "@/smartspecs/di/container";
 
 export function useFilesData() {
   const { file, setFile } = useFilesContext();

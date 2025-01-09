@@ -10,8 +10,6 @@ import {
   IFilesRepository,
   IUploadFileUseCase,
   ITranscriptAudioUseCase,
-  IGetFileUrlUseCase,
-  IOpenAIDatasource,
 } from "@/smartspecs/lib/index";
 
 export const DI_SYMBOLS = {
