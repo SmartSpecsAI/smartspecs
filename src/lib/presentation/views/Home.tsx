@@ -42,7 +42,7 @@ export function Home() {
     error: requirementsError,
   } = useRequirementsData();
 
-  const { files } = useFilesData();
+  const { file } = useFilesData();
 
   const items = projects.map((project) => ({
     label: project.name ?? "",
@@ -73,7 +73,6 @@ export function Home() {
     if (!selectedProject) return;
     try {
       const path = `projects/${selectedProject.id}/requirements/${id}/document.pdf`;
-      const file = files.find((f) => f.name === path);
       if (file) {
         window.open(URL.createObjectURL(file));
       }
@@ -130,10 +129,7 @@ export function Home() {
           onSelect={handleMenuClick}
           selectedItem={selectedProjectToDropdown}
         />
-        <RequirementModal
-          triggerButtonText="Add Requirement"
-          onSubmit={() => {}}
-        ></RequirementModal>
+        <RequirementModal />
       </div>
 
       <Row gutter={[16, 16]}>
@@ -155,10 +151,7 @@ export function Home() {
         ) : requirements.length === 0 ? (
           <Col span={24}>
             <Empty description="No requirements found">
-              <RequirementModal
-                triggerButtonText="Add Requirement"
-                onSubmit={() => {}}
-              ></RequirementModal>
+              <RequirementModal triggerButtonText="Add Requirement"></RequirementModal>
             </Empty>
           </Col>
         ) : (

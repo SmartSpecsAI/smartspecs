@@ -7,6 +7,11 @@ import {
   IFirebaseDatasource,
   IFilesRepository,
   IUploadFileUseCase,
+<<<<<<< Updated upstream
+=======
+  IOpenAIDatasource,
+  ITranscriptAudioUseCase,
+>>>>>>> Stashed changes
 } from "@/smartspecs/index";
 
 export const DI_SYMBOLS = {
@@ -25,6 +30,7 @@ export const DI_SYMBOLS = {
   ),
   ICreateNewRequirementUseCase: Symbol.for("ICreateNewRequirementUseCase"),
   IUploadFileUseCase: Symbol.for("IUploadFileUseCase"),
+  ITranscriptAudioUseCase: Symbol.for("ITranscriptAudioUseCase"),
 } as const;
 
 export interface DI_RETURN_TYPES {
@@ -41,4 +47,5 @@ export interface DI_RETURN_TYPES {
   IGetAllRequirementsByProjectUseCase: IGetAllRequirementsByProjectUseCase;
   ICreateNewRequirementUseCase: ICreateNewRequirementUseCase;
   IUploadFileUseCase: IUploadFileUseCase;
+  ITranscriptAudioUseCase: ITranscriptAudioUseCase;
 }

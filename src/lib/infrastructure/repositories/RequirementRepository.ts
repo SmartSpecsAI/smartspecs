@@ -50,11 +50,20 @@ export class RequirementRepository implements IRequirementRepository {
   }
 
   async create(requirement: Omit<Requirement, "id">): Promise<Requirement> {
-    const docId = await this.firebase.addDocument(this.collection, requirement);
-    const newDoc = await this.firebase.getDocument(this.collection, docId);
+    const docReference = await this.firebase.getDocumentReference(
+      this.collection,
+      requirement.projectId
+    );
+
+    const newDocId = await this.firebase.addDocumentToDocumentCollection(
+      docReference,
+      "requirements",
+      requirement
+    );
+
     return {
-      id: newDoc.id,
-      ...newDoc.data(),
+      id: newDocId,
+      ...requirement,
     } as Requirement;
   }
 

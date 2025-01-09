@@ -1,12 +1,19 @@
 import { Requirement } from "@/smartspecs/domain";
 import { IRequirementRepository } from "@/smartspecs/domain/repositories";
+import { Timestamp } from "firebase/firestore";
 
 export const CreateNewRequirementUseCase = (
   requirementRepository: IRequirementRepository
 ) => ({
   async execute(requirement: Omit<Requirement, "id">): Promise<Requirement> {
     try {
-      return await requirementRepository.create(requirement);
+      const requirementWithDates = {
+        ...requirement,
+        status: "in_progress",
+        createdAt: Timestamp.fromDate(new Date()),
+        updatedAt: Timestamp.fromDate(new Date()),
+      };
+      return await requirementRepository.create(requirementWithDates);
     } catch (error) {
       console.error("Error creating new requirement:", error);
       throw new Error(

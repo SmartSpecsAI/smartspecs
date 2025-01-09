@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useProjects } from "../contexts/ProjectsContext";
 import { getInjection } from "@/di/container";
 import { Requirement } from "@/lib/domain";
+import { useRequirements } from "../contexts";
 
 export function useRequirementsData() {
   const getAllRequirementsByProjectUseCase = getInjection(
@@ -11,7 +12,7 @@ export function useRequirementsData() {
   const createRequirementUseCase = getInjection("ICreateNewRequirementUseCase");
   const { selectedProject } = useProjects();
 
-  const [requirements, setRequirements] = useState<Requirement[]>([]);
+  const { requirements, setRequirements } = useRequirements();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -44,7 +45,9 @@ export function useRequirementsData() {
       const newRequirement = await createRequirementUseCase.execute(
         requirement
       );
-      setRequirements((prev) => [...prev, newRequirement]);
+      const updatedRequirements = [...requirements, newRequirement];
+      console.log("Updated requirements:", updatedRequirements);
+      setRequirements(updatedRequirements);
     } catch (err) {
       setError(
         err instanceof Error ? err.message : "Failed to create requirement"
@@ -54,5 +57,5 @@ export function useRequirementsData() {
     }
   };
 
-  return { requirements, isLoading, error, createRequirement };
+  return { requirements, setRequirements, isLoading, error, createRequirement };
 }

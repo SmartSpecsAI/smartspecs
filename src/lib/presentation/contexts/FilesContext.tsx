@@ -2,20 +2,20 @@
 import { createContext, useContext, useState, ReactNode } from "react";
 
 interface FilesContextType {
-  files: File[];
-  setFiles: (files: File[]) => void;
+  file: File | null;
+  setFile: (file: File | null) => void;
 }
 
 const FilesContext = createContext<FilesContextType | undefined>(undefined);
 
 export function FilesProvider({ children }: { children: ReactNode }) {
-  const [files, setFiles] = useState<File[]>([]);
+  const [file, setFile] = useState<File | null>(null);
 
   return (
     <FilesContext.Provider
       value={{
-        files,
-        setFiles,
+        file,
+        setFile,
       }}
     >
       {children}
