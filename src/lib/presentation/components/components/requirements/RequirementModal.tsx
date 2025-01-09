@@ -8,7 +8,6 @@ import {
   useRequirementsData,
 } from "@/smartspecs/lib/presentation";
 import { DetailsStep, UploadStep } from "./steps";
-
 interface RequirementModalProps {
   triggerButtonText?: string;
   initialData?: Requirement;
@@ -147,18 +146,17 @@ export const RequirementModal: React.FC<RequirementModalProps> = ({
     const transcriptionResult = await transcriptAudio(file);
 
     const analysisResult = await getRequirementAnalysis(transcriptionResult);
-    console.log("transcriptionResult", transcriptionResult);
     const requirementData = {
       ...analysisResult,
       transcription: transcriptionResult,
-      projectId: selectedProject?.id,
+      projectId: selectedProject?.id || "",
       audioUrl: fileUrl,
     };
     form.setFieldsValue({
       title: analysisResult.title,
       description: analysisResult.description,
     });
-    setTempRequirement(requirementData);
+    setTempRequirement(requirementData as Requirement);
   };
 
   const uploadProps = {
