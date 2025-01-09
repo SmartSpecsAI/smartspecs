@@ -5,8 +5,8 @@ import {
   CreateNewRequirementUseCase,
   UploadFileUseCase,
   TranscriptAudioUseCase,
-} from "@/smartspecs/domain/";
-import { DI_SYMBOLS } from "@/di/types";
+} from "@/smartspecs/lib/domain/";
+import { DI_SYMBOLS } from "@/smartspecs/di/types";
 
 export function createDomainModule() {
   const domainModule = createModule();

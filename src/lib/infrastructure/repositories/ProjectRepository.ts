@@ -1,7 +1,6 @@
-import { Project } from "@/smartspecs/domain/entities";
-import { IProjectsRepository } from "@/smartspecs/domain";
+import { IProjectsRepository, Project } from "@/smartspecs/lib/domain";
 import { IFirebaseDatasource } from "../datasources";
-import { getInjection } from "@/di/container";
+import { getInjection } from "@/smartspecs/di/container";
 
 export class ProjectsRepository implements IProjectsRepository {
   private readonly collection = "projects";

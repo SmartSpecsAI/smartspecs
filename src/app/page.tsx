@@ -1,5 +1,4 @@
-import { Home as AppHome } from "@/smartspecs/presentation";
-import { MultiProvider } from "@/lib/presentation/contexts";
+import { Home as AppHome, MultiProvider } from "@/smartspecs/lib/presentation";
 
 export default function Home() {
   return (

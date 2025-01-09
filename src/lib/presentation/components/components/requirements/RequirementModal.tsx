@@ -1,10 +1,13 @@
 "use client";
 import { useState, useEffect } from "react";
 import { Modal, Form, Upload, Button, Steps } from "antd";
-import { Requirement } from "@/smartspecs/domain";
-import { useFilesData, useProjectsData } from "@/smartspecs/presentation";
+import { Requirement } from "@/smartspecs/lib/domain";
+import {
+  useFilesData,
+  useProjectsData,
+  useRequirementsData,
+} from "@/smartspecs/lib/presentation";
 import { DetailsStep, UploadStep } from "./steps";
-import { useRequirementsData } from "@/lib/presentation/hooks/RequirementHooks";
 
 interface RequirementModalProps {
   triggerButtonText?: string;

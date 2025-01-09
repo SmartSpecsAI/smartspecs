@@ -3,8 +3,8 @@ import {
   ProjectsRepository,
   RequirementRepository,
   FilesRepository,
-} from "@/smartspecs/infrastructure/";
-import { DI_SYMBOLS } from "@/di/types";
+} from "@/smartspecs/lib/infrastructure/";
+import { DI_SYMBOLS } from "@/smartspecs/di/types";
 
 export function createRepositoryModule() {
   const repositoryModule = createModule();

@@ -1,8 +1,8 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useProjects } from "../contexts/ProjectsContext";
-import { getInjection } from "@/di/container";
-import { Requirement } from "@/lib/domain";
+import { getInjection } from "@/smartspecs/di/container";
+import { Requirement } from "@/smartspecs/lib/domain";
 import { useRequirements } from "../contexts";
 
 export function useRequirementsData() {

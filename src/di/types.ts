@@ -7,12 +7,8 @@ import {
   IFirebaseDatasource,
   IFilesRepository,
   IUploadFileUseCase,
-<<<<<<< Updated upstream
-=======
-  IOpenAIDatasource,
   ITranscriptAudioUseCase,
->>>>>>> Stashed changes
-} from "@/smartspecs/index";
+} from "@/smartspecs/lib/index";
 
 export const DI_SYMBOLS = {
   // Repositories

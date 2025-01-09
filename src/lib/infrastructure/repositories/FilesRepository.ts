@@ -1,5 +1,5 @@
-import { getInjection } from "@/di/container";
-import { IFirebaseDatasource } from "@/smartspecs/infrastructure";
+import { getInjection } from "@/smartspecs/di/container";
+import { IFirebaseDatasource } from "@/smartspecs/lib/infrastructure";
 
 export class FilesRepository {
   private readonly firebase: IFirebaseDatasource;

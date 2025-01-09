@@ -1,5 +1,5 @@
-import { IFirebaseDatasource } from "@/lib/infrastructure";
-import { firebase } from "@/smartspecs/config";
+import { IFirebaseDatasource } from "@/smartspecs/lib/infrastructure";
+import { firebase } from "@/smartspecs/lib/config";
 import {
   getFirestore,
   collection,

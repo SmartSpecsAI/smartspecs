@@ -1,5 +1,5 @@
-import { Requirement } from "@/smartspecs/domain";
-import { IRequirementRepository } from "@/smartspecs/domain/repositories";
+import { Requirement } from "@/smartspecs/lib/domain";
+import { IRequirementRepository } from "@/smartspecs/lib/domain/repositories";
 import { Timestamp } from "firebase/firestore";
 
 export const CreateNewRequirementUseCase = (
