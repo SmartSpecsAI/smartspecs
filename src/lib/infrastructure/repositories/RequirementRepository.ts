@@ -1,4 +1,4 @@
-import { Requirement, RequirementItem } from "@/smartspecs/lib/domain";
+import { Requirement } from "@/smartspecs/lib/domain";
 import { IRequirementRepository } from "@/smartspecs/lib/domain";
 import {
   IFirebaseDatasource,
