@@ -11,6 +11,7 @@ import {
   getDoc,
   DocumentReference,
   DocumentData,
+  CollectionReference,
 } from "firebase/firestore";
 import { getStorage, ref, uploadBytes, deleteObject } from "firebase/storage";
 
@@ -26,7 +27,7 @@ export class FirebaseDatasource implements IFirebaseDatasource {
   async getCollection(
     collectionName: string,
     reference?: DocumentReference<DocumentData>
-  ) {
+  ): Promise<any[]> {
     const collectionRef = reference
       ? collection(reference, collectionName)
       : collection(this.db, collectionName);
@@ -38,7 +39,7 @@ export class FirebaseDatasource implements IFirebaseDatasource {
     }));
   }
 
-  async getDocument(collectionName: string, docId: string) {
+  async getDocument(collectionName: string, docId: string): Promise<any> {
     const docRef = doc(this.db, collectionName, docId);
     const docSnap = await getDoc(docRef);
     return {
@@ -48,34 +49,59 @@ export class FirebaseDatasource implements IFirebaseDatasource {
     };
   }
 
-  getDocumentReference(
+  async getDocumentReference(
     collectionName: string,
     docId: string
-  ): DocumentReference<DocumentData> {
+  ): Promise<DocumentReference<DocumentData>> {
     return doc(this.db, collectionName, docId);
   }
 
-  async addDocument(collectionName: string, data: any) {
-    const docRef = await addDoc(collection(this.db, collectionName), data);
+  async getCollectionReference(
+    collectionName: string,
+    reference?: DocumentReference<DocumentData>
+  ): Promise<CollectionReference<DocumentData>> {
+    return reference
+      ? collection(reference, collectionName)
+      : collection(this.db, collectionName);
+  }
+  async addDocument(collectionName: string, data: any): Promise<string> {
+    const collectionRef = collection(this.db, collectionName);
+
+    const docRef = await addDoc(collectionRef, data);
     return docRef.id;
   }
 
-  async updateDocument(collectionName: string, docId: string, data: any) {
+  async addDocumentToDocumentCollection(
+    documentRef: DocumentReference<DocumentData>,
+    collectionName: string,
+    data: any
+  ): Promise<string> {
+    const collectionRef = collection(documentRef, collectionName);
+
+    const docRef = await addDoc(collectionRef, data);
+    return docRef.id;
+  }
+
+  async updateDocument(
+    collectionName: string,
+    docId: string,
+    data: any
+  ): Promise<void> {
     const docRef = doc(this.db, collectionName, docId);
     await updateDoc(docRef, data);
   }
 
-  async deleteDocument(collectionName: string, docId: string) {
+  async deleteDocument(collectionName: string, docId: string): Promise<void> {
     const docRef = doc(this.db, collectionName, docId);
     await deleteDoc(docRef);
   }
 
-  async addFile(path: string, file: File) {
+  async addFile(path: string, file: File): Promise<void> {
     const storageRef = ref(this.storage, path);
     await uploadBytes(storageRef, file);
   }
 
-  async removeFile(path: string) {
+  async removeFile(path: string): Promise<void> {
     const storageRef = ref(this.storage, path);
     await deleteObject(storageRef);
   }

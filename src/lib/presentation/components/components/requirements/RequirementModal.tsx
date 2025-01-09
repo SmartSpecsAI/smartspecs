@@ -4,10 +4,11 @@ import { Modal, Form, Upload, Button, Steps } from "antd";
 import { Requirement } from "@/smartspecs/domain";
 import { useFilesData, useProjectsData } from "@/smartspecs/presentation";
 import { DetailsStep, UploadStep } from "./steps";
+import { useRequirementsData } from "@/lib/presentation/hooks/RequirementHooks";
 
 interface RequirementModalProps {
   triggerButtonText?: string;
-  onSubmit: (requirement: Partial<Requirement>, audioFile?: File) => void;
+
   initialData?: Requirement;
   title?: string;
 }
@@ -33,7 +34,7 @@ const StepsIndicator = ({
 
 export const RequirementModal: React.FC<RequirementModalProps> = ({
   triggerButtonText = "Add Requirement",
-  onSubmit,
+
   initialData,
   title = initialData ? "Edit Requirement" : "Create Requirement",
 }) => {
@@ -43,10 +44,11 @@ export const RequirementModal: React.FC<RequirementModalProps> = ({
   const [step, setStep] = useState<"upload" | "details">(
     initialData ? "details" : "upload"
   );
-  const { files, setFiles, uploadFile } = useFilesData();
-  const { selectedProject } = useProjectsData();
 
-  const file = files[0];
+  const { file, setFile, transcriptAudio, transcription, setTranscription } =
+    useFilesData();
+  const { selectedProject } = useProjectsData();
+  const { createRequirement } = useRequirementsData();
 
   useEffect(() => {
     if (isModalOpen && initialData) {
@@ -62,11 +64,23 @@ export const RequirementModal: React.FC<RequirementModalProps> = ({
     try {
       setLoading(true);
       const values = await form.validateFields();
-      onSubmit(values, file || undefined);
-      form.resetFields();
-      setFiles([]);
-      setStep("upload");
-      setIsModalOpen(false);
+      if (file) {
+        const transcriptionResult = await transcriptAudio(file);
+        console.log("transcriptionResult", transcriptionResult);
+        const requirementData = {
+          ...values,
+          transcription: transcriptionResult,
+          projectId: selectedProject?.id,
+        };
+
+        await createRequirement(requirementData);
+
+        form.resetFields();
+        setFile(null);
+        setStep("upload");
+        setTranscription("");
+        setIsModalOpen(false);
+      }
     } catch (error) {
       console.error("Validation failed:", error);
     } finally {
@@ -76,14 +90,15 @@ export const RequirementModal: React.FC<RequirementModalProps> = ({
 
   const handleCancel = () => {
     setIsModalOpen(false);
-    setFiles([]);
+    setFile(null);
     setStep("upload");
+    setTranscription("");
     form.resetFields();
   };
 
   const handleOpen = () => setIsModalOpen(true);
 
-  const handleContinue = () => {
+  const handleContinue = async () => {
     if (!file) {
       console.error("Please upload an audio file");
       return;
@@ -99,7 +114,7 @@ export const RequirementModal: React.FC<RequirementModalProps> = ({
     if (info.file.status === "done") {
       try {
         const uploadedFile = info.file.originFileObj;
-        setFiles([uploadedFile]);
+        setFile(uploadedFile);
       } catch (error) {
         console.error(`Failed to upload ${info.file.name}`);
       }
@@ -137,7 +152,7 @@ export const RequirementModal: React.FC<RequirementModalProps> = ({
           <Button key="cancel" style={{ float: "left" }} onClick={handleCancel}>
             Cancel
           </Button>,
-          !initialData && step === "details" && (
+          !initialData && step !== "upload" && (
             <Button key="back" onClick={handleBack}>
               Back
             </Button>
@@ -147,14 +162,16 @@ export const RequirementModal: React.FC<RequirementModalProps> = ({
               Continue
             </Button>
           ) : (
-            <Button
-              key="submit"
-              type="primary"
-              loading={loading}
-              onClick={handleSubmit}
-            >
-              Submit
-            </Button>
+            step === "details" && (
+              <Button
+                key="submit"
+                type="primary"
+                loading={loading}
+                onClick={handleSubmit}
+              >
+                Submit
+              </Button>
+            )
           ),
         ].filter(Boolean)}
       >

@@ -7,6 +7,7 @@ export class OpenAIDatasource implements IOpenAIDatasource {
   constructor() {
     this.openai = new OpenAI({
       apiKey: process.env.OPENAI_API_KEY,
+      dangerouslyAllowBrowser: true,
     });
   }
 

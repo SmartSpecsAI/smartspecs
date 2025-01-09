@@ -4,11 +4,17 @@ import { useFilesContext } from "../contexts/FilesContext";
 import { getInjection } from "@/di/container";
 
 export function useFilesData() {
-  const { files, setFiles } = useFilesContext();
+  const { file, setFile } = useFilesContext();
   const uploadFileUseCase = getInjection("IUploadFileUseCase");
+  const transcriptAudioUseCase = getInjection("ITranscriptAudioUseCase");
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const [loading, setLoading] = useState(false);
+  const [transcribingLoading, setTranscribingLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [transcriptionError, setTranscriptionError] = useState<string | null>(
+    null
+  );
+  const [transcription, setTranscription] = useState<string>("");
 
   const uploadFile = async (file: File, path: string) => {
     setLoading(true);
@@ -23,12 +29,35 @@ export function useFilesData() {
     }
   };
 
+  const transcriptAudio = async (file: File) => {
+    setTranscribingLoading(true);
+    setTranscriptionError(null);
+    try {
+      const result = await transcriptAudioUseCase.execute(file);
+      console.log("TRANSCRIPCION::::", result);
+      setTranscription(result);
+      return result;
+    } catch (err) {
+      setTranscriptionError(
+        err instanceof Error ? err.message : "Failed to transcribe audio"
+      );
+      return "";
+    } finally {
+      setTranscribingLoading(false);
+    }
+  };
+
   return {
-    files,
-    setFiles,
+    file,
+    setFile,
     uploadFile,
     uploadedFiles,
+    transcription,
+    setTranscription,
+    transcriptAudio,
     loading,
+    transcribingLoading,
     error,
+    transcriptionError,
   };
 }
