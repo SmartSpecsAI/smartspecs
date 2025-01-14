@@ -4,15 +4,19 @@ import { Layout, Menu } from "antd";
 import type { MenuProps } from "antd";
 import {
   FileDoneOutlined,
+  HeartFilled,
   MenuFoldOutlined,
   MenuUnfoldOutlined,
 } from "@ant-design/icons";
+import { useRouter, usePathname } from "next/navigation";
 
 const { Sider } = Layout;
 
 export const AppSider: React.FC = () => {
   const [collapsed, setCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
     const checkMobile = () => {
@@ -30,16 +34,13 @@ export const AppSider: React.FC = () => {
       key: "smartspecs",
       icon: <FileDoneOutlined />,
       label: "SmartSpecs",
-      //   children: [
-      //     {
-      //       key: "/manage/worklog",
-      //       label: "Log Time",
-      //     },
-      //     {
-      //       key: "/manage/leave/my",
-      //       label: "Take Leave",
-      //     },
-      //   ],
+      onClick: () => router.push("/smartspecs"),
+    },
+    {
+      key: "menuitem1",
+      icon: <HeartFilled />,
+      label: "Menu Item 1",
+      onClick: () => router.push("/menuitem1"),
     },
   ];
 
@@ -62,7 +63,7 @@ export const AppSider: React.FC = () => {
         <Menu
           mode="inline"
           className="border-end-0"
-          defaultSelectedKeys={["smartspecs"]}
+          selectedKeys={[pathname.split("/")[1]]}
           items={menuItems}
         />
       </div>

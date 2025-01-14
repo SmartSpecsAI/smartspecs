@@ -8,6 +8,7 @@ import {
   IFilesRepository,
   IUploadFileUseCase,
   ITranscriptAudioUseCase,
+  IGetFileUrlUseCase,
 } from "@/smartspecs/lib/index";
 
 export const DI_SYMBOLS = {
@@ -27,6 +28,7 @@ export const DI_SYMBOLS = {
   ICreateNewRequirementUseCase: Symbol.for("ICreateNewRequirementUseCase"),
   IUploadFileUseCase: Symbol.for("IUploadFileUseCase"),
   ITranscriptAudioUseCase: Symbol.for("ITranscriptAudioUseCase"),
+  IGetFileUrlUseCase: Symbol.for("IGetFileUrlUseCase"),
 } as const;
 
 export interface DI_RETURN_TYPES {
@@ -44,4 +46,5 @@ export interface DI_RETURN_TYPES {
   ICreateNewRequirementUseCase: ICreateNewRequirementUseCase;
   IUploadFileUseCase: IUploadFileUseCase;
   ITranscriptAudioUseCase: ITranscriptAudioUseCase;
+  IGetFileUrlUseCase: IGetFileUrlUseCase;
 }

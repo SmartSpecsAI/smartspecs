@@ -15,4 +15,8 @@ export class FilesRepository {
   async removeFile(path: string): Promise<void> {
     await this.firebase.removeFile(path);
   }
+
+  async getFileUrl(path: string): Promise<string> {
+    return await this.firebase.getFileUrl(path);
+  }
 }

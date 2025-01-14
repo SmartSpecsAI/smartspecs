@@ -14,7 +14,7 @@ export const AppLayout = ({ children }: LayoutProps) => {
     <Layout>
       <AppHeader />
       <Layout hasSider className="h-auto md:overflow-hidden">
-        <AppSider></AppSider>
+        <AppSider />
         <Content className="d-flex flex-column px-3 py-4 page-container min-h-100">
           {children}
         </Content>

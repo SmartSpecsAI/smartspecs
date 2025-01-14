@@ -1,4 +1,4 @@
-import { IFilesRepository } from "@/smartspecs/domain/repositories";
+import { IFilesRepository } from "@/smartspecs/lib/domain/repositories";
 
 export const UploadFileUseCase = (filesRepository: IFilesRepository) => ({
   async execute(file: File, path: string): Promise<void> {

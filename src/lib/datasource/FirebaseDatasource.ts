@@ -13,15 +13,22 @@ import {
   DocumentData,
   CollectionReference,
 } from "firebase/firestore";
-import { getStorage, ref, uploadBytes, deleteObject } from "firebase/storage";
+import {
+  getStorage,
+  ref,
+  uploadBytes,
+  deleteObject,
+  getDownloadURL,
+} from "firebase/storage";
 
+const storageBucket = `gs://smartspecs57b.firebasestorage.app`;
 export class FirebaseDatasource implements IFirebaseDatasource {
   private db;
   private storage;
 
   constructor() {
     this.db = getFirestore(firebase);
-    this.storage = getStorage(firebase);
+    this.storage = getStorage(firebase, storageBucket);
   }
 
   async getCollection(
@@ -104,5 +111,9 @@ export class FirebaseDatasource implements IFirebaseDatasource {
   async removeFile(path: string): Promise<void> {
     const storageRef = ref(this.storage, path);
     await deleteObject(storageRef);
+  }
+
+  async getFileUrl(path: string): Promise<string> {
+    return `https://firebasestorage.googleapis.com/v0/b/smartspecs57b.firebasestorage.app/o/${path}?alt=media`;
   }
 }

@@ -5,6 +5,7 @@ import {
   CreateNewRequirementUseCase,
   UploadFileUseCase,
   TranscriptAudioUseCase,
+  GetFileUrlUseCase,
 } from "@/smartspecs/lib/domain/";
 import { DI_SYMBOLS } from "@/smartspecs/di/types";
 
@@ -38,6 +39,10 @@ export function createDomainModule() {
     .toHigherOrderFunction(TranscriptAudioUseCase, [
       DI_SYMBOLS.IFilesRepository,
     ]);
+
+  domainModule
+    .bind(DI_SYMBOLS.IGetFileUrlUseCase)
+    .toHigherOrderFunction(GetFileUrlUseCase, [DI_SYMBOLS.IFilesRepository]);
 
   return domainModule;
 }
