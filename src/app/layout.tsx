@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 import { ReactNode } from "react";
-import { AppLayout } from "@/smartspecs/lib/presentation";
+import { AppLayout, MultiProvider } from "@/smartspecs/lib/presentation";
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -18,7 +18,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <AppLayout>{children}</AppLayout>
+        <AppLayout>
+          <MultiProvider>{children}</MultiProvider>{" "}
+        </AppLayout>
       </body>
     </html>
   );

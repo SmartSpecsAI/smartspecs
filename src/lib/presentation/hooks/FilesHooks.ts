@@ -7,6 +7,7 @@ export function useFilesData() {
   const { file, setFile } = useFilesContext();
   const uploadFileUseCase = getInjection("IUploadFileUseCase");
   const transcriptAudioUseCase = getInjection("ITranscriptAudioUseCase");
+  const getFileUrlUseCase = getInjection("IGetFileUrlUseCase");
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const [loading, setLoading] = useState(false);
   const [transcribingLoading, setTranscribingLoading] = useState(false);
@@ -26,6 +27,16 @@ export function useFilesData() {
       setError(err instanceof Error ? err.message : "Failed to upload file");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const getFileUrl = async (path: string): Promise<string> => {
+    try {
+      const url = await getFileUrlUseCase.execute(path);
+      return url;
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to get file URL");
+      return "";
     }
   };
 
@@ -55,6 +66,7 @@ export function useFilesData() {
     transcription,
     setTranscription,
     transcriptAudio,
+    getFileUrl,
     loading,
     transcribingLoading,
     error,

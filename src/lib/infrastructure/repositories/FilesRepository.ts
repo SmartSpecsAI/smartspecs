@@ -21,4 +21,8 @@ export class FilesRepository {
   async transcribeAudioFile(file: File): Promise<string> {
     return await this.openai.transcribeAudio(file);
   }
+
+  async getFileUrl(path: string): Promise<string> {
+    return await this.firebase.getFileUrl(path);
+  }
 }

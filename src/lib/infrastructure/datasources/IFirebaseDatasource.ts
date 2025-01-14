@@ -32,4 +32,5 @@ export interface IFirebaseDatasource {
   deleteDocument(collectionName: string, docId: string): Promise<void>;
   addFile(path: string, file: File): Promise<void>;
   removeFile(path: string): Promise<void>;
+  getFileUrl(path: string): Promise<string>;
 }

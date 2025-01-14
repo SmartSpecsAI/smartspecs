@@ -24,8 +24,10 @@ import {
   useRequirementsData,
   useFilesData,
 } from "@/smartspecs/lib/presentation";
+import { useRouter } from "next/navigation";
 
-export function Home() {
+export function SmartspecsView() {
+  const router = useRouter();
   const {
     projects,
     selectedProject,
@@ -80,7 +82,7 @@ export function Home() {
   };
 
   const handleEdit = (id: string) => {
-    // TODO: Implement edit logic
+    router.push(`/smartspecs/${id}`);
   };
 
   const handleDelete = (id: string) => {
@@ -155,7 +157,11 @@ export function Home() {
         ) : (
           requirements.map((requirement) => (
             <Col xs={24} md={12} lg={8} key={requirement.id}>
-              <Card title={requirement.title} className="card">
+              <Card
+                title={requirement.title}
+                className="card cursor-pointer"
+                onClick={() => router.push(`/smartspecs/${requirement.id}`)}
+              >
                 <p>{requirement.description}</p>
                 <p className="text-gray-700">
                   Created: {requirement.createdAt.toDate().toLocaleString()}
@@ -176,14 +182,20 @@ export function Home() {
                       <Button
                         type="default"
                         icon={<FilePdfOutlined />}
-                        onClick={() => handleOpenPDF(requirement.id)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleOpenPDF(requirement.id);
+                        }}
                       />
                     </Tooltip>
                     <Tooltip title="Edit Requirement" arrow={false}>
                       <Button
                         type="default"
                         icon={<EditOutlined />}
-                        onClick={() => handleEdit(requirement.id)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleEdit(requirement.id);
+                        }}
                       />
                     </Tooltip>
                     <Tooltip title="Delete Requirement" arrow={false}>
@@ -191,7 +203,10 @@ export function Home() {
                         type="default"
                         danger
                         icon={<DeleteOutlined />}
-                        onClick={() => handleDelete(requirement.id)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDelete(requirement.id);
+                        }}
                       />
                     </Tooltip>
                   </Space>

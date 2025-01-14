@@ -44,12 +44,20 @@ export const RequirementModal: React.FC<RequirementModalProps> = ({
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [fileUrl, setFileUrl] = useState("");
   const [step, setStep] = useState<"upload" | "details">(
     initialData ? "details" : "upload"
   );
 
-  const { file, setFile, transcriptAudio, transcription, setTranscription } =
-    useFilesData();
+  const {
+    file,
+    setFile,
+    transcriptAudio,
+    transcription,
+    setTranscription,
+    uploadFile,
+    getFileUrl,
+  } = useFilesData();
   const { selectedProject } = useProjectsData();
   const { createRequirement } = useRequirementsData();
 
@@ -68,12 +76,13 @@ export const RequirementModal: React.FC<RequirementModalProps> = ({
       setLoading(true);
       const values = await form.validateFields();
       if (file) {
-        const transcriptionResult = await transcriptAudio(file);
-        console.log("transcriptionResult", transcriptionResult);
+        // const transcriptionResult = await transcriptAudio(file);
+        // console.log("transcriptionResult", transcriptionResult);
         const requirementData = {
           ...values,
-          transcription: transcriptionResult,
+          // transcription: transcriptionResult,
           projectId: selectedProject?.id,
+          audioUrl: fileUrl,
         };
 
         await createRequirement(requirementData);
@@ -117,7 +126,17 @@ export const RequirementModal: React.FC<RequirementModalProps> = ({
     if (info.file.status === "done") {
       try {
         const uploadedFile = info.file.originFileObj;
+        console.log("uploadedFile", uploadedFile);
         setFile(uploadedFile);
+        await uploadFile(
+          uploadedFile,
+          `requirements/audios/${uploadedFile.uid}.mp3`
+        );
+        const fileURL = await getFileUrl(
+          `requirements/audios/${uploadedFile.uid}.mp3`
+        );
+
+        setFileUrl(fileURL);
       } catch (error) {
         console.error(`Failed to upload ${info.file.name}`);
       }
