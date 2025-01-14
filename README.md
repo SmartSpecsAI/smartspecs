@@ -1,36 +1,74 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# SmartSpecs
 
-## Getting Started
+## Description
 
-First, run the development server:
+SmartSpecs is a web application built using React to manage tasks and projects, providing a user-friendly interface for effective collaboration. The application utilizes Firebase for storing requirements data and audio files.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## Tools and Technologies
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- **Frontend:**
+  - **Framework:** React
+  - **Styling:**
+    - Sass
+    - Tailwind CSS
+    - Ant Design (UI Component Library)
+  - **State Management:** Context API
+- **Backend:**
+  - **Database:** Firebase Firestore (for storing requirements data)
+  - **Storage:** Firebase Storage (for saving audio files)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Architecture
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+The architecture of the project is organized into several layers:
 
-## Learn More
+- **Datasource:** Handles data retrieval and storage using Firebase Firestore for requirements data and Firebase Storage for audio files.
+- **Domain:** Contains the business logic and rules of the application.
+- **Infrastructure:** Provides necessary services and components, such as authentication and logging.
+- **Presentation:** Responsible for the user interface, built using React components styled with Sass, Tailwind CSS, and Ant Design.
+- **Utils:** Includes utility functions and helpers for code reusability.
+- **Config:** Manages configuration settings for the application.
 
-To learn more about Next.js, take a look at the following resources:
+## Installation
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Instructions on how to set up the project locally. For example:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/jesussanchezro/smartspecs.git
+   ```
+2. Navigate to the project directory:
+   ```bash
+   cd smartspecs
+   ```
+3. Install dependencies:
+   ```bash
+   npm install
+   ```
 
-## Deploy on Vercel
+## Usage
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Instructions on how to run the project. For example:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. Start the development server:
+   ```bash
+   npm start
+   ```
+2. Open your browser and navigate to `http://localhost:3000`.
+
+## Contributing
+
+Guidelines for contributing to the project. For example:
+
+1. Fork the repository.
+2. Create a new branch (`git checkout -b feature/YourFeature`).
+3. Make your changes and commit them (`git commit -m 'Add some feature'`).
+4. Push to the branch (`git push origin feature/YourFeature`).
+5. Open a pull request.
+
+## License
+
+Include information about the project's license, if applicable.
+
+## Acknowledgments
+
+Mention any resources, libraries, or individuals that contributed to the project.

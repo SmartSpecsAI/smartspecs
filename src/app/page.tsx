@@ -1,3 +1,3 @@
 export default function Home() {
-  return "Hole";
+  return "Welcome! Please visite SmartSpecs";
 }

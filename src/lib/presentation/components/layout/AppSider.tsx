@@ -36,12 +36,6 @@ export const AppSider: React.FC = () => {
       label: "SmartSpecs",
       onClick: () => router.push("/smartspecs"),
     },
-    {
-      key: "menuitem1",
-      icon: <HeartFilled />,
-      label: "Menu Item 1",
-      onClick: () => router.push("/menuitem1"),
-    },
   ];
 
   return (
