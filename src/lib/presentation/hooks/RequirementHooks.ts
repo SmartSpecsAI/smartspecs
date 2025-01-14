@@ -4,6 +4,7 @@ import { useProjects } from "../contexts/ProjectsContext";
 import { getInjection } from "@/smartspecs/di/container";
 import { Requirement } from "@/smartspecs/lib/domain";
 import { useRequirements } from "../contexts";
+import { get } from "http";
 
 export function useRequirementsData() {
   const getAllRequirementsByProjectUseCase = getInjection(
@@ -14,6 +15,7 @@ export function useRequirementsData() {
   const generateRequirementItemsFromConversation = getInjection(
     "IGenerateRequirementItemsFromConversation"
   );
+  const getRequirementByIdUseCase = getInjection("IGetRequirementByIdUseCase");
   const { selectedProject } = useProjects();
 
   const { requirements, setRequirements } = useRequirements();
@@ -47,9 +49,18 @@ export function useRequirementsData() {
     setIsLoading(true);
     setError(null);
     try {
-      const requirement = requirements.find((req) => req.id === id);
+      let requirement = requirements.find((req) => req.id === id);
       if (!requirement) {
-        throw new Error("Requirement not found");
+        if (!selectedProject) throw new Error("Requirement not found");
+        const result = await getRequirementByIdUseCase.execute(
+          selectedProject!.id,
+          id
+        );
+        if (result) {
+          requirement = result;
+        } else {
+          throw new Error("Requirement not found");
+        }
       }
       setSelectedRequirement(requirement);
       return requirement;

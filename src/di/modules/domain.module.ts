@@ -2,6 +2,7 @@ import { createModule } from "@evyweb/ioctopus";
 import {
   GetAllProjectsUseCase,
   GetAllRequirementsByProjectUseCase,
+  GetRequirementByIdUseCase,
   GenerateRequirementItemsFromConversation,
   CreateNewRequirementUseCase,
   UploadFileUseCase,
@@ -48,6 +49,12 @@ export function createDomainModule() {
   domainModule
     .bind(DI_SYMBOLS.IGenerateRequirementItemsFromConversation)
     .toHigherOrderFunction(GenerateRequirementItemsFromConversation, [
+      DI_SYMBOLS.IRequirementRepository,
+    ]);
+
+  domainModule
+    .bind(DI_SYMBOLS.IGetRequirementByIdUseCase)
+    .toHigherOrderFunction(GetRequirementByIdUseCase, [
       DI_SYMBOLS.IRequirementRepository,
     ]);
 
