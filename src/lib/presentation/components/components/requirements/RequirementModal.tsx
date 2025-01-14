@@ -142,7 +142,7 @@ export const RequirementModal: React.FC<RequirementModalProps> = ({
   };
 
   const _analyzeAndBuildRequirement = async (file: File | null) => {
-    if (!file) return;
+    if (!file || !selectedProject?.id) return;
     const transcriptionResult = await transcriptAudio(file);
 
     const analysisResult = await getRequirementAnalysis(transcriptionResult);
