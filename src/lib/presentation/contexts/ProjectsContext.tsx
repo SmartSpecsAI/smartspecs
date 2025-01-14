@@ -1,5 +1,5 @@
 "use client";
-import { Project } from "@/lib/domain";
+import { Project } from "@/smartspecs/lib/domain";
 import { createContext, useContext, useState, ReactNode } from "react";
 
 interface ProjectsContextType {

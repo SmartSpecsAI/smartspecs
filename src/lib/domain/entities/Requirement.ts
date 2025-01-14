@@ -20,5 +20,5 @@ export type Requirement = {
     name: string;
   };
   transcription?: string;
-  items?: RequirementItem;
+  items?: RequirementItem[];
 };

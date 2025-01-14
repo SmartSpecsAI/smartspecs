@@ -1,22 +1,7 @@
 "use client";
 import { useEffect } from "react";
-import {
-  Card,
-  Row,
-  Col,
-  Tag,
-  Button,
-  Space,
-  Tooltip,
-  Skeleton,
-  Empty,
-} from "antd";
-import {
-  FilePdfOutlined,
-  EditOutlined,
-  DeleteOutlined,
-  ReloadOutlined,
-} from "@ant-design/icons";
+import { Card, Row, Col, Tag, Button, Skeleton, Empty } from "antd";
+import { ReloadOutlined } from "@ant-design/icons";
 import {
   Dropdown,
   DropdownItem,
@@ -74,26 +59,6 @@ export function SmartspecsView() {
       default:
         return "default";
     }
-  };
-
-  const handleOpenPDF = async (id: string) => {
-    if (!selectedProject) return;
-    try {
-      const path = `projects/${selectedProject.id}/requirements/${id}/document.pdf`;
-      if (file) {
-        window.open(URL.createObjectURL(file));
-      }
-    } catch (error) {
-      console.error("Error opening PDF:", error);
-    }
-  };
-
-  const handleEdit = (id: string) => {
-    router.push(`/smartspecs/${id}`);
-  };
-
-  const handleDelete = (id: string) => {
-    // TODO: Implement delete logic
   };
 
   const handleMenuClick = (item: DropdownItem) => {
@@ -174,7 +139,7 @@ export function SmartspecsView() {
             <Col xs={24} md={12} lg={8} key={requirement.id}>
               <Card
                 title={requirement.title}
-                className="card cursor-pointer"
+                className="card cursor-pointer transition-shadow duration-300 hover:shadow-outline"
                 onClick={() => router.push(`/smartspecs/${requirement.id}`)}
               >
                 <p>{requirement.description}</p>
@@ -191,41 +156,6 @@ export function SmartspecsView() {
                 >
                   {requirement.status.replace("_", " ").toUpperCase()}
                 </Tag>
-                <div className="mt-3">
-                  <Space>
-                    <Tooltip title="View PDF" arrow={false}>
-                      <Button
-                        type="default"
-                        icon={<FilePdfOutlined />}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleOpenPDF(requirement.id);
-                        }}
-                      />
-                    </Tooltip>
-                    <Tooltip title="Edit Requirement" arrow={false}>
-                      <Button
-                        type="default"
-                        icon={<EditOutlined />}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleEdit(requirement.id);
-                        }}
-                      />
-                    </Tooltip>
-                    <Tooltip title="Delete Requirement" arrow={false}>
-                      <Button
-                        type="default"
-                        danger
-                        icon={<DeleteOutlined />}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDelete(requirement.id);
-                        }}
-                      />
-                    </Tooltip>
-                  </Space>
-                </div>
               </Card>
             </Col>
           ))

@@ -1,35 +1,28 @@
-export const CONVERSATION_ANALYSIS_PROMPT = `I want you to analyze the following conversation transcript and generate a detailed JSON document based on its content. The JSON should contain a list of requirements, with each item including the following fields:
+export const CONVERSATION_ANALYSIS_PROMPT = `Analyze the following conversation transcript and generate a JSON document with the requirements. Each requirement should include:
 
 {
-    "title: string, // Representative name for the conversation,
-    "description: string, // Brief description of the conversation,
+    "title": "string", // Summary name for the conversation, be detailed
+    "description": "string", // Brief overview of the conversation, be detailed
     "items": [
         {
-        "name": "string", // Representative name for the requirement
-        "short_resume": "string", // Brief summary
-        "long_description": "string", // Detailed explanation including participant contributions
-        "type": "bug_fix" | "new_feature" | "update", // Type of requirement
-        "estimation_time": "string", // Estimated completion time (hours/days)
-        "priority": "low" | "medium" | "high", // Priority level
-        "recommended_technologies": [
-            {
-            "name": "string", // Technology/tool name
-            "reason": "string", // Why it's suitable
-            "implementation_steps": ["string"] // Step-by-step implementation guide
-            }
-        ]
+            "name": "string", // Name for the requirement, be detailed
+            "summary": "string", // Brief summary, be detailed
+            "details": "string", // Detailed explanation of the requirement, with bugs definitions if exists, with concerns, expectations, step by step to follow the process. Format it to shown properly in HTML if necessary.
+            "type": "bug_fix" | "new_feature" | "update", // Requirement type
+            "estimated_time": "string", // Estimated time (hours/days)
+            "priority": "low" | "medium" | "high", // Priority level
         }
     ]
 }
 
-Guidelines for analysis:
-- Each requirement should be scoped to realizable goals
-- Clearly separate items based on distinct conversation parts
-- Include participant names and their contributions in long_description
-- Provide detailed implementation steps for each recommended technology
+Guidelines:
+- Scope each requirement to achievable goals
+- Distinctly separate items based on conversation segments
+- Include participant names and contributions in details
+- Provide implementation steps for recommended technologies
 
-Here is the conversation transcript:
+Transcript:
 
 [TRANSCRIPT]
 
-Please analyze the transcript carefully and produce and only the JSON output following the schema above.`;
+Produce only the JSON output as per the schema.`;

@@ -10,16 +10,13 @@ import {
   Row,
   Col,
   message,
+  List,
+  Input,
 } from "antd";
-import {
-  EditOutlined,
-  PlayCircleOutlined,
-  PauseCircleOutlined,
-  SaveOutlined,
-} from "@ant-design/icons";
+import { EditOutlined, SaveOutlined } from "@ant-design/icons";
 import { useParams } from "next/navigation";
 import { useRequirementsData } from "@/smartspecs/lib/presentation";
-import { Requirement } from "@/smartspecs/lib/domain";
+import { Requirement, RequirementItem } from "@/smartspecs/lib/domain";
 
 const { Title, Paragraph } = Typography;
 
@@ -30,6 +27,7 @@ export function RequirementDetailView() {
   const { getRequirementAnalysis, getRequirementById, isLoading, error } =
     useRequirementsData();
   const [requirement, setRequirement] = useState<Requirement | null>(null);
+  const [editedItems, setEditedItems] = useState<RequirementItem[]>([]);
   const audioRef = useRef<HTMLAudioElement>(null);
 
   useEffect(() => {
@@ -37,6 +35,7 @@ export function RequirementDetailView() {
       if (params.slug) {
         const data = await getRequirementById(params.slug as string);
         setRequirement(data);
+        // setEditedItems(data?.items || []);
       }
     };
     fetchRequirement();
@@ -84,6 +83,24 @@ export function RequirementDetailView() {
       blocked: "error",
     };
     return statusMap[status.toLowerCase()] || "default";
+  };
+
+  const handleItemChange = (index: number, field: string, value: string) => {
+    const newItems = [...editedItems];
+    newItems[index] = { ...newItems[index], [field]: value };
+    setEditedItems(newItems);
+  };
+
+  const handleConfirmItems = () => {
+    // setRequirement((prev) => {
+    //   if (!prev) return null;
+    //   const updatedItems = editedItems.map((item, index) => ({
+    //     ...prev.items[index],
+    //     ...item,
+    //   }));
+    //   return { ...prev, items: updatedItems };
+    // });
+    message.success("Items confirmed successfully");
   };
 
   if (isLoading) {
@@ -145,7 +162,7 @@ export function RequirementDetailView() {
       >
         <Row gutter={[24, 24]}>
           <Col className="!flex flex-col gap-2" xs={24} lg={16}>
-            <Card className="card bg-gray-50 border">
+            <Card className="card bg-gray-50 border !p-0">
               <Title level={5} className="text-gray-700">
                 Description
               </Title>
@@ -164,13 +181,10 @@ export function RequirementDetailView() {
                 </Title>
                 <Paragraph className="bg-white p-4 rounded border text-base leading-relaxed max-h-[250px] overflow-y-auto">
                   {requirement.transcription ?? ""}
-                  {requirement.transcription ?? ""}
-                  {requirement.transcription ?? ""}
                 </Paragraph>
               </Card>
             )}
           </Col>
-
           <Col xs={24} lg={8}>
             <Card className="card bg-gray-50 border">
               <Space direction="vertical" className="w-full" size="large">
@@ -211,6 +225,62 @@ export function RequirementDetailView() {
             </Card>
           </Col>
         </Row>
+        <Card className="card bg-gray-50 border mt-2">
+          <Title level={5} className="text-gray-700">
+            Requirement Items
+          </Title>
+          <List
+            dataSource={requirement.items}
+            renderItem={(item, index) => (
+              <List.Item>
+                <Card className="w-full bg-gray-50 border p-2">
+                  <Space direction="vertical" size="small" className="w-full">
+                    <div>
+                      <Title level={5} className="text-gray-700 m-0">
+                        {item.name}
+                      </Title>
+                      <Paragraph className="m-0 text-sm text-gray-500">
+                        {item.short_resume}
+                      </Paragraph>
+                    </div>
+                    <div>
+                      <Title level={5} className="text-gray-700 m-0">
+                        Long Description
+                      </Title>
+                      {isEditMode ? (
+                        <Input.TextArea
+                          value={item.details}
+                          onChange={(e) =>
+                            handleItemChange(index, "details", e.target.value)
+                          }
+                          className="bg-white p-2 rounded border"
+                        />
+                      ) : (
+                        <Paragraph className="m-0">{item.details}</Paragraph>
+                      )}
+                    </div>
+                    <div>
+                      <Title level={5} className="text-gray-700 m-0">
+                        Type, Estimation Time & Priority
+                      </Title>
+                      <Space className="mt-2">
+                        <Tag color="blue" className="m-0">
+                          {item.type}
+                        </Tag>
+                        <Tag color="green" className="m-0">
+                          {item.estimated_time}
+                        </Tag>
+                        <Tag color="red" className="m-0">
+                          {item.priority}
+                        </Tag>
+                      </Space>
+                    </div>
+                  </Space>
+                </Card>
+              </List.Item>
+            )}
+          />
+        </Card>
       </Card>
     </div>
   );

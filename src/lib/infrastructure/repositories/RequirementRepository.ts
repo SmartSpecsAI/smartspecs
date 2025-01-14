@@ -45,13 +45,11 @@ export class RequirementRepository implements IRequirementRepository {
     })) as Requirement[];
   }
 
-  async getById(id: string): Promise<Requirement | null> {
-    const doc = await this.firebase.getDocument(this.collection, id);
-    if (!doc.exists) return null;
-    return {
-      id: doc.id,
-      ...doc.data(),
-    } as Requirement;
+  async getById(projectId: string, id: string): Promise<Requirement | null> {
+    const requirementsByProject = await this.getAllById(projectId);
+    const requirement = requirementsByProject.find((req) => req.id === id);
+    if (!requirement) return null;
+    return requirement as Requirement;
   }
 
   async create(requirement: Omit<Requirement, "id">): Promise<Requirement> {

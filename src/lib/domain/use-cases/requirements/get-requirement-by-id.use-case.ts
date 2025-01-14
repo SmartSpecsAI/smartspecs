@@ -1,12 +1,12 @@
 import { Requirement } from "../../entities";
 import { IRequirementRepository } from "@/smartspecs/lib/domain/repositories";
 
-export const GetAllRequirementsByProjectUseCase = (
+export const GetRequirementByIdUseCase = (
   requirementRepository: IRequirementRepository
 ) => ({
-  async execute(projectId: string): Promise<Requirement[]> {
+  async execute(projectId: string, id: string): Promise<Requirement | null> {
     try {
-      return await requirementRepository.getAllById(projectId);
+      return await requirementRepository.getById(projectId, id);
     } catch (error) {
       console.error("Error getting requirements by project:", error);
       throw new Error(
@@ -16,6 +16,6 @@ export const GetAllRequirementsByProjectUseCase = (
   },
 });
 
-export type IGetAllRequirementsByProjectUseCase = ReturnType<
-  typeof GetAllRequirementsByProjectUseCase
+export type IGetRequirementByIdUseCase = ReturnType<
+  typeof GetRequirementByIdUseCase
 >;
