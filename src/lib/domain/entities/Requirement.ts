@@ -1,5 +1,4 @@
 import { Timestamp } from "firebase/firestore";
-import { Transcription } from "./Transcription";
 import { RequirementItem } from "./RequirementItem";
 
 export type Requirement = {

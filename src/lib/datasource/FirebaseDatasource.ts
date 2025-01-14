@@ -104,6 +104,7 @@ export class FirebaseDatasource implements IFirebaseDatasource {
   }
 
   async addFile(path: string, file: File): Promise<void> {
+    console.log("path:::", path);
     const storageRef = ref(this.storage, path);
     await uploadBytes(storageRef, file);
   }

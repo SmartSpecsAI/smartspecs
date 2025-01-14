@@ -85,8 +85,8 @@ export const RequirementModal: React.FC<RequirementModalProps> = ({
       const values = await form.validateFields();
 
       if (file) {
-        // const transcriptionResult = await transcriptAudio(file);
-        // console.log("transcriptionResult", transcriptionResult);
+        const transcriptionResult = await transcriptAudio(file);
+        console.log("transcriptionResult", transcriptionResult);
         const requirementData = {
           ...tempRequirement,
           ...values,

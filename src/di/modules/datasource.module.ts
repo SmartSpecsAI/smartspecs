@@ -13,6 +13,5 @@ export function createDatasourceModule() {
     .toClass(FirebaseDatasource);
 
   datasourceModule.bind(DI_SYMBOLS.IOpenAIDatasource).toClass(OpenAIDatasource);
-
   return datasourceModule;
 }
