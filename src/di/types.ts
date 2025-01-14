@@ -3,12 +3,14 @@ import {
   IRequirementRepository,
   IGetAllProjectsUseCase,
   IGetAllRequirementsByProjectUseCase,
+  IGenerateRequirementItemsFromConversation,
   ICreateNewRequirementUseCase,
   IFirebaseDatasource,
   IFilesRepository,
   IUploadFileUseCase,
   ITranscriptAudioUseCase,
   IGetFileUrlUseCase,
+  IOpenAIDatasource,
 } from "@/smartspecs/lib/index";
 
 export const DI_SYMBOLS = {
@@ -19,11 +21,15 @@ export const DI_SYMBOLS = {
 
   // Datasources
   IFirebaseDatasource: Symbol.for("IFirebaseDatasource"),
+  IOpenAIDatasource: Symbol.for("IOpenAIDatasource"),
 
   // Use Cases
   IGetAllProjectsUseCase: Symbol.for("IGetAllProjectsUseCase"),
   IGetAllRequirementsByProjectUseCase: Symbol.for(
     "IGetAllRequirementsByProjectUseCase"
+  ),
+  IGenerateRequirementItemsFromConversation: Symbol.for(
+    "IGenerateRequirementItemsFromConversation"
   ),
   ICreateNewRequirementUseCase: Symbol.for("ICreateNewRequirementUseCase"),
   IUploadFileUseCase: Symbol.for("IUploadFileUseCase"),
@@ -38,7 +44,8 @@ export interface DI_RETURN_TYPES {
   IFilesRepository: IFilesRepository;
 
   // Datasources
-  IFirebaseDatasource: IFirebaseDatasource; // TODO: Add interface
+  IFirebaseDatasource: IFirebaseDatasource;
+  IOpenAIDatasource: IOpenAIDatasource;
 
   // Use Cases
   IGetAllProjectsUseCase: IGetAllProjectsUseCase;
@@ -47,4 +54,5 @@ export interface DI_RETURN_TYPES {
   IUploadFileUseCase: IUploadFileUseCase;
   ITranscriptAudioUseCase: ITranscriptAudioUseCase;
   IGetFileUrlUseCase: IGetFileUrlUseCase;
+  IGenerateRequirementItemsFromConversation: IGenerateRequirementItemsFromConversation;
 }

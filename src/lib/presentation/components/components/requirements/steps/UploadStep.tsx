@@ -68,8 +68,6 @@ export const UploadStep: React.FC<UploadStepProps> = ({ uploadProps }) => {
 
   const handleUploadChange = useCallback(
     async (info: any) => {
-      console.log(info);
-
       if (info.file.status === "done") {
         const file = info.file.originFileObj;
         const url = URL.createObjectURL(file);

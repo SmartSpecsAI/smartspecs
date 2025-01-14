@@ -15,6 +15,7 @@ import {
   FilePdfOutlined,
   EditOutlined,
   DeleteOutlined,
+  ReloadOutlined,
 } from "@ant-design/icons";
 import {
   Dropdown,
@@ -34,15 +35,21 @@ export function SmartspecsView() {
     setSelectedProject,
     isLoading: projectsLoading,
     error: projectsError,
+    refetch: refetchProjects,
   } = useProjectsData();
 
   const {
     requirements,
     isLoading: requirementsLoading,
     error: requirementsError,
+    refetch: refetchRequirements,
   } = useRequirementsData();
 
   const { file } = useFilesData();
+
+  const handleRefresh = async () => {
+    await Promise.all([refetchProjects(), refetchRequirements()]);
+  };
 
   const items = projects.map((project) => ({
     label: project.name ?? "",
@@ -124,11 +131,19 @@ export function SmartspecsView() {
   return (
     <div>
       <div className="flex justify-between w-100 mb-3">
-        <Dropdown
-          items={items}
-          onSelect={handleMenuClick}
-          selectedItem={selectedProjectToDropdown}
-        />
+        <div className="flex">
+          <Dropdown
+            items={items}
+            onSelect={handleMenuClick}
+            selectedItem={selectedProjectToDropdown}
+          />
+          <Button
+            icon={<ReloadOutlined />}
+            onClick={handleRefresh}
+            loading={projectsLoading || requirementsLoading}
+            shape="circle"
+          />
+        </div>
         <RequirementModal />
       </div>
 

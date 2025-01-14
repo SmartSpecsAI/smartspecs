@@ -1,5 +1,5 @@
 import { Form, FormInstance, Input, Select } from "antd";
-import { Project } from "@/smartspecs/domain";
+import { Project } from "@/smartspecs/lib/domain";
 
 interface DetailsStepProps {
   form: FormInstance<any> | undefined;
@@ -25,7 +25,7 @@ export const DetailsStep: React.FC<DetailsStepProps> = ({ form, project }) => (
     </Form.Item>
 
     <Form.Item
-      name="clientRep"
+      name="clientRepName"
       label="Client Representative"
       rules={[
         {
@@ -36,7 +36,7 @@ export const DetailsStep: React.FC<DetailsStepProps> = ({ form, project }) => (
     >
       <Select
         placeholder="Select a representative"
-        options={project?.representatives?.map((rep) => ({
+        options={project?.representatives?.map((rep: { name: string }) => ({
           label: rep.name,
           value: rep.name,
         }))}

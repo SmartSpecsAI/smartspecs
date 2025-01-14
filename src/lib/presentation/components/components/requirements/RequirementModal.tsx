@@ -11,7 +11,6 @@ import { DetailsStep, UploadStep } from "./steps";
 
 interface RequirementModalProps {
   triggerButtonText?: string;
-
   initialData?: Requirement;
   title?: string;
 }
@@ -37,7 +36,6 @@ const StepsIndicator = ({
 
 export const RequirementModal: React.FC<RequirementModalProps> = ({
   triggerButtonText = "Add Requirement",
-
   initialData,
   title = initialData ? "Edit Requirement" : "Create Requirement",
 }) => {
@@ -49,49 +47,53 @@ export const RequirementModal: React.FC<RequirementModalProps> = ({
     initialData ? "details" : "upload"
   );
 
+  const [tempRequirement, setTempRequirement] = useState<Requirement | null>(
+    null
+  );
+
   const {
     file,
     setFile,
-    transcriptAudio,
-    transcription,
     setTranscription,
     uploadFile,
     getFileUrl,
+    transcriptAudio,
   } = useFilesData();
   const { selectedProject } = useProjectsData();
-  const { createRequirement } = useRequirementsData();
+  const { createRequirement, getRequirementAnalysis } = useRequirementsData();
 
   useEffect(() => {
     if (isModalOpen && initialData) {
       form.setFieldsValue({
         title: initialData.title,
         description: initialData.description,
-        clientRep: initialData.clientRepName,
+        clientRepName: initialData.clientRepName,
       });
     }
   }, [isModalOpen, initialData, form]);
+
+  const resetForm = () => {
+    form.resetFields();
+    setFile(null);
+    setStep("upload");
+    setTranscription("");
+    setIsModalOpen(false);
+  };
 
   const handleSubmit = async () => {
     try {
       setLoading(true);
       const values = await form.validateFields();
+
       if (file) {
-        // const transcriptionResult = await transcriptAudio(file);
-        // console.log("transcriptionResult", transcriptionResult);
+        const transcriptionResult = await transcriptAudio(file);
+        console.log("transcriptionResult", transcriptionResult);
         const requirementData = {
+          ...tempRequirement,
           ...values,
-          // transcription: transcriptionResult,
-          projectId: selectedProject?.id,
-          audioUrl: fileUrl,
         };
-
         await createRequirement(requirementData);
-
-        form.resetFields();
-        setFile(null);
-        setStep("upload");
-        setTranscription("");
-        setIsModalOpen(false);
+        resetForm();
       }
     } catch (error) {
       console.error("Validation failed:", error);
@@ -100,13 +102,7 @@ export const RequirementModal: React.FC<RequirementModalProps> = ({
     }
   };
 
-  const handleCancel = () => {
-    setIsModalOpen(false);
-    setFile(null);
-    setStep("upload");
-    setTranscription("");
-    form.resetFields();
-  };
+  const handleCancel = () => resetForm();
 
   const handleOpen = () => setIsModalOpen(true);
 
@@ -115,34 +111,54 @@ export const RequirementModal: React.FC<RequirementModalProps> = ({
       console.error("Please upload an audio file");
       return;
     }
-    setStep("details");
+    setLoading(true);
+    try {
+      await _analyzeAndBuildRequirement(file);
+      setStep("details");
+    } catch (error) {
+      console.error("Analysis failed:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleBack = () => {
-    setStep("upload");
-  };
+  const handleBack = () => setStep("upload");
 
   const handleFileChange = async (info: any) => {
     if (info.file.status === "done") {
       try {
         const uploadedFile = info.file.originFileObj;
-        console.log("uploadedFile", uploadedFile);
+        const filePath = `requirements/audios/${uploadedFile.uid}`;
         setFile(uploadedFile);
-        await uploadFile(
-          uploadedFile,
-          `requirements/audios/${uploadedFile.uid}.mp3`
-        );
-        const fileURL = await getFileUrl(
-          `requirements/audios/${uploadedFile.uid}.mp3`
-        );
-
+        await uploadFile(uploadedFile, filePath);
+        const fileURL = await getFileUrl(filePath.replaceAll("/", "%2F"));
         setFileUrl(fileURL);
+        console.log("NEW FILE", info);
       } catch (error) {
         console.error(`Failed to upload ${info.file.name}`);
       }
     } else if (info.file.status === "error") {
       console.error(`${info.file.name} upload failed`);
     }
+  };
+
+  const _analyzeAndBuildRequirement = async (file: File | null) => {
+    if (!file) return;
+    const transcriptionResult = await transcriptAudio(file);
+
+    const analysisResult = await getRequirementAnalysis(transcriptionResult);
+    console.log("transcriptionResult", transcriptionResult);
+    const requirementData = {
+      ...analysisResult,
+      transcription: transcriptionResult,
+      projectId: selectedProject?.id,
+      audioUrl: fileUrl,
+    };
+    form.setFieldsValue({
+      title: analysisResult.title,
+      description: analysisResult.description,
+    });
+    setTempRequirement(requirementData);
   };
 
   const uploadProps = {
@@ -156,9 +172,42 @@ export const RequirementModal: React.FC<RequirementModalProps> = ({
     },
     onChange: handleFileChange,
     maxCount: 1,
-    file: file,
+    file,
     accept: "audio/*",
   };
+
+  const renderFooterButtons = () =>
+    [
+      <Button key="cancel" style={{ float: "left" }} onClick={handleCancel}>
+        Cancel
+      </Button>,
+      !initialData && step !== "upload" && (
+        <Button key="back" onClick={handleBack}>
+          Back
+        </Button>
+      ),
+      !initialData && step === "upload" ? (
+        <Button
+          key="continue"
+          type="primary"
+          onClick={handleContinue}
+          loading={loading}
+        >
+          {loading ? "Analyzing" : "Continue"}
+        </Button>
+      ) : (
+        step === "details" && (
+          <Button
+            key="submit"
+            type="primary"
+            loading={loading}
+            onClick={handleSubmit}
+          >
+            Submit
+          </Button>
+        )
+      ),
+    ].filter(Boolean);
 
   return (
     <>
@@ -170,32 +219,7 @@ export const RequirementModal: React.FC<RequirementModalProps> = ({
         open={isModalOpen}
         closable={false}
         onCancel={handleCancel}
-        footer={[
-          <Button key="cancel" style={{ float: "left" }} onClick={handleCancel}>
-            Cancel
-          </Button>,
-          !initialData && step !== "upload" && (
-            <Button key="back" onClick={handleBack}>
-              Back
-            </Button>
-          ),
-          !initialData && step === "upload" ? (
-            <Button key="continue" type="primary" onClick={handleContinue}>
-              Continue
-            </Button>
-          ) : (
-            step === "details" && (
-              <Button
-                key="submit"
-                type="primary"
-                loading={loading}
-                onClick={handleSubmit}
-              >
-                Submit
-              </Button>
-            )
-          ),
-        ].filter(Boolean)}
+        footer={renderFooterButtons()}
       >
         {!initialData && <StepsIndicator currentStep={step} />}
         {!initialData && step === "upload" ? (

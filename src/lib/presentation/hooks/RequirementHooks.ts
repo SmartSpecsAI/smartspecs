@@ -11,6 +11,9 @@ export function useRequirementsData() {
   );
 
   const createRequirementUseCase = getInjection("ICreateNewRequirementUseCase");
+  const generateRequirementItemsFromConversation = getInjection(
+    "IGenerateRequirementItemsFromConversation"
+  );
   const { selectedProject } = useProjects();
 
   const { requirements, setRequirements } = useRequirements();
@@ -19,24 +22,24 @@ export function useRequirementsData() {
   const [selectedRequirement, setSelectedRequirement] =
     useState<Requirement | null>(null);
 
+  const fetchRequirements = async () => {
+    if (!selectedProject) return;
+    setIsLoading(true);
+    setError(null);
+    try {
+      const requirementsData = await getAllRequirementsByProjectUseCase.execute(
+        selectedProject.id
+      );
+      setRequirements(requirementsData);
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Failed to fetch requirements"
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
   useEffect(() => {
-    const fetchRequirements = async () => {
-      if (!selectedProject) return;
-      setIsLoading(true);
-      setError(null);
-      try {
-        const requirementsData =
-          await getAllRequirementsByProjectUseCase.execute(selectedProject.id);
-        setRequirements(requirementsData);
-      } catch (err) {
-        setError(
-          err instanceof Error ? err.message : "Failed to fetch requirements"
-        );
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
     fetchRequirements();
   }, [selectedProject]);
 
@@ -44,7 +47,6 @@ export function useRequirementsData() {
     setIsLoading(true);
     setError(null);
     try {
-      console.log("requirements,,,", id, requirements);
       const requirement = requirements.find((req) => req.id === id);
       if (!requirement) {
         throw new Error("Requirement not found");
@@ -80,6 +82,11 @@ export function useRequirementsData() {
     }
   };
 
+  const getRequirementAnalysis = async (
+    conversation: string
+  ): Promise<Requirement> =>
+    await generateRequirementItemsFromConversation.execute(conversation);
+
   return {
     requirements,
     setRequirements,
@@ -88,5 +95,7 @@ export function useRequirementsData() {
     error,
     createRequirement,
     getRequirementById,
+    getRequirementAnalysis,
+    refetch: fetchRequirements,
   };
 }

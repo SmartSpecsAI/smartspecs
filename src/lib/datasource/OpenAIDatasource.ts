@@ -1,5 +1,5 @@
 import OpenAI from "openai";
-import { IOpenAIDatasource } from "@/smartspecs/infrastructure";
+import { IOpenAIDatasource } from "@/smartspecs/lib/infrastructure";
 
 export class OpenAIDatasource implements IOpenAIDatasource {
   private openai: OpenAI;

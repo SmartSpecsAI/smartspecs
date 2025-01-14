@@ -27,7 +27,8 @@ export function RequirementDetailView() {
   const params = useParams();
   const [isEditMode, setIsEditMode] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
-  const { getRequirementById, isLoading, error } = useRequirementsData();
+  const { getRequirementAnalysis, getRequirementById, isLoading, error } =
+    useRequirementsData();
   const [requirement, setRequirement] = useState<Requirement | null>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
 
@@ -69,6 +70,11 @@ export function RequirementDetailView() {
       };
     }
   }, []);
+
+  useEffect(() => {
+    if (!requirement?.transcription) return;
+    getRequirementAnalysis(requirement?.transcription);
+  }, [requirement]);
 
   const getStatusColor = (status: string) => {
     const statusMap: { [key: string]: string } = {
@@ -156,8 +162,10 @@ export function RequirementDetailView() {
                 <Title level={5} className="text-gray-700">
                   Transcription
                 </Title>
-                <Paragraph className="bg-white p-4 rounded border text-base leading-relaxed">
-                  {requirement.transcription.text ?? ""}
+                <Paragraph className="bg-white p-4 rounded border text-base leading-relaxed max-h-[250px] overflow-y-auto">
+                  {requirement.transcription ?? ""}
+                  {requirement.transcription ?? ""}
+                  {requirement.transcription ?? ""}
                 </Paragraph>
               </Card>
             )}
@@ -166,6 +174,17 @@ export function RequirementDetailView() {
           <Col xs={24} lg={8}>
             <Card className="card bg-gray-50 border">
               <Space direction="vertical" className="w-full" size="large">
+                <div>
+                  <Title level={5} className="text-gray-700">
+                    Client Representative
+                  </Title>
+                  <Paragraph
+                    editable={isEditMode}
+                    className="bg-white p-2 rounded border m-0"
+                  >
+                    {requirement.clientRepName}
+                  </Paragraph>
+                </div>
                 <div>
                   <Title level={5} className="text-gray-700">
                     Status
