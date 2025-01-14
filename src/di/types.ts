@@ -11,6 +11,7 @@ import {
   IUploadFileUseCase,
   ITranscriptAudioUseCase,
   IGetFileUrlUseCase,
+  IOpenAIDatasource,
 } from "@/smartspecs/lib/index";
 
 export const DI_SYMBOLS = {
@@ -54,4 +55,5 @@ export interface DI_RETURN_TYPES {
   IUploadFileUseCase: IUploadFileUseCase;
   ITranscriptAudioUseCase: ITranscriptAudioUseCase;
   IGetFileUrlUseCase: IGetFileUrlUseCase;
+  IGenerateRequirementItemsFromConversation: IGenerateRequirementItemsFromConversation;
 }

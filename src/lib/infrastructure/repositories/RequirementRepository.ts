@@ -1,14 +1,19 @@
-import { Requirement } from "@/smartspecs/lib/domain";
+import { Requirement, RequirementItem } from "@/smartspecs/lib/domain";
 import { IRequirementRepository } from "@/smartspecs/lib/domain";
-import { IFirebaseDatasource } from "@/smartspecs/lib/infrastructure";
+import {
+  IFirebaseDatasource,
+  IOpenAIDatasource,
+} from "@/smartspecs/lib/infrastructure";
 import { getInjection } from "@/smartspecs/di/container";
 
 export class RequirementRepository implements IRequirementRepository {
   private readonly collection = "projects";
   private readonly firebase: IFirebaseDatasource;
+  private readonly openAI: IOpenAIDatasource;
 
   constructor() {
     this.firebase = getInjection("IFirebaseDatasource");
+    this.openAI = getInjection("IOpenAIDatasource");
   }
 
   async getAll(): Promise<Requirement[]> {
@@ -81,5 +86,9 @@ export class RequirementRepository implements IRequirementRepository {
 
   async delete(id: string): Promise<void> {
     await this.firebase.deleteDocument(this.collection, id);
+  }
+
+  async generateRequirementsItems(prompt: string): Promise<string> {
+    return await this.openAI.executePrompt(prompt);
   }
 }

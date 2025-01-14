@@ -45,7 +45,6 @@ export function useFilesData() {
     setTranscriptionError(null);
     try {
       const result = await transcriptAudioUseCase.execute(file);
-      console.log("TRANSCRIPCION::::", result);
       setTranscription(result);
       return result;
     } catch (err) {

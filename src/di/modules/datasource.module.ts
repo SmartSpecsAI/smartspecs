@@ -1,5 +1,8 @@
 import { createModule } from "@evyweb/ioctopus";
-import { FirebaseDatasource } from "@/smartspecs/lib/datasource";
+import {
+  FirebaseDatasource,
+  OpenAIDatasource,
+} from "@/smartspecs/lib/datasource";
 import { DI_SYMBOLS } from "@/smartspecs/di/types";
 
 export function createDatasourceModule() {

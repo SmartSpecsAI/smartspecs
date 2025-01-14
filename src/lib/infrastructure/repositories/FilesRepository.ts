@@ -1,5 +1,8 @@
 import { getInjection } from "@/smartspecs/di/container";
-import { IFirebaseDatasource } from "@/smartspecs/lib/infrastructure";
+import {
+  IFirebaseDatasource,
+  IOpenAIDatasource,
+} from "@/smartspecs/lib/infrastructure";
 
 export class FilesRepository {
   private readonly firebase: IFirebaseDatasource;
@@ -24,5 +27,9 @@ export class FilesRepository {
 
   async getFileUrl(path: string): Promise<string> {
     return await this.firebase.getFileUrl(path);
+  }
+
+  async transcribeAudioFile(file: File): Promise<string> {
+    return await this.openai.transcribeAudio(file);
   }
 }

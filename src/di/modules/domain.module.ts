@@ -2,6 +2,7 @@ import { createModule } from "@evyweb/ioctopus";
 import {
   GetAllProjectsUseCase,
   GetAllRequirementsByProjectUseCase,
+  GenerateRequirementItemsFromConversation,
   CreateNewRequirementUseCase,
   UploadFileUseCase,
   TranscriptAudioUseCase,
@@ -43,6 +44,12 @@ export function createDomainModule() {
   domainModule
     .bind(DI_SYMBOLS.IGetFileUrlUseCase)
     .toHigherOrderFunction(GetFileUrlUseCase, [DI_SYMBOLS.IFilesRepository]);
+
+  domainModule
+    .bind(DI_SYMBOLS.IGenerateRequirementItemsFromConversation)
+    .toHigherOrderFunction(GenerateRequirementItemsFromConversation, [
+      DI_SYMBOLS.IRequirementRepository,
+    ]);
 
   return domainModule;
 }

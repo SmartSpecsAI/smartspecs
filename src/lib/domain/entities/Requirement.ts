@@ -1,5 +1,6 @@
 import { Timestamp } from "firebase/firestore";
 import { Transcription } from "./Transcription";
+import { RequirementItem } from "./RequirementItem";
 
 export type Requirement = {
   id: string;
@@ -18,5 +19,6 @@ export type Requirement = {
     id: string;
     name: string;
   };
-  transcription?: Transcription;
+  transcription?: string;
+  items?: RequirementItem;
 };
