@@ -9,7 +9,8 @@ SmartSpecs is a web application built using React to manage tasks and projects, 
 For a visual overview of the project, you can watch this [video](https://www.loom.com/share/229039890df042b08760942306ca4228?sid=ea4a11e5-803e-441f-9eb8-696c0c14d5f1).
 Alternatively, you can view the embedded video below:
 
-<iframe src="https://www.loom.com/embed/229039890df042b08760942306ca4228?sid=ea4a11e5-803e-441f-9eb8-696c0c14d5f1" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen style="width:100%; height:400px;"></iframe>
+https://github.com/user-attachments/assets/003cb94b-6148-44f6-9443-62a6ab1cd1cb
+
 
 ## Tools and Technologies
 
