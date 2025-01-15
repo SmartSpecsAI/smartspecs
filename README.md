@@ -2,7 +2,7 @@
 
 ## Description
 
-SmartSpecs is a web application built using React to manage tasks and projects, providing a user-friendly interface for effective collaboration. The application utilizes Firebase for storing requirements data and audio files.
+SmartSpecs is a web application built using React to manage tasks and projects, providing a user-friendly interface for effective collaboration. The application utilizes Firebase for storing requirements data and audio files. Additionally, OpenAI is used to analyze data, enhancing the application's capabilities.
 
 ## Tools and Technologies
 
@@ -16,6 +16,7 @@ SmartSpecs is a web application built using React to manage tasks and projects, 
 - **Backend:**
   - **Database:** Firebase Firestore (for storing requirements data)
   - **Storage:** Firebase Storage (for saving audio files)
+  - **Data Analysis:** OpenAI (for analyzing data)
 
 ## Architecture
 
@@ -23,7 +24,7 @@ The architecture of the project is organized into several layers:
 
 - **Datasource:** Handles data retrieval and storage using Firebase Firestore for requirements data and Firebase Storage for audio files.
 - **Domain:** Contains the business logic and rules of the application.
-- **Infrastructure:** Provides necessary services and components, such as authentication and logging.
+- **Infrastructure:** Provides necessary data management tools.
 - **Presentation:** Responsible for the user interface, built using React components styled with Sass, Tailwind CSS, and Ant Design.
 - **Utils:** Includes utility functions and helpers for code reusability.
 - **Config:** Manages configuration settings for the application.
@@ -51,7 +52,7 @@ Instructions on how to run the project. For example:
 
 1. Start the development server:
    ```bash
-   npm start
+   npm run dev
    ```
 2. Open your browser and navigate to `http://localhost:3000`.
 
@@ -64,11 +65,3 @@ Guidelines for contributing to the project. For example:
 3. Make your changes and commit them (`git commit -m 'Add some feature'`).
 4. Push to the branch (`git push origin feature/YourFeature`).
 5. Open a pull request.
-
-## License
-
-Include information about the project's license, if applicable.
-
-## Acknowledgments
-
-Mention any resources, libraries, or individuals that contributed to the project.
