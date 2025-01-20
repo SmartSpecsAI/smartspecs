@@ -13,10 +13,15 @@ import {
   List,
   Input,
 } from "antd";
-import { EditOutlined, SaveOutlined } from "@ant-design/icons";
+import parse from "html-react-parser";
+import { CheckOutlined, EditOutlined, SaveOutlined } from "@ant-design/icons";
 import { useParams } from "next/navigation";
 import { useRequirementsData } from "@/smartspecs/lib/presentation";
-import { Requirement, RequirementItem } from "@/smartspecs/lib/domain";
+import {
+  colorByStatus,
+  Requirement,
+  RequirementItem,
+} from "@/smartspecs/lib/domain";
 
 const { Title, Paragraph } = Typography;
 
@@ -24,8 +29,7 @@ export function RequirementDetailView() {
   const params = useParams();
   const [isEditMode, setIsEditMode] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
-  const { getRequirementAnalysis, getRequirementById, isLoading, error } =
-    useRequirementsData();
+  const { getRequirementById, isLoading, error } = useRequirementsData();
   const [requirement, setRequirement] = useState<Requirement | null>(null);
   const [editedItems, setEditedItems] = useState<RequirementItem[]>([]);
   const audioRef = useRef<HTMLAudioElement>(null);
@@ -69,21 +73,6 @@ export function RequirementDetailView() {
       };
     }
   }, []);
-
-  useEffect(() => {
-    if (!requirement?.transcription) return;
-    getRequirementAnalysis(requirement?.transcription);
-  }, [requirement]);
-
-  const getStatusColor = (status: string) => {
-    const statusMap: { [key: string]: string } = {
-      in_progress: "processing",
-      completed: "success",
-      pending: "warning",
-      blocked: "error",
-    };
-    return statusMap[status.toLowerCase()] || "default";
-  };
 
   const handleItemChange = (index: number, field: string, value: string) => {
     const newItems = [...editedItems];
@@ -148,14 +137,32 @@ export function RequirementDetailView() {
               </Title>
             </Col>
             <Col>
-              <Button
-                type={isEditMode ? "primary" : "default"}
-                icon={isEditMode ? <SaveOutlined /> : <EditOutlined />}
-                onClick={handleEditToggle}
-                className="hover:scale-105 transition-transform duration-200"
-              >
-                {isEditMode ? "Save Changes" : "Edit"}
-              </Button>
+              <Space className="mr-4">
+                <Button
+                  type={isEditMode ? "primary" : "default"}
+                  icon={isEditMode ? <SaveOutlined /> : <EditOutlined />}
+                  onClick={handleEditToggle}
+                  className="hover:scale-105 transition-transform duration-200"
+                >
+                  {isEditMode ? "Save Changes" : "Edit"}
+                </Button>
+                <Button
+                  type="primary"
+                  onClick={() => message.success("Requirement approved")}
+                  className="hover:scale-105 transition-transform duration-200"
+                  danger={false}
+                >
+                  Approve
+                </Button>
+                <Button
+                  type="primary"
+                  onClick={() => message.error("Requirement rejected")}
+                  className="hover:scale-105 transition-transform duration-200"
+                  danger
+                >
+                  Reject
+                </Button>
+              </Space>
             </Col>
           </Row>
         }
@@ -180,7 +187,7 @@ export function RequirementDetailView() {
                   Transcription
                 </Title>
                 <Paragraph className="bg-white p-4 rounded border text-base leading-relaxed max-h-[250px] overflow-y-auto">
-                  {requirement.transcription ?? ""}
+                  {parse(requirement.transcription ?? "")}
                 </Paragraph>
               </Card>
             )}
@@ -204,7 +211,7 @@ export function RequirementDetailView() {
                     Status
                   </Title>
                   <Tag
-                    color={getStatusColor(requirement.status)}
+                    color={colorByStatus(requirement.status)}
                     className="text-lg px-4 py-1"
                   >
                     {requirement.status.replace("_", " ").toUpperCase()}
@@ -265,15 +272,44 @@ export function RequirementDetailView() {
                       </Title>
                       <Space className="mt-2">
                         <Tag color="blue" className="m-0">
-                          {item.type}
+                          {item.type
+                            .replace("_", " ")
+                            .replace(/\b\w/g, (l) => l.toUpperCase())}
                         </Tag>
                         <Tag color="green" className="m-0">
                           {item.estimated_time}
                         </Tag>
-                        <Tag color="red" className="m-0">
-                          {item.priority}
+                        <Tag
+                          color={
+                            item.priority === "high"
+                              ? "red"
+                              : item.priority === "medium"
+                              ? "orange"
+                              : "yellow"
+                          }
+                          className="m-0"
+                        >
+                          {item.priority.replace(/\b\w/g, (l) =>
+                            l.toUpperCase()
+                          )}
                         </Tag>
                       </Space>
+                    </div>
+                    <div>
+                      <Title level={5} className="text-gray-700 m-0">
+                        Action Items
+                      </Title>
+                      <List
+                        dataSource={item.action_items}
+                        renderItem={(actionItem) => (
+                          <List.Item>
+                            <Space>
+                              <CheckOutlined />
+                              {actionItem}
+                            </Space>
+                          </List.Item>
+                        )}
+                      />
                     </div>
                   </Space>
                 </Card>

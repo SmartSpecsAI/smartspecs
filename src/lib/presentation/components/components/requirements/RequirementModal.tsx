@@ -86,7 +86,6 @@ export const RequirementModal: React.FC<RequirementModalProps> = ({
 
       if (file) {
         const transcriptionResult = await transcriptAudio(file);
-        console.log("transcriptionResult", transcriptionResult);
         const requirementData = {
           ...tempRequirement,
           ...values,
@@ -132,7 +131,6 @@ export const RequirementModal: React.FC<RequirementModalProps> = ({
         await uploadFile(uploadedFile, filePath);
         const fileURL = await getFileUrl(filePath.replaceAll("/", "%2F"));
         setFileUrl(fileURL);
-        console.log("NEW FILE", info);
       } catch (error) {
         console.error(`Failed to upload ${info.file.name}`);
       }
@@ -146,6 +144,7 @@ export const RequirementModal: React.FC<RequirementModalProps> = ({
     const transcriptionResult = await transcriptAudio(file);
 
     const analysisResult = await getRequirementAnalysis(transcriptionResult);
+
     const requirementData = {
       ...analysisResult,
       transcription: transcriptionResult,

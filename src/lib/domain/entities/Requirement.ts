@@ -1,5 +1,6 @@
 import { Timestamp } from "firebase/firestore";
 import { RequirementItem } from "./RequirementItem";
+import { Status } from "./Status";
 
 export type Requirement = {
   id: string;
@@ -7,8 +8,7 @@ export type Requirement = {
   description: string;
   createdAt: Timestamp;
   updatedAt: Timestamp;
-  // status: "in_progress" | "approved" | "rejected";
-  status: string;
+  status: Status;
   clientRepName: string;
   projectId: string;
   source: "audio" | "text" | "integration";

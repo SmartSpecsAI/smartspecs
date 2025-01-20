@@ -7,12 +7,13 @@ export const CONVERSATION_ANALYSIS_PROMPT = `Analyze the following conversation 
         {
             "name": "string", // Name for the requirement, be detailed
             "summary": "string", // Brief summary, be detailed
+            "action_items:" "string[]" // List of action items
             "details": "string", // Detailed explanation of the requirement, with bugs definitions if exists, with concerns, expectations, step by step to follow the process. Format it to shown properly in HTML if necessary.
             "type": "bug_fix" | "new_feature" | "update", // Requirement type
             "estimated_time": "string", // Estimated time (hours/days)
             "priority": "low" | "medium" | "high", // Priority level
         }
-    ]
+    ],
 }
 
 Guidelines:

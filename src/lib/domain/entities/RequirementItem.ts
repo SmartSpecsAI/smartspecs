@@ -5,6 +5,7 @@ export type RequirementItem = {
   type: "bug_fix" | "new_feature" | "update";
   estimated_time: string;
   priority: "low" | "medium" | "high";
+  action_items: string[];
   recommended_technologies: {
     name: string;
     reason: string;

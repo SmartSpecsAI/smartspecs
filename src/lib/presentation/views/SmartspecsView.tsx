@@ -11,6 +11,7 @@ import {
   useFilesData,
 } from "@/smartspecs/lib/presentation";
 import { useRouter } from "next/navigation";
+import { colorByStatus, stringToStatus } from "../../domain";
 
 export function SmartspecsView() {
   const router = useRouter();
@@ -47,19 +48,6 @@ export function SmartspecsView() {
         label: selectedProject.name ?? "",
       }
     : null;
-
-  const getStatusTagColor = (status: string) => {
-    switch (status) {
-      case "in_progress":
-        return "warning";
-      case "approved":
-        return "success";
-      case "rejected":
-        return "error";
-      default:
-        return "default";
-    }
-  };
 
   const handleMenuClick = (item: DropdownItem) => {
     const project = projects.find((p) => p.id === item.value);
@@ -135,30 +123,33 @@ export function SmartspecsView() {
             </Empty>
           </Col>
         ) : (
-          requirements.map((requirement) => (
-            <Col xs={24} md={12} lg={8} key={requirement.id}>
-              <Card
-                title={requirement.title}
-                className="card cursor-pointer transition-shadow duration-300 hover:shadow-outline"
-                onClick={() => router.push(`/smartspecs/${requirement.id}`)}
-              >
-                <p>{requirement.description}</p>
-                <p className="text-gray-700">
-                  Created: {requirement.createdAt.toDate().toLocaleString()}
-                  <br />
-                  Updated: {requirement.updatedAt.toDate().toLocaleString()}
-                  <br />
-                  <b>Client Rep:</b> {requirement.clientRepName}
-                </p>
-                <Tag
-                  color={getStatusTagColor(requirement.status)}
-                  className="rounded-lg"
+          requirements.map((requirement) => {
+            const status = stringToStatus(requirement.status);
+            return (
+              <Col xs={24} md={12} lg={8} key={requirement.id}>
+                <Card
+                  title={requirement.title}
+                  className="card cursor-pointer transition-shadow duration-300 hover:shadow-outline"
+                  onClick={() => router.push(`/smartspecs/${requirement.id}`)}
                 >
-                  {requirement.status.replace("_", " ").toUpperCase()}
-                </Tag>
-              </Card>
-            </Col>
-          ))
+                  <p>{requirement.description}</p>
+                  <p className="text-gray-700">
+                    Created: {requirement.createdAt.toDate().toLocaleString()}
+                    <br />
+                    Updated: {requirement.updatedAt.toDate().toLocaleString()}
+                    <br />
+                    <b>Client Rep:</b> {requirement.clientRepName}
+                  </p>
+                  <Tag
+                    color={status ? colorByStatus(status) : "default"}
+                    className="rounded-lg"
+                  >
+                    {requirement.status.replace("_", " ").toUpperCase()}
+                  </Tag>
+                </Card>
+              </Col>
+            );
+          })
         )}
       </Row>
     </div>
