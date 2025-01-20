@@ -13,13 +13,7 @@ import {
   DocumentData,
   CollectionReference,
 } from "firebase/firestore";
-import {
-  getStorage,
-  ref,
-  uploadBytes,
-  deleteObject,
-  getDownloadURL,
-} from "firebase/storage";
+import { getStorage, ref, uploadBytes, deleteObject } from "firebase/storage";
 
 const storageBucket = `gs://smartspecs57b.firebasestorage.app`;
 export class FirebaseDatasource implements IFirebaseDatasource {
@@ -34,7 +28,7 @@ export class FirebaseDatasource implements IFirebaseDatasource {
   async getCollection(
     collectionName: string,
     reference?: DocumentReference<DocumentData>
-  ): Promise<any[]> {
+  ): Promise<Object[]> {
     const collectionRef = reference
       ? collection(reference, collectionName)
       : collection(this.db, collectionName);
@@ -46,7 +40,7 @@ export class FirebaseDatasource implements IFirebaseDatasource {
     }));
   }
 
-  async getDocument(collectionName: string, docId: string): Promise<any> {
+  async getDocument(collectionName: string, docId: string): Promise<Object> {
     const docRef = doc(this.db, collectionName, docId);
     const docSnap = await getDoc(docRef);
     return {
@@ -82,7 +76,7 @@ export class FirebaseDatasource implements IFirebaseDatasource {
   async addDocumentToDocumentCollection(
     documentRef: DocumentReference<DocumentData>,
     collectionName: string,
-    data: any
+    data: Object
   ): Promise<string> {
     const collectionRef = collection(documentRef, collectionName);
 

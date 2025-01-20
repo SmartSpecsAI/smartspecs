@@ -1,4 +1,4 @@
-import { Requirement } from "@/smartspecs/lib/domain";
+import { Requirement, Status } from "@/smartspecs/lib/domain";
 import { IRequirementRepository } from "@/smartspecs/lib/domain/repositories";
 import { Timestamp } from "firebase/firestore";
 
@@ -9,7 +9,7 @@ export const CreateNewRequirementUseCase = (
     try {
       const requirementWithDates = {
         ...requirement,
-        status: "in_progress",
+        status: Status.IN_PROGRESS,
         createdAt: Timestamp.fromDate(new Date()),
         updatedAt: Timestamp.fromDate(new Date()),
       };

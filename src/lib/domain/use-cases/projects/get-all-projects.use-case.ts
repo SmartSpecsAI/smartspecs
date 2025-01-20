@@ -1,5 +1,5 @@
-import { Project } from "@/smartspecs/domain/entities";
-import { IProjectsRepository } from "@/smartspecs/domain/repositories";
+import { Project } from "@/smartspecs/lib/domain/entities";
+import { IProjectsRepository } from "@/smartspecs/lib/domain/repositories";
 
 export const GetAllProjectsUseCase = (
   projectsRepository: IProjectsRepository

@@ -1,4 +1,4 @@
-import { Requirement, RequirementItem } from "../entities";
+import { Requirement } from "../entities";
 
 export interface IRequirementRepository {
   getAll(): Promise<Requirement[]>;
@@ -7,5 +7,5 @@ export interface IRequirementRepository {
   create(requirement: Omit<Requirement, "id">): Promise<Requirement>;
   update(projectId: string, requirement: Requirement): Promise<Requirement>;
   delete(id: string): Promise<void>;
-  generateRequirementsItems(conversation: String): Promise<string>;
+  generateRequirementsItems(conversation: string): Promise<string>;
 }
