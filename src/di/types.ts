@@ -12,6 +12,9 @@ import {
   ITranscriptAudioUseCase,
   IGetFileUrlUseCase,
   IOpenAIDatasource,
+  IUpdateRequirementUseCase,
+  IApproveRequirementUseCase,
+  IRejectRequirementUseCase,
 } from "@/smartspecs/lib/index";
 
 export const DI_SYMBOLS = {
@@ -37,6 +40,9 @@ export const DI_SYMBOLS = {
   ITranscriptAudioUseCase: Symbol.for("ITranscriptAudioUseCase"),
   IGetFileUrlUseCase: Symbol.for("IGetFileUrlUseCase"),
   IGetRequirementByIdUseCase: Symbol.for("IGetRequirementByIdUseCase"),
+  IUpdateRequirementUseCase: Symbol.for("IUpdateRequirementUseCase"),
+  IApproveRequirementUseCase: Symbol.for("IApproveRequirementUseCase"),
+  IRejectRequirementUseCase: Symbol.for("IRejectRequirementUseCase"),
 } as const;
 
 export interface DI_RETURN_TYPES {
@@ -58,4 +64,7 @@ export interface DI_RETURN_TYPES {
   IGetFileUrlUseCase: IGetFileUrlUseCase;
   IGenerateRequirementItemsFromConversation: IGenerateRequirementItemsFromConversation;
   IGetRequirementByIdUseCase: IGetRequirementByIdUseCase;
+  IUpdateRequirementUseCase: IUpdateRequirementUseCase;
+  IApproveRequirementUseCase: IApproveRequirementUseCase;
+  IRejectRequirementUseCase: IRejectRequirementUseCase;
 }

@@ -9,7 +9,6 @@ import {
   Tag,
   Row,
   Col,
-  message,
   List,
   Input,
 } from "antd";
@@ -28,51 +27,42 @@ const { Title, Paragraph } = Typography;
 export function RequirementDetailView() {
   const params = useParams();
   const [isEditMode, setIsEditMode] = useState(false);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const { getRequirementById, isLoading, error } = useRequirementsData();
+  const {
+    getRequirementById,
+    updateRequirement,
+    approveRequirement,
+    rejectRequirement,
+    isLoading,
+    error,
+  } = useRequirementsData();
   const [requirement, setRequirement] = useState<Requirement | null>(null);
   const [editedItems, setEditedItems] = useState<RequirementItem[]>([]);
-  const audioRef = useRef<HTMLAudioElement>(null);
+  const [editedDescription, setEditedDescription] = useState<string>("");
 
   useEffect(() => {
     const fetchRequirement = async () => {
       if (params.slug) {
         const data = await getRequirementById(params.slug as string);
         setRequirement(data);
-        // setEditedItems(data?.items || []);
+        setEditedDescription(data?.description || "");
+        setEditedItems(data?.items || []);
       }
     };
     fetchRequirement();
   }, [params.slug]);
 
-  const handleEditToggle = () => {
+  const handleEditToggle = async () => {
     if (isEditMode) {
-      message.success("Changes saved successfully");
+      const updatedRequirement: Requirement = {
+        ...requirement!,
+        description: editedDescription,
+        items: editedItems,
+      };
+      setRequirement(updatedRequirement);
+      await updateRequirement(updatedRequirement);
     }
     setIsEditMode(!isEditMode);
   };
-
-  const handleAudioPlay = () => {
-    if (audioRef.current) {
-      if (isPlaying) {
-        audioRef.current.pause();
-      } else {
-        audioRef.current.play();
-      }
-      setIsPlaying(!isPlaying);
-    }
-  };
-
-  useEffect(() => {
-    const audioElement = audioRef.current;
-    if (audioElement) {
-      const handleEnded = () => setIsPlaying(false);
-      audioElement.addEventListener("ended", handleEnded);
-      return () => {
-        audioElement.removeEventListener("ended", handleEnded);
-      };
-    }
-  }, []);
 
   const handleItemChange = (index: number, field: string, value: string) => {
     const newItems = [...editedItems];
@@ -80,16 +70,26 @@ export function RequirementDetailView() {
     setEditedItems(newItems);
   };
 
-  const handleConfirmItems = () => {
-    // setRequirement((prev) => {
-    //   if (!prev) return null;
-    //   const updatedItems = editedItems.map((item, index) => ({
-    //     ...prev.items[index],
-    //     ...item,
-    //   }));
-    //   return { ...prev, items: updatedItems };
-    // });
-    message.success("Items confirmed successfully");
+  const handleActionItemChange = (
+    itemIndex: number,
+    actionIndex: number,
+    value: string
+  ) => {
+    const newItems = [...editedItems];
+    newItems[itemIndex].action_items[actionIndex] = value;
+    setEditedItems(newItems);
+  };
+
+  const handleApprove = async () => {
+    const updatedRequirement = await approveRequirement(requirement!.id);
+    if (!updatedRequirement) return;
+    setRequirement(updatedRequirement);
+  };
+
+  const handleReject = async () => {
+    const updatedRequirement = await rejectRequirement(requirement!.id);
+    if (!updatedRequirement) return;
+    setRequirement(updatedRequirement);
   };
 
   if (isLoading) {
@@ -144,24 +144,48 @@ export function RequirementDetailView() {
                   onClick={handleEditToggle}
                   className="hover:scale-105 transition-transform duration-200"
                 >
-                  {isEditMode ? "Save Changes" : "Edit"}
+                  <p className="inline ms-2">
+                    {isEditMode ? "Save Changes" : "Edit"}
+                  </p>
                 </Button>
-                <Button
-                  type="primary"
-                  onClick={() => message.success("Requirement approved")}
-                  className="hover:scale-105 transition-transform duration-200"
-                  danger={false}
-                >
-                  Approve
-                </Button>
-                <Button
-                  type="primary"
-                  onClick={() => message.error("Requirement rejected")}
-                  className="hover:scale-105 transition-transform duration-200"
-                  danger
-                >
-                  Reject
-                </Button>
+                {requirement.status === "approved" ? (
+                  <Button
+                    type="primary"
+                    onClick={handleReject}
+                    className="hover:scale-105 transition-transform duration-200"
+                    danger
+                  >
+                    Reject
+                  </Button>
+                ) : requirement.status === "rejected" ? (
+                  <Button
+                    type="primary"
+                    onClick={handleApprove}
+                    className="hover:scale-105 transition-transform duration-200"
+                    danger={false}
+                  >
+                    Approve
+                  </Button>
+                ) : (
+                  <>
+                    <Button
+                      type="primary"
+                      onClick={handleApprove}
+                      className="hover:scale-105 transition-transform duration-200"
+                      danger={false}
+                    >
+                      Approve
+                    </Button>
+                    <Button
+                      type="primary"
+                      onClick={handleReject}
+                      className="hover:scale-105 transition-transform duration-200"
+                      danger
+                    >
+                      Reject
+                    </Button>
+                  </>
+                )}
               </Space>
             </Col>
           </Row>
@@ -173,12 +197,17 @@ export function RequirementDetailView() {
               <Title level={5} className="text-gray-700">
                 Description
               </Title>
-              <Paragraph
-                editable={isEditMode}
-                className="bg-white p-3 rounded border"
-              >
-                {requirement.description}
-              </Paragraph>
+              {isEditMode ? (
+                <Input.TextArea
+                  value={editedDescription}
+                  onChange={(e) => setEditedDescription(e.target.value)}
+                  className="bg-white p-3 rounded border"
+                />
+              ) : (
+                <Paragraph className="bg-white p-3 rounded border">
+                  {requirement.description}
+                </Paragraph>
+              )}
             </Card>
 
             {requirement.transcription && (
@@ -199,10 +228,7 @@ export function RequirementDetailView() {
                   <Title level={5} className="text-gray-700">
                     Client Representative
                   </Title>
-                  <Paragraph
-                    editable={isEditMode}
-                    className="bg-white p-2 rounded border m-0"
-                  >
+                  <Paragraph className="bg-white p-2 rounded border m-0">
                     {requirement.clientRepName}
                   </Paragraph>
                 </div>
@@ -237,7 +263,7 @@ export function RequirementDetailView() {
             Requirement Items
           </Title>
           <List
-            dataSource={requirement.items}
+            dataSource={editedItems}
             renderItem={(item, index) => (
               <List.Item>
                 <Card className="w-full bg-gray-50 border p-2">
@@ -252,7 +278,7 @@ export function RequirementDetailView() {
                     </div>
                     <div>
                       <Title level={5} className="text-gray-700 m-0">
-                        Long Description
+                        Description
                       </Title>
                       {isEditMode ? (
                         <Input.TextArea
@@ -299,17 +325,42 @@ export function RequirementDetailView() {
                       <Title level={5} className="text-gray-700 m-0">
                         Action Items
                       </Title>
-                      <List
-                        dataSource={item.action_items}
-                        renderItem={(actionItem) => (
-                          <List.Item>
-                            <Space>
-                              <CheckOutlined />
-                              {actionItem}
-                            </Space>
-                          </List.Item>
-                        )}
-                      />
+                      {isEditMode ? (
+                        <List
+                          dataSource={item.action_items}
+                          renderItem={(actionItem, actionIndex) => (
+                            <List.Item>
+                              <div className="flex w-full gap-3">
+                                <CheckOutlined />
+                                <Input
+                                  value={actionItem}
+                                  onChange={(e) =>
+                                    handleActionItemChange(
+                                      index,
+                                      actionIndex,
+                                      e.target.value
+                                    )
+                                  }
+                                  contentEditable
+                                  className="bg-white p-2 rounded border w-full"
+                                />
+                              </div>
+                            </List.Item>
+                          )}
+                        />
+                      ) : (
+                        <List
+                          dataSource={item.action_items}
+                          renderItem={(actionItem) => (
+                            <List.Item>
+                              <Space>
+                                <CheckOutlined />
+                                {actionItem}
+                              </Space>
+                            </List.Item>
+                          )}
+                        />
+                      )}
                     </div>
                   </Space>
                 </Card>

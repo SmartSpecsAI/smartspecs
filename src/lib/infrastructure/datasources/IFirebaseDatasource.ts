@@ -29,6 +29,11 @@ export interface IFirebaseDatasource {
     docId: string,
     data: any
   ): Promise<void>;
+  updateDocumentByCollection(
+    collection: CollectionReference<DocumentData, DocumentData>,
+    docId: string,
+    data: any
+  ): Promise<void>;
   deleteDocument(collectionName: string, docId: string): Promise<void>;
   addFile(path: string, file: File): Promise<void>;
   removeFile(path: string): Promise<void>;

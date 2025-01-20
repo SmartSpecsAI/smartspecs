@@ -71,6 +71,7 @@ export class FirebaseDatasource implements IFirebaseDatasource {
       ? collection(reference, collectionName)
       : collection(this.db, collectionName);
   }
+
   async addDocument(collectionName: string, data: any): Promise<string> {
     const collectionRef = collection(this.db, collectionName);
 
@@ -95,6 +96,16 @@ export class FirebaseDatasource implements IFirebaseDatasource {
     data: any
   ): Promise<void> {
     const docRef = doc(this.db, collectionName, docId);
+    await updateDoc(docRef, data);
+  }
+
+  async updateDocumentByCollection(
+    collection: CollectionReference<DocumentData, DocumentData>,
+    docId: string,
+    data: any
+  ): Promise<void> {
+    console.log("collection:::", collection);
+    const docRef = doc(collection, docId);
     await updateDoc(docRef, data);
   }
 

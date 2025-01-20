@@ -71,14 +71,45 @@ export class RequirementRepository implements IRequirementRepository {
   }
 
   async update(
-    id: string,
-    requirement: Partial<Requirement>
+    projectId: string,
+    requirement: Requirement
   ): Promise<Requirement> {
-    await this.firebase.updateDocument(this.collection, id, requirement);
-    const updatedDoc = await this.firebase.getDocument(this.collection, id);
+    const { id, ...data } = requirement;
+    console.log("ID", id, data);
+
+    const docReference = await this.firebase.getDocumentReference(
+      this.collection,
+      projectId
+    );
+
+    const collectionReference = await this.firebase.getCollectionReference(
+      "requirements",
+      docReference
+    );
+
+    // Remove duplicate update call
+    await this.firebase.updateDocumentByCollection(
+      collectionReference,
+      id,
+      data
+    );
+
+    // Reuse docReference instead of creating docReference2
+    const collectionSnapshot = await this.firebase.getCollection(
+      "requirements",
+      docReference
+    );
+
+    // Use find instead of filter to directly get the updated document
+    const updatedDoc = collectionSnapshot.find((col) => col.id === id);
+
+    if (!updatedDoc) {
+      throw new Error(`Requirement with id ${id} not found after update.`);
+    }
+
     return {
       id: updatedDoc.id,
-      ...updatedDoc.data(),
+      ...updatedDoc,
     } as Requirement;
   }
 
