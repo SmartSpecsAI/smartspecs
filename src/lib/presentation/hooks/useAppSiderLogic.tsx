@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import { FileDoneOutlined } from "@ant-design/icons";
 import type { MenuProps } from "antd";
+import { FileDoneOutlined } from "@ant-design/icons";
 
-export const useAppSider = () => {
+export const useAppSiderLogic = () => {
   const [collapsed, setCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const router = useRouter();
@@ -33,7 +33,7 @@ export const useAppSider = () => {
     collapsed,
     setCollapsed,
     isMobile,
-    pathname,
     menuItems,
+    selectedKeys: [pathname.split("/")[1]],
   };
 }; 

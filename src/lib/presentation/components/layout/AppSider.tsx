@@ -1,13 +1,16 @@
 "use client";
 import React from "react";
 import { Layout, Menu } from "antd";
-import { MenuFoldOutlined, MenuUnfoldOutlined } from "@ant-design/icons";
-import { useAppSider } from "../../../hooks/useAppSider";
+import {
+  MenuFoldOutlined,
+  MenuUnfoldOutlined,
+} from "@ant-design/icons";
+import { useAppSiderLogic } from "../../hooks/useAppSiderLogic";
 
 const { Sider } = Layout;
 
 export const AppSider: React.FC = () => {
-const { collapsed, setCollapsed, isMobile, pathname, menuItems } = useAppSider();
+  const { collapsed, setCollapsed, isMobile, menuItems, selectedKeys } = useAppSiderLogic();
 
   return (
     <Sider
@@ -28,7 +31,7 @@ const { collapsed, setCollapsed, isMobile, pathname, menuItems } = useAppSider()
         <Menu
           mode="inline"
           className="border-end-0"
-          selectedKeys={[pathname.split("/")[1]]}
+          selectedKeys={selectedKeys}
           items={menuItems}
         />
       </div>
