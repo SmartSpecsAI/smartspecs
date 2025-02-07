@@ -1,17 +1,10 @@
 "use client";
-import { useEffect } from "react";
 import { Card, Row, Col, Tag, Button, Skeleton, Empty } from "antd";
 import { ReloadOutlined } from "@ant-design/icons";
-import {
-  Dropdown,
-  DropdownItem,
-  RequirementModal,
-  useProjectsData,
-  useRequirementsData,
-  useFilesData,
-} from "@/smartspecs/lib/presentation";
+import { Dropdown, DropdownItem, RequirementModal } from "@/smartspecs/lib/presentation";
 import { useRouter } from "next/navigation";
 import { colorByStatus, stringToStatus } from "../../domain";
+import { useSmartspecsData } from "../../hooks/useSmartspecsData";
 
 export function SmartspecsView() {
   const router = useRouter();
@@ -19,23 +12,13 @@ export function SmartspecsView() {
     projects,
     selectedProject,
     setSelectedProject,
-    isLoading: projectsLoading,
-    error: projectsError,
-    refetch: refetchProjects,
-  } = useProjectsData();
-
-  const {
+    projectsLoading,
+    projectsError,
     requirements,
-    isLoading: requirementsLoading,
-    error: requirementsError,
-    refetch: refetchRequirements,
-  } = useRequirementsData();
-
-  const { file } = useFilesData();
-
-  const handleRefresh = async () => {
-    await Promise.all([refetchProjects(), refetchRequirements()]);
-  };
+    requirementsLoading,
+    requirementsError,
+    handleRefresh,
+  } = useSmartspecsData();
 
   const items = projects.map((project) => ({
     label: project.name ?? "",
@@ -55,12 +38,6 @@ export function SmartspecsView() {
       setSelectedProject(project);
     }
   };
-
-  useEffect(() => {
-    if (projects[0]) {
-      setSelectedProject(projects[0]);
-    }
-  }, [projects]);
 
   if (projects.length == 0 || projectsLoading) {
     return (
