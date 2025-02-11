@@ -1,10 +1,11 @@
 "use client";
 import { useEffect, useState } from "react";
-import { useProjects } from "../contexts/ProjectsContext";
 import { getInjection } from "@/smartspecs/di/container";
 import { Requirement } from "@/smartspecs/lib/domain";
-import { useRequirements } from "../contexts";
-import { get } from "http";
+import { useSelector, useDispatch } from 'react-redux';
+import { setRequirements } from '../store/requirementsSlice';
+import { setSelectedProject } from '../store/projectsSlice';
+import { RootState } from '../store/store';
 
 export function useRequirementsData() {
   const getAllRequirementsByProjectUseCase = getInjection(
@@ -19,9 +20,13 @@ export function useRequirementsData() {
   const updateRequirementUseCase = getInjection("IUpdateRequirementUseCase");
   const approveRequirementUseCase = getInjection("IApproveRequirementUseCase");
   const rejectRequirementUseCase = getInjection("IRejectRequirementUseCase");
-  const { selectedProject } = useProjects();
 
-  const { requirements, setRequirements } = useRequirements();
+  const dispatch = useDispatch();
+  const { selectedProject, requirements } = useSelector((state: RootState) => ({
+    selectedProject: state.projects.selectedProject,
+    requirements: state.requirements.requirements,
+  }));
+
   const [error, setError] = useState<string | null>(null);
   const [selectedRequirement, setSelectedRequirement] =
     useState<Requirement | null>(null);
@@ -44,7 +49,7 @@ export function useRequirementsData() {
       const requirementsData = await getAllRequirementsByProjectUseCase.execute(
         selectedProject.id
       );
-      setRequirements(requirementsData);
+      dispatch(setRequirements(requirementsData));
     } catch (err) {
       setError(
         err instanceof Error ? err.message : "Failed to fetch requirements"
@@ -53,6 +58,7 @@ export function useRequirementsData() {
       setLoadingMap((prev) => ({ ...prev, fetchRequirements: false }));
     }
   };
+
   useEffect(() => {
     fetchRequirements();
   }, [selectedProject]);
@@ -95,7 +101,7 @@ export function useRequirementsData() {
         requirement
       );
       const updatedRequirements = [...requirements, newRequirement];
-      setRequirements(updatedRequirements);
+      dispatch(setRequirements(updatedRequirements));
     } catch (err) {
       setError(
         err instanceof Error ? err.message : "Failed to create requirement"
@@ -119,7 +125,7 @@ export function useRequirementsData() {
       const updatedRequirements = requirements.map((req) =>
         req.id === id ? updatedRequirement : req
       );
-      setRequirements(updatedRequirements);
+      dispatch(setRequirements(updatedRequirements));
       setSelectedRequirement(updatedRequirement);
     } catch (err) {
       setError(
@@ -142,7 +148,7 @@ export function useRequirementsData() {
       const updatedRequirements = requirements.map((req) =>
         req.id === requirementId ? approvedRequirement : req
       );
-      setRequirements(updatedRequirements);
+      dispatch(setRequirements(updatedRequirements));
       setSelectedRequirement(approvedRequirement);
       return updatedRequirements.filter((req) => req.id === requirementId)[0];
     } catch (err) {
@@ -166,7 +172,7 @@ export function useRequirementsData() {
       const updatedRequirements = requirements.map((req) =>
         req.id === requirementId ? rejectedRequirement : req
       );
-      setRequirements(updatedRequirements);
+      dispatch(setRequirements(updatedRequirements));
       setSelectedRequirement(rejectedRequirement);
       return updatedRequirements.filter((req) => req.id === requirementId)[0];
     } catch (err) {
@@ -187,11 +193,20 @@ export function useRequirementsData() {
     return loadingMap[id];
   };
 
+  const selectProject = (projectId: string) => {
+    const project = useSelector((state: RootState) => state.projects.projects.find(proj => proj.id === projectId));
+    
+    if (project) {
+      dispatch(setSelectedProject(project));
+    } else {
+      console.error("Project not found");
+    }
+  };
+
   return {
     requirements,
-    setRequirements,
     selectedRequirement,
-    isLoading: loadingMap.fetchRequirements, // Return fetchRequirements loader as default
+    isLoading: loadingMap.fetchRequirements,
     isLoadingObject,
     error,
     createRequirement,
@@ -201,5 +216,6 @@ export function useRequirementsData() {
     rejectRequirement,
     getRequirementAnalysis,
     refetch: fetchRequirements,
+    selectProject,
   };
 }

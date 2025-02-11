@@ -1,10 +1,12 @@
 "use client";
 import { useState } from "react";
-import { useFilesContext } from "../contexts/FilesContext";
+import { useDispatch, useSelector } from "react-redux";
 import { getInjection } from "@/smartspecs/di/container";
+import { setFile, selectFile } from "../store/filesSlice";
 
 export function useFilesData() {
-  const { file, setFile } = useFilesContext();
+  const dispatch = useDispatch();
+  const file = useSelector(selectFile);
   const uploadFileUseCase = getInjection("IUploadFileUseCase");
   const transcriptAudioUseCase = getInjection("ITranscriptAudioUseCase");
   const getFileUrlUseCase = getInjection("IGetFileUrlUseCase");
@@ -57,9 +59,18 @@ export function useFilesData() {
     }
   };
 
+  const updateFile = (newFile: File | null) => {
+    if (newFile) {
+      dispatch(setFile(newFile));
+    } else {
+      dispatch(setFile(null));
+    }
+  };
+
   return {
     file,
-    setFile,
+    setFile: updateFile,
+    updateFile,
     uploadFile,
     uploadedFiles,
     transcription,

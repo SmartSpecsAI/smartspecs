@@ -1,11 +1,18 @@
 "use client";
 import { useEffect, useState } from "react";
-import { useProjects } from "../contexts/ProjectsContext";
 import { getInjection } from "@/smartspecs/di/container";
+import { useSelector, useDispatch } from 'react-redux';
+import { RootState } from '../store/store';
+import { setProjects, setSelectedProject } from '../store/projectsSlice';
+import { Project } from "@/smartspecs/lib/domain";
 
 export function useProjectsData() {
-  const { projects, setProjects, setSelectedProject, selectedProject } =
-    useProjects();
+  const dispatch = useDispatch();
+  const { projects, selectedProject } = useSelector((state: RootState) => ({
+    projects: state.projects.projects,
+    selectedProject: state.projects.selectedProject,
+  }));
+  
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const getAllProjectsUseCase = getInjection("IGetAllProjectsUseCase");
@@ -15,9 +22,9 @@ export function useProjectsData() {
     setError(null);
     try {
       const projectsData = await getAllProjectsUseCase.execute();
-      setProjects(projectsData);
+      dispatch(setProjects(projectsData));
       if (projectsData.length > 0) {
-        setSelectedProject(projectsData[0]);
+        dispatch(setSelectedProject(projectsData[0]));
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to fetch projects");
@@ -28,15 +35,12 @@ export function useProjectsData() {
 
   useEffect(() => {
     if (isLoading || projects.length > 0) return;
-    const fetch = async () => {
-      await fetchProjects();
-    };
-    fetch();
-  }, [isLoading, projects, setProjects, setSelectedProject]);
+    fetchProjects();
+  }, [isLoading, projects]);
 
   return {
     projects,
-    setSelectedProject,
+    setSelectedProject: (project: Project) => dispatch(setSelectedProject(project)),
     selectedProject,
     isLoading,
     error,
