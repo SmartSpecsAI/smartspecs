@@ -1,42 +1,16 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { Layout, Menu } from "antd";
-import type { MenuProps } from "antd";
 import {
-  FileDoneOutlined,
-  HeartFilled,
   MenuFoldOutlined,
   MenuUnfoldOutlined,
 } from "@ant-design/icons";
-import { useRouter, usePathname } from "next/navigation";
+import { useAppSiderLogic } from "../../hooks/useAppSiderLogic";
 
 const { Sider } = Layout;
 
 export const AppSider: React.FC = () => {
-  const [collapsed, setCollapsed] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
-  const router = useRouter();
-  const pathname = usePathname();
-
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth <= 992); // lg breakpoint is 992px
-    };
-
-    checkMobile();
-    window.addEventListener("resize", checkMobile);
-
-    return () => window.removeEventListener("resize", checkMobile);
-  }, []);
-
-  const menuItems: MenuProps["items"] = [
-    {
-      key: "smartspecs",
-      icon: <FileDoneOutlined />,
-      label: "SmartSpecs",
-      onClick: () => router.push("/smartspecs"),
-    },
-  ];
+  const { collapsed, setCollapsed, isMobile, menuItems, selectedKeys } = useAppSiderLogic();
 
   return (
     <Sider
@@ -57,7 +31,7 @@ export const AppSider: React.FC = () => {
         <Menu
           mode="inline"
           className="border-end-0"
-          selectedKeys={[pathname.split("/")[1]]}
+          selectedKeys={selectedKeys}
           items={menuItems}
         />
       </div>
