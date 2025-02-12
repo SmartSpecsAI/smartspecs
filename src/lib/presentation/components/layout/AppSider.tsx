@@ -21,7 +21,7 @@ export const AppSider: React.FC = () => {
       collapsed={collapsed}
       onCollapse={(value) => setCollapsed(value)}
       className="bg-white overflow-hidden"
-      theme="light"
+      // theme="light"
       breakpoint="lg"
       style={{
         boxShadow: "rgba(208, 208, 208, 0.7) 0px 0px 7px 0px",
@@ -35,7 +35,7 @@ export const AppSider: React.FC = () => {
               <Image src={SmartSpecsIsotype} alt="Logo" className="w-6 h-6 mr-2" />
               <span className="font-semibold text-lg text-primary">SmartSpecs</span>
             </div>
-          }
+        }
         </div>
 
         <div

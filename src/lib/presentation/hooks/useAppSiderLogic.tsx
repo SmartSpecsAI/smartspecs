@@ -23,7 +23,7 @@ export const useAppSiderLogic = () => {
   const menuItems: MenuProps["items"] = [
     {
       key: "smartspecs",
-      icon: <FileDoneOutlined />,
+      icon: <FileDoneOutlined/>,
       label: "SmartSpecs",
       onClick: () => router.push("/smartspecs"),
     },
