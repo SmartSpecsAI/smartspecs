@@ -5,6 +5,7 @@ import { CheckOutlined, EditOutlined, SaveOutlined } from "@ant-design/icons";
 import { colorByStatus } from "@/smartspecs/lib/domain";
 import { useRequirementDetail } from "../../hooks/useRequirementDetail";
 import { RequirementActionButton } from "../components/common/RequirementActionButton";
+import { StatusTag } from '../components/common/StatusTag';
 
 const { Title, Paragraph } = Typography;
 
@@ -154,12 +155,11 @@ export function RequirementDetailView() {
                   <Title level={5} className="text-gray-700">
                     Status
                   </Title>
-                  <Tag
-                    color={colorByStatus(requirement.status)}
+                  <StatusTag
+                    type="status"
+                    value={requirement.status}
                     className="text-lg px-4 py-1"
-                  >
-                    {requirement.status.replace("_", " ").toUpperCase()}
-                  </Tag>
+                  />
                 </div>
 
                 <div>
@@ -215,28 +215,9 @@ export function RequirementDetailView() {
                         Type, Estimation Time & Priority
                       </Title>
                       <Space className="mt-2">
-                        <Tag color="blue" className="m-0">
-                          {item.type
-                            .replace("_", " ")
-                            .replace(/\b\w/g, (l) => l.toUpperCase())}
-                        </Tag>
-                        <Tag color="green" className="m-0">
-                          {item.estimated_time}
-                        </Tag>
-                        <Tag
-                          color={
-                            item.priority === "high"
-                              ? "red"
-                              : item.priority === "medium"
-                              ? "orange"
-                              : "yellow"
-                          }
-                          className="m-0"
-                        >
-                          {item.priority.replace(/\b\w/g, (l) =>
-                            l.toUpperCase()
-                          )}
-                        </Tag>
+                        <StatusTag type="itemType" value={item.type} />
+                        <StatusTag type="estimatedTime" value={item.estimated_time} />
+                        <StatusTag type="priority" value={item.priority} />
                       </Space>
                     </div>
                     <div>

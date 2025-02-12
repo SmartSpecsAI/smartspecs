@@ -7,6 +7,7 @@ import {
 } from "@ant-design/icons";
 import { useState, useCallback, useEffect } from "react";
 import useUploadLogic from "@/smartspecs/lib/presentation/hooks/useUploadLogic";
+import { InfoTag } from "../../../common/InfoTag";
 
 interface FileInfo {
   name: string;
@@ -78,24 +79,18 @@ export const UploadStep: React.FC<UploadStepProps> = ({ uploadProps }) => {
                 Audio File Details
               </Title>
               <div className="flex flex-wrap gap-2">
-                <Tag
+                <InfoTag
                   icon={<SoundOutlined />}
                   color="blue"
-                  style={{ whiteSpace: "normal", height: "auto" }}
-                >
-                  <Text strong className="mr-2">
-                    File:
-                  </Text>
-                  <Text style={{ wordBreak: "break-word" }}>
-                    {fileInfo.name}
-                  </Text>
-                </Tag>
-                <Tag icon={<ClockCircleOutlined />} color="cyan">
-                  <Text strong className="mr-2">
-                    Duration:
-                  </Text>
-                  <Text>{formatDuration(fileInfo.duration)}</Text>
-                </Tag>
+                  label="File"
+                  value={fileInfo.name}
+                />
+                <InfoTag
+                  icon={<ClockCircleOutlined />}
+                  color="cyan"
+                  label="Duration"
+                  value={formatDuration(fileInfo.duration)}
+                />
               </div>
             </div>
           )}

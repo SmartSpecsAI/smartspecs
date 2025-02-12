@@ -5,6 +5,7 @@ import { Dropdown, DropdownItem, RequirementModal } from "@/smartspecs/lib/prese
 import { useRouter } from "next/navigation";
 import { colorByStatus, stringToStatus } from "../../domain";
 import { useSmartspecsData } from "../../hooks/useSmartspecsData";
+import { StatusTag } from "../components/common/StatusTag";
 
 export function SmartspecsView() {
   const router = useRouter();
@@ -119,12 +120,11 @@ export function SmartspecsView() {
                     <br />
                     <b>Client Rep:</b> {requirement.clientRepName}
                   </p>
-                  <Tag
-                    color={status ? colorByStatus(status) : "default"}
+                  <StatusTag
+                    type="status"
+                    value={requirement.status}
                     className="rounded-lg"
-                  >
-                    {requirement.status.replace("_", " ").toUpperCase()}
-                  </Tag>
+                  />
                 </Card>
               </Col>
             );
