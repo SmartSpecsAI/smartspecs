@@ -2,10 +2,10 @@
 import { Card, Button, Typography, Space, Skeleton, Tag, Row, Col, List, Input } from "antd";
 import parse from "html-react-parser";
 import { CheckOutlined, EditOutlined, SaveOutlined } from "@ant-design/icons";
-import { colorByStatus } from "@/smartspecs/lib/domain";
 import { useRequirementDetail } from "../../hooks/useRequirementDetail";
 import { RequirementActionButton } from "../components/common/RequirementActionButton";
 import { StatusTag } from '../components/common/StatusTag';
+import { DetailCard } from "../components/common/DetailCard";
 
 const { Title, Paragraph } = Typography;
 
@@ -112,10 +112,7 @@ export function RequirementDetailView() {
       >
         <Row gutter={[24, 24]}>
           <Col className="!flex flex-col gap-2" xs={24} lg={16}>
-            <Card className="card bg-gray-50 border !p-0">
-              <Title level={5} className="text-gray-700">
-                Description
-              </Title>
+            <DetailCard title="Description">
               {isEditMode ? (
                 <Input.TextArea
                   value={editedDescription}
@@ -127,26 +124,20 @@ export function RequirementDetailView() {
                   {requirement.description}
                 </Paragraph>
               )}
-            </Card>
+            </DetailCard>
 
             {requirement.transcription && (
-              <Card className="card bg-gray-50 border">
-                <Title level={5} className="text-gray-700">
-                  Transcription
-                </Title>
+              <DetailCard title="Transcription">
                 <Paragraph className="bg-white p-4 rounded border text-base leading-relaxed max-h-[250px] overflow-y-auto">
                   {parse(requirement.transcription ?? "")}
                 </Paragraph>
-              </Card>
+              </DetailCard>
             )}
           </Col>
           <Col xs={24} lg={8}>
-            <Card className="card bg-gray-50 border">
+            <DetailCard title="Client Representative">
               <Space direction="vertical" className="w-full" size="large">
                 <div>
-                  <Title level={5} className="text-gray-700">
-                    Client Representative
-                  </Title>
                   <Paragraph className="bg-white p-2 rounded border m-0">
                     {requirement.clientRepName}
                   </Paragraph>
@@ -173,13 +164,10 @@ export function RequirementDetailView() {
                   />
                 </div>
               </Space>
-            </Card>
+            </DetailCard>
           </Col>
         </Row>
-        <Card className="card bg-gray-50 border mt-2">
-          <Title level={5} className="text-gray-700">
-            Requirement Items
-          </Title>
+        <DetailCard title="Requirement Items" className="mt-2">
           <List
             dataSource={editedItems}
             renderItem={(item, index) => (
@@ -266,7 +254,7 @@ export function RequirementDetailView() {
               </List.Item>
             )}
           />
-        </Card>
+        </DetailCard>
       </Card>
     </div>
   );

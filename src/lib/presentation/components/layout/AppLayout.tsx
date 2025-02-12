@@ -1,5 +1,5 @@
 "use client";
-import { Layout, Menu } from "antd";
+import { Layout } from "antd";
 import { ReactNode } from "react";
 import { AppHeader } from "./AppHeader";
 import { AppSider } from "./AppSider";
@@ -7,7 +7,7 @@ import { AppSider } from "./AppSider";
 interface LayoutProps {
   children: ReactNode;
 }
-const { Header, Content, Footer, Sider } = Layout;
+const { Content } = Layout;
 
 export const AppLayout = ({ children }: LayoutProps) => {
   return (
