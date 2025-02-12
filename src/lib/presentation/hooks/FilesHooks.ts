@@ -1,20 +1,24 @@
 "use client";
 import { useState } from "react";
-import { useFilesContext } from "../contexts/FilesContext";
+import { useSelector, useDispatch } from "react-redux";
+import { RootState } from "../store/store";
+import { setFile } from "../store/filesSlice";
 import { getInjection } from "@/smartspecs/di/container";
 
 export function useFilesData() {
-  const { file, setFile } = useFilesContext();
+  // Reemplazamos useFilesContext con useSelector y useDispatch
+  const file = useSelector((state: RootState) => state.files.file);
+  const dispatch = useDispatch();
+
   const uploadFileUseCase = getInjection("IUploadFileUseCase");
   const transcriptAudioUseCase = getInjection("ITranscriptAudioUseCase");
   const getFileUrlUseCase = getInjection("IGetFileUrlUseCase");
+
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const [loading, setLoading] = useState(false);
   const [transcribingLoading, setTranscribingLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [transcriptionError, setTranscriptionError] = useState<string | null>(
-    null
-  );
+  const [transcriptionError, setTranscriptionError] = useState<string | null>(null);
   const [transcription, setTranscription] = useState<string>("");
 
   const uploadFile = async (file: File, path: string) => {
@@ -57,9 +61,16 @@ export function useFilesData() {
     }
   };
 
+  const handleFileChange = (file: File) => {
+    const { name, lastModified } = file;
+    const uid = `rc-upload-${Date.now()}`;
+
+    dispatch(setFile({ uid, name, lastModified }));
+  };
+
   return {
     file,
-    setFile,
+    setFile: handleFileChange,
     uploadFile,
     uploadedFiles,
     transcription,
