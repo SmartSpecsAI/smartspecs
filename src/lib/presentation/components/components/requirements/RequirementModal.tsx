@@ -1,5 +1,5 @@
 "use client";
-import { Modal, Form, Upload, Button, Steps } from "antd";
+import { Modal, Form, Upload, Steps } from "antd";
 import { Requirement } from "@/smartspecs/lib/domain";
 import {
   useFilesData,
@@ -8,6 +8,7 @@ import {
 } from "@/smartspecs/lib/presentation";
 import { DetailsStep, UploadStep } from "./steps";
 import { useRequirementModal } from "@/smartspecs/lib/presentation/hooks/useRequirementModal";
+import { StandardButton } from "@/smartspecs/lib/presentation/components/common/StandardButton";
 
 interface RequirementModalProps {
   triggerButtonText?: string;
@@ -75,42 +76,50 @@ export const RequirementModal: React.FC<RequirementModalProps> = ({
 
   const renderFooterButtons = () =>
     [
-      <Button key="cancel" style={{ float: "left" }} onClick={handleCancel}>
+      <StandardButton
+        key="cancel"
+        buttonVariant="cancel"
+        onClick={handleCancel}
+      >
         Cancel
-      </Button>,
+      </StandardButton>,
       !initialData && step !== "upload" && (
-        <Button key="back" onClick={handleBack}>
+        <StandardButton
+          key="back"
+          buttonVariant="secondary"
+          onClick={handleBack}
+        >
           Back
-        </Button>
+        </StandardButton>
       ),
       !initialData && step === "upload" ? (
-        <Button
+        <StandardButton
           key="continue"
-          type="primary"
+          buttonVariant="primary"
           onClick={handleContinue}
-          loading={loading}
+          isLoading={loading}
         >
           {loading ? "Analyzing" : "Continue"}
-        </Button>
+        </StandardButton>
       ) : (
         step === "details" && (
-          <Button
+          <StandardButton
             key="submit"
-            type="primary"
-            loading={loading}
+            buttonVariant="primary"
+            isLoading={loading}
             onClick={handleSubmit}
           >
             Submit
-          </Button>
+          </StandardButton>
         )
       ),
     ].filter(Boolean);
 
   return (
     <>
-      <Button type="primary" onClick={handleOpen}>
+      <StandardButton buttonVariant="primary" onClick={handleOpen}>
         {triggerButtonText}
-      </Button>
+      </StandardButton>
       <Modal
         title={title}
         open={isModalOpen}

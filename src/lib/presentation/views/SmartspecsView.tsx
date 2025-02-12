@@ -72,6 +72,8 @@ export function SmartspecsView() {
             onClick={handleRefresh}
             loading={projectsLoading || requirementsLoading}
             shape="circle"
+            className="ml-2 hover:shadow-md transition-shadow duration-200 bg-white border border-gray-200"
+            size="middle"
           />
         </div>
         <RequirementModal />

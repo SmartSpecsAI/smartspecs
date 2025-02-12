@@ -4,6 +4,7 @@ import parse from "html-react-parser";
 import { CheckOutlined, EditOutlined, SaveOutlined } from "@ant-design/icons";
 import { colorByStatus } from "@/smartspecs/lib/domain";
 import { useRequirementDetail } from "../../hooks/useRequirementDetail";
+import { RequirementActionButton } from "../components/common/RequirementActionButton";
 
 const { Title, Paragraph } = Typography;
 
@@ -69,52 +70,38 @@ export function RequirementDetailView() {
             </Col>
             <Col>
               <Space className="mr-4">
-                <Button
+                <RequirementActionButton
                   type={isEditMode ? "primary" : "default"}
                   icon={isEditMode ? <SaveOutlined /> : <EditOutlined />}
                   onClick={handleEditToggle}
-                  className="hover:scale-105 transition-transform duration-200"
-                >
-                  <p className="inline ms-2">
-                    {isEditMode ? "Save Changes" : "Edit"}
-                  </p>
-                </Button>
+                  label={isEditMode ? "Save Changes" : "Edit"}
+                />
                 {requirement.status === "approved" ? (
-                  <Button
+                  <RequirementActionButton
                     type="primary"
                     onClick={handleReject}
-                    className="hover:scale-105 transition-transform duration-200"
                     danger
-                  >
-                    Reject
-                  </Button>
+                    label="Reject"
+                  />
                 ) : requirement.status === "rejected" ? (
-                  <Button
+                  <RequirementActionButton
                     type="primary"
                     onClick={handleApprove}
-                    className="hover:scale-105 transition-transform duration-200"
-                    danger={false}
-                  >
-                    Approve
-                  </Button>
+                    label="Approve"
+                  />
                 ) : (
                   <>
-                    <Button
+                    <RequirementActionButton
                       type="primary"
                       onClick={handleApprove}
-                      className="hover:scale-105 transition-transform duration-200"
-                      danger={false}
-                    >
-                      Approve
-                    </Button>
-                    <Button
+                      label="Approve"
+                    />
+                    <RequirementActionButton
                       type="primary"
                       onClick={handleReject}
-                      className="hover:scale-105 transition-transform duration-200"
                       danger
-                    >
-                      Reject
-                    </Button>
+                      label="Reject"
+                    />
                   </>
                 )}
               </Space>
