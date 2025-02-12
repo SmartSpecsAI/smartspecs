@@ -1,5 +1,4 @@
 "use client";
-import { useState, useEffect } from "react";
 import { Modal, Form, Upload, Button, Steps } from "antd";
 import { Requirement } from "@/smartspecs/lib/domain";
 import {
@@ -8,6 +7,8 @@ import {
   useRequirementsData,
 } from "@/smartspecs/lib/presentation";
 import { DetailsStep, UploadStep } from "./steps";
+import { useRequirementModal } from "@/smartspecs/lib/presentation/hooks/useRequirementModal";
+
 interface RequirementModalProps {
   triggerButtonText?: string;
   initialData?: Requirement;
@@ -38,125 +39,24 @@ export const RequirementModal: React.FC<RequirementModalProps> = ({
   initialData,
   title = initialData ? "Edit Requirement" : "Create Requirement",
 }) => {
-  const [form] = Form.useForm();
-  const [loading, setLoading] = useState(false);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [fileUrl, setFileUrl] = useState("");
-  const [step, setStep] = useState<"upload" | "details">(
-    initialData ? "details" : "upload"
-  );
-
-  const [tempRequirement, setTempRequirement] = useState<Requirement | null>(
-    null
-  );
+  const {
+    form,
+    loading,
+    isModalOpen,
+    setIsModalOpen,
+    step,
+    handleSubmit,
+    handleOpen,
+    handleCancel,
+    handleContinue,
+    handleBack,
+    handleFileChange,
+  } = useRequirementModal(initialData);
 
   const {
     file,
-    setFile,
-    setTranscription,
-    uploadFile,
-    getFileUrl,
-    transcriptAudio,
   } = useFilesData();
   const { selectedProject } = useProjectsData();
-  const { createRequirement, getRequirementAnalysis } = useRequirementsData();
-
-  useEffect(() => {
-    if (isModalOpen && initialData) {
-      form.setFieldsValue({
-        title: initialData.title,
-        description: initialData.description,
-        clientRepName: initialData.clientRepName,
-      });
-    }
-  }, [isModalOpen, initialData, form]);
-
-  const resetForm = () => {
-    form.resetFields();
-    setFile(null);
-    setStep("upload");
-    setTranscription("");
-    setIsModalOpen(false);
-  };
-
-  const handleSubmit = async () => {
-    try {
-      setLoading(true);
-      const values = await form.validateFields();
-
-      if (file) {
-        const transcriptionResult = await transcriptAudio(file);
-        const requirementData = {
-          ...tempRequirement,
-          ...values,
-        };
-        await createRequirement(requirementData);
-        resetForm();
-      }
-    } catch (error) {
-      console.error("Validation failed:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleCancel = () => resetForm();
-
-  const handleOpen = () => setIsModalOpen(true);
-
-  const handleContinue = async () => {
-    if (!file) {
-      console.error("Please upload an audio file");
-      return;
-    }
-    setLoading(true);
-    try {
-      await _analyzeAndBuildRequirement(file);
-      setStep("details");
-    } catch (error) {
-      console.error("Analysis failed:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleBack = () => setStep("upload");
-
-  const handleFileChange = async (info: any) => {
-    if (info.file.status === "done") {
-      try {
-        const uploadedFile = info.file.originFileObj;
-        const filePath = `requirements/audios/${uploadedFile.uid}`;
-        setFile(uploadedFile);
-        await uploadFile(uploadedFile, filePath);
-        const fileURL = await getFileUrl(filePath.replaceAll("/", "%2F"));
-        setFileUrl(fileURL);
-      } catch (error) {
-        console.error(`Failed to upload ${info.file.name}`);
-      }
-    } else if (info.file.status === "error") {
-      console.error(`${info.file.name} upload failed`);
-    }
-  };
-
-  const _analyzeAndBuildRequirement = async (file: File | null) => {
-    if (!file || !selectedProject?.id) return;
-    const transcriptionResult = await transcriptAudio(file);
-
-    const analysisResult = await getRequirementAnalysis(transcriptionResult);
-
-    const requirementData = {
-      ...analysisResult,
-      transcription: transcriptionResult,
-      projectId: selectedProject?.id || "",
-      audioUrl: fileUrl,
-    };
-    form.setFieldsValue({
-      title: analysisResult.title,
-      description: analysisResult.description,
-    });
-    setTempRequirement(requirementData as Requirement);
-  };
 
   const uploadProps = {
     beforeUpload: (file: File) => {
