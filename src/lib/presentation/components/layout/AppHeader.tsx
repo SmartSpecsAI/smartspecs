@@ -1,8 +1,7 @@
 import React from "react";
-import { Layout, Button } from "antd";
+import { Layout } from "antd";
 import SmartSpecsLogo from "@/smartspecs/assets/images/brand/smartspecs-imagotype.svg";
 import Image from "next/image";
-import { MenuOutlined } from "@ant-design/icons";
 const { Header } = Layout;
 
 export const AppHeader: React.FC = () => {
