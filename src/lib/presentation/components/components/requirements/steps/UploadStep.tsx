@@ -9,7 +9,7 @@ import { useState, useCallback, useEffect } from "react";
 import useUploadLogic from "@/smartspecs/lib/presentation/hooks/useUploadLogic";
 import { InfoTag } from "../../../common/InfoTag";
 import { StandardButton } from "../../../common/StandardButton";
-import { RequirementActionButton } from "../../../common/RequirementActionButton";
+import { IconButton } from "../../../common/IconButton";
 
 interface FileInfo {
   name: string;
@@ -109,7 +109,7 @@ export const UploadStep: React.FC<UploadStepProps> = ({ uploadProps }) => {
                 <Text type="warning" strong>
                   Not sure about this file?
                 </Text>
-                <RequirementActionButton
+                <IconButton
                   type="primary"
                   ghost
                   icon={<UploadOutlined />}

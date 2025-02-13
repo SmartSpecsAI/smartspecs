@@ -1,17 +1,17 @@
 import { Button } from "antd";
 import { ButtonProps } from "antd/lib/button";
 
-interface RequirementActionButtonProps extends ButtonProps {
+interface IconButtonProps extends ButtonProps {
   label: string;
   icon?: React.ReactNode;
 }
 
-export function RequirementActionButton({
+export function IconButton({
   label,
   icon,
   className = "",
   ...props
-}: RequirementActionButtonProps) {
+}: IconButtonProps) {
   return (
     <Button
       {...props}

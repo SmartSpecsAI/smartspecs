@@ -8,6 +8,8 @@ import {
 import { useAppSiderLogic } from "../../hooks/useAppSiderLogic";
 import SmartSpecsIsotype from "@/smartspecs/assets/images/brand/smartspecs-isotype.svg";
 import Image from "next/image";
+import { IconButton } from "../common/IconButton";
+
 const { Sider } = Layout;
 
 export const AppSider: React.FC = () => {

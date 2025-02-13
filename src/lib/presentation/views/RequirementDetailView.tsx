@@ -3,10 +3,10 @@ import { Card, Button, Typography, Space, Skeleton, Tag, Row, Col, List, Input }
 import parse from "html-react-parser";
 import { CheckOutlined, EditOutlined, SaveOutlined } from "@ant-design/icons";
 import { useRequirementDetail } from "../../hooks/useRequirementDetail";
-import { RequirementActionButton } from "../components/common/RequirementActionButton";
 import { StatusTag } from '../components/common/StatusTag';
 import { DetailCard } from "../components/common/DetailCard";
-
+import { StandardButton } from "../components/common/StandardButton";
+import { IconButton } from "../components/common/IconButton";
 const { Title, Paragraph } = Typography;
 
 export function RequirementDetailView() {
@@ -71,38 +71,42 @@ export function RequirementDetailView() {
             </Col>
             <Col>
               <Space className="mr-4">
-                <RequirementActionButton
+                <IconButton
                   type={isEditMode ? "primary" : "default"}
                   icon={isEditMode ? <SaveOutlined /> : <EditOutlined />}
                   onClick={handleEditToggle}
                   label={isEditMode ? "Save Changes" : "Edit"}
                 />
                 {requirement.status === "approved" ? (
-                  <RequirementActionButton
-                    type="primary"
+                  <StandardButton
+                    buttonVariant="primary"
                     onClick={handleReject}
                     danger
-                    label="Reject"
-                  />
+                  >
+                    Reject
+                  </StandardButton>
                 ) : requirement.status === "rejected" ? (
-                  <RequirementActionButton
-                    type="primary"
+                  <StandardButton
+                    buttonVariant="primary" 
                     onClick={handleApprove}
-                    label="Approve"
-                  />
+                  >
+                    Approve
+                  </StandardButton>
                 ) : (
                   <>
-                    <RequirementActionButton
-                      type="primary"
+                    <StandardButton
+                      buttonVariant="primary"
                       onClick={handleApprove}
-                      label="Approve"
-                    />
-                    <RequirementActionButton
-                      type="primary"
+                    >
+                      Approve
+                    </StandardButton>
+                    <StandardButton
+                      buttonVariant="primary"
                       onClick={handleReject}
                       danger
-                      label="Reject"
-                    />
+                    >
+                      Reject
+                    </StandardButton>
                   </>
                 )}
               </Space>
