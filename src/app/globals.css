@@ -3,8 +3,13 @@
 @tailwind utilities;
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --bs-primary: #007bff;
+  --bs-secondary: #6c757d;
+  --bs-success: #28a745;
+  --bs-info: #17a2b8;
+  --bs-warning: #ffc107;
+  --bs-danger: #dc3545;
+  
 }
 
 nextjs-portal {
@@ -13,8 +18,18 @@ nextjs-portal {
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --bs-primary: #007bff;
+    --bs-secondary: #6c757d;
+    --bs-success: #28a745;
+    --bs-info: #17a2b8;
+    --bs-warning: #ffc107;
+    --bs-danger: #dc3545;
+    --bs-light: #f8f9fa;
+    --bs-dark: #343a40;
+    --bs-gray-100: #f8f9fa;
+    --bs-gray-200: #e9ecef;
+    --bs-gray-300: #dee2e6;
+    --bs-gray-400: #ced4da;
   }
 }
 
@@ -30873,21 +30888,21 @@ div.ant-typography-edit-content.ant-typography-rtl {
     --bs-gray-800: #3b506c;
     --bs-gray-900: #202732;
     --bs-primary: #01377F;
-    --bs-secondary: #535559;
-    --bs-success: #40C585;
-    --bs-info: #27b1ff;
-    --bs-warning: #F5B100;
-    --bs-danger: #F95252;
-    --bs-light: #e7e7e7;
-    --bs-dark: #202732;
+    --bs-secondary: #FFA52F;
+    --bs-success: #28A745;
+    --bs-info: #17A2B8;
+    --bs-warning: #FFC107;
+    --bs-danger: #DC3545;
+    --bs-light: #F8F9FA;
+    --bs-dark: #212529;
     --bs-primary-rgb: 1, 55, 127;
-    --bs-secondary-rgb: 83, 85, 89;
-    --bs-success-rgb: 64, 197, 133;
-    --bs-info-rgb: 39, 177, 255;
-    --bs-warning-rgb: 245, 177, 0;
-    --bs-danger-rgb: 249, 82, 82;
-    --bs-light-rgb: 231, 231, 231;
-    --bs-dark-rgb: 32, 39, 50;
+    --bs-secondary-rgb: 255, 165, 47;
+    --bs-success-rgb: 40, 167, 69;
+    --bs-info-rgb: 23, 162, 184;
+    --bs-warning-rgb: 255, 193, 7;
+    --bs-danger-rgb: 220, 53, 69;
+    --bs-light-rgb: 248, 249, 250;
+    --bs-dark-rgb: 33, 37, 41;
     --bs-primary-text-emphasis: #1c3e66;
     --bs-secondary-text-emphasis: rgb(33.2, 34, 35.6);
     --bs-success-text-emphasis: #40C585;

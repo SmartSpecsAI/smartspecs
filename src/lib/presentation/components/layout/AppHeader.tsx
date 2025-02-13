@@ -2,6 +2,7 @@ import React from "react";
 import { Layout } from "antd";
 import SmartSpecsLogo from "@/smartspecs/assets/images/brand/smartspecs-imagotype.svg";
 import Image from "next/image";
+import ThemeToggleButton from "@/smartspecs/lib/components/ThemeToggleButton";
 
 const { Header } = Layout;
 
@@ -23,16 +24,7 @@ export const AppHeader: React.FC = () => {
               />
             </span>
           </a>
-          {/* <Button
-            type="primary"
-            shape="circle"
-            icon={<MenuOutlined />}
-            className="flex-grow-0 flex-shrink-0"
-            style={{
-              backgroundColor: "rgb(187, 207, 231)",
-              borderColor: "rgb(187, 207, 231)",
-            }}
-          /> */}
+          <ThemeToggleButton />
         </nav>
       </div>
     </Header>
