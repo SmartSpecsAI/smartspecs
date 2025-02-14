@@ -1,14 +1,16 @@
+"use client";
+
 import React from "react";
 import { Layout } from "antd";
 import SmartSpecsLogo from "@/smartspecs/assets/images/brand/smartspecs-imagotype.svg";
 import Image from "next/image";
-
+import ThemeToggleButton from "../common/ThemeToggleButton";
 const { Header } = Layout;
 
 export const AppHeader: React.FC = () => {
 
   return (
-    <Header className="bg-primary shadow-lg rounded-lg border-b-2 border-gray-300 fixed top-0 left-0 right-0 z-10">
+    <Header className="bg-background shadow-lg rounded-lg border-b-2 border-gray-300 fixed top-0 left-0 right-0 z-10">
       <div className="system-header w-full">
         <nav className="navbar flex items-center justify-between p-4">
           <a
@@ -24,7 +26,8 @@ export const AppHeader: React.FC = () => {
               />
             </span>
           </a>
-          <div className="flex items-center">
+          <div className="flex items-center space-x-4">
+            <ThemeToggleButton />
           </div>
         </nav>
       </div>
