@@ -2,7 +2,26 @@
 @tailwind components;
 @tailwind utilities;
 
-@media (prefers-color-scheme: light) {
+.light {
+  --background: #ffffff;
+  --primary: #007bff;
+  --secondary: #FFA52F;
+  --accent: #dc2626;
+  --success: #28a745;
+  --danger: #dc3545;
+  --warning: #ffc107;
+  --info: #17a2b8;
+}
+
+.dark {
+  --background: #0a0a0a;
+  --primary: #007bff;
+  --secondary: #FFB649;
+  --accent: #dc2626;
+  --success: #3ac357;
+  --danger: #ff4d4f;
+  --warning: #ffd43b;
+  --info: #20c5df;
 }
 
 html {
@@ -11,7 +30,6 @@ html {
 
 body {
   min-height: 100vh;
-  background-color: #eaf1fe;
 }
 
 @layer utilities {
