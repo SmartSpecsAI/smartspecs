@@ -4,24 +4,26 @@
 
 .light {
   --background: 255, 255, 255;
-  --primary: 0, 123, 255;
-  --secondary: 255, 165, 47;
+  --primary: 1, 55, 127;
+  --secondary: 255, 182, 73;
   --accent: 220, 38, 38;
   --success: 40, 167, 69;
   --danger: 220, 53, 69;
   --warning: 255, 193, 7;
   --info: 23, 162, 184;
+  --text: 0, 0, 0;
 }
 
 .dark {
-  --background: 10, 10, 10;
-  --primary: 0, 123, 255;
+  --background: 15, 23, 42;
+  --primary: 255, 182, 73;
   --secondary: 255, 182, 73;
   --accent: 220, 38, 38;
   --success: 58, 195, 87;
   --danger: 255, 77, 79;
   --warning: 255, 212, 59;
   --info: 32, 197, 223;
+  --text: 255, 255, 255;
 }
 
 html {
@@ -30,6 +32,7 @@ html {
 
 body {
   min-height: 100vh;
+  background-color: var(--background);
 }
 
 @layer utilities {

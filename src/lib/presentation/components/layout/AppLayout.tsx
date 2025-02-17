@@ -14,12 +14,12 @@ export const AppLayout = ({ children }: LayoutProps) => {
   const { collapsed, setCollapsed, menuItems, selectedKeys } = useAppSiderLogic();
 
   return (
-    <Layout className="min-h-screen bg-gray-100">
+    <Layout className="min-h-screen">
       <AppHeader />
       <Layout hasSider className="flex h-auto md:overflow-hidden">
         <AppSider collapsed={collapsed} setCollapsed={setCollapsed} menuItems={menuItems} selectedKeys={selectedKeys} />
         <Content
-          className="flex flex-col px-4 py-6 bg-white shadow-md rounded-lg min-h-screen overflow-y-auto flex-1"
+          className="flex flex-col px-4 py-6 shadow-md rounded-lg min-h-screen overflow-y-auto flex-1 bg-white dark:bg-background"
           style={{
             marginTop: '64px',
             marginLeft: collapsed ? '64px' : '200px',

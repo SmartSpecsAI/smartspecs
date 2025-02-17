@@ -13,11 +13,13 @@ const useTheme = () => {
     }
   }, []);
 
+  useEffect(() => {
+    document.body.className = theme;
+    localStorage.setItem("theme", theme);
+  }, [theme]);
+
   const toggleTheme = () => {
-    const newTheme = theme === "light" ? "dark" : "light";
-    setTheme(newTheme);
-    document.body.className = newTheme;
-    localStorage.setItem("theme", newTheme);
+    setTheme(prevTheme => (prevTheme === 'light' ? 'dark' : 'light'));
   };
 
   return { theme, toggleTheme };

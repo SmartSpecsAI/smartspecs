@@ -53,7 +53,7 @@ export function SmartspecsView() {
 
   if (projectsError) {
     return (
-      <div className="text-red-500">
+      <div className="text-error">
         Error loading projects: {projectsError}
       </div>
     );
@@ -73,7 +73,7 @@ export function SmartspecsView() {
             onClick={handleRefresh}
             loading={projectsLoading || requirementsLoading}
             shape="circle"
-            className="ml-2 hover:shadow-md transition-shadow duration-200 bg-white border border-gray-200"
+            className="ml-2 hover:shadow-md transition-shadow duration-200 border border-gray-200"
             size="middle"
           />
         </div>
@@ -93,7 +93,7 @@ export function SmartspecsView() {
             </Col>
           ))
         ) : requirementsError ? (
-          <div className="text-red-500">
+          <div className="text-error">
             Error loading requirements: {requirementsError}
           </div>
         ) : requirements.length === 0 ? (
@@ -104,7 +104,6 @@ export function SmartspecsView() {
           </Col>
         ) : (
           requirements.map((requirement) => {
-            const status = stringToStatus(requirement.status);
             return (
               <Col xs={24} md={12} lg={8} key={requirement.id}>
                 <Card
@@ -113,7 +112,7 @@ export function SmartspecsView() {
                   onClick={() => router.push(`/smartspecs/${requirement.id}`)}
                 >
                   <p>{requirement.description}</p>
-                  <p className="text-gray-700">
+                  <p>
                     Created: {requirement.createdAt.toDate().toLocaleString()}
                     <br />
                     Updated: {requirement.updatedAt.toDate().toLocaleString()}

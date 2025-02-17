@@ -77,7 +77,7 @@ export const UploadStep: React.FC<UploadStepProps> = ({ uploadProps }) => {
         <div>
           {fileInfo && (
             <div className="mb-3 bg-gray-100 p-4 rounded-lg">
-              <Title level={5} className="mb-2 text-blue-500">
+              <Title level={5} className="mb-2 text-primary">
                 Audio File Details
               </Title>
               <div className="flex flex-wrap gap-2">

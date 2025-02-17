@@ -117,7 +117,7 @@ export const RequirementModal: React.FC<RequirementModalProps> = ({
 
   return (
     <>
-      <StandardButton buttonVariant="primary" onClick={handleOpen}>
+      <StandardButton buttonVariant="primary" onClick={handleOpen} className="bg-primary text-white dark:text-background">
         {triggerButtonText}
       </StandardButton>
       <Modal

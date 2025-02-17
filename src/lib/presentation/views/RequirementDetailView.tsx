@@ -61,11 +61,11 @@ export function RequirementDetailView() {
   return (
     <div className="p-1">
       <Card
-        className="card shadow-sm hover:shadow-md transition-shadow duration-300"
+        className="card shadow-sm hover:shadow-md transition-shadow duration-300 bg-white dark:bg-background"
         title={
           <Row justify="space-between" align="middle">
             <Col>
-              <Title level={3} style={{ margin: 0 }}>
+              <Title level={3} style={{ margin: 0, color: '#1890ff' }}>
                 {requirement.title}
               </Title>
             </Col>
@@ -147,7 +147,7 @@ export function RequirementDetailView() {
                   </Paragraph>
                 </div>
                 <div>
-                  <Title level={5} className="text-gray-700">
+                  <Title level={5} className="text-text">
                     Status
                   </Title>
                   <StatusTag
@@ -158,7 +158,7 @@ export function RequirementDetailView() {
                 </div>
 
                 <div>
-                  <Title level={5} className="text-gray-700">
+                  <Title level={5} className="text-text">
                     Audio Recording
                   </Title>
                   <audio
@@ -179,7 +179,7 @@ export function RequirementDetailView() {
                 <Card className="w-full bg-gray-50 border p-2">
                   <Space direction="vertical" size="small" className="w-full">
                     <div>
-                      <Title level={5} className="text-gray-700 m-0">
+                      <Title level={5} className="text-text m-0">
                         {item.name}
                       </Title>
                       <Paragraph className="m-0 text-sm text-gray-500">
@@ -187,7 +187,7 @@ export function RequirementDetailView() {
                       </Paragraph>
                     </div>
                     <div>
-                      <Title level={5} className="text-gray-700 m-0">
+                      <Title level={5} className="text-text m-0">
                         Description
                       </Title>
                       {isEditMode ? (
@@ -203,7 +203,7 @@ export function RequirementDetailView() {
                       )}
                     </div>
                     <div>
-                      <Title level={5} className="text-gray-700 m-0">
+                      <Title level={5} className="text-text m-0">
                         Type, Estimation Time & Priority
                       </Title>
                       <Space className="mt-2">
@@ -213,7 +213,7 @@ export function RequirementDetailView() {
                       </Space>
                     </div>
                     <div>
-                      <Title level={5} className="text-gray-700 m-0">
+                      <Title level={5} className="text-text m-0">
                         Action Items
                       </Title>
                       {isEditMode ? (

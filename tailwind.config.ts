@@ -13,6 +13,7 @@ export default {
         danger: "rgba(var(--danger))",
         warning: "rgba(var(--warning))",
         info: "rgba(var(--info))",
+        text: "rgba(var(--text))",
       },
     },
   },

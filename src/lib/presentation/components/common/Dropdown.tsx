@@ -100,7 +100,7 @@ export const Dropdown: React.FC<DropdownProps> = ({
                 />
               )}
 
-              <span className="d-inline-block text-truncate align-middle ms-2">
+              <span className="d-inline-block text-truncate align-middle ms-2 text-text">
                 {item.label}
               </span>
 
