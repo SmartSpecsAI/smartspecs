@@ -61,7 +61,7 @@ export function SmartspecsView() {
 
   return (
     <div>
-      <div className="flex justify-between w-100 mb-3">
+      <div className="flex justify-between w-100 mb-3 text-text">
         <div className="flex">
           <Dropdown
             items={items}

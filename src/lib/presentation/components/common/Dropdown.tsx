@@ -38,8 +38,8 @@ export const Dropdown: React.FC<DropdownProps> = ({
   return (
     <div
       ref={dropdownRef}
-      className="d-inline-block me-3 py-1 px-2 dropdown"
-      style={{ background: "#fff", borderRadius: "60px" }}
+      className="d-inline-block me-3 py-1 px-2 dropdown dark:text-background"
+      style={{ borderRadius: "60px", color: "black", backgroundColor: "white" }}
     >
       <a
         className={`dropdown-project-toggle dropdown-toggle flex gap-2 items-center px-1 ${
@@ -100,7 +100,7 @@ export const Dropdown: React.FC<DropdownProps> = ({
                 />
               )}
 
-              <span className="d-inline-block text-truncate align-middle ms-2 text-text">
+              <span className="d-inline-block text-truncate align-middle ms-2">
                 {item.label}
               </span>
 
