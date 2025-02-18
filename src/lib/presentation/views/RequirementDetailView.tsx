@@ -7,6 +7,7 @@ import { StatusTag } from '../components/common/StatusTag';
 import { DetailCard } from "../components/common/DetailCard";
 import { StandardButton } from "../components/common/StandardButton";
 import { IconButton } from "../components/common/IconButton";
+import ExportPrdButton from "../components/components/PrdPdf/PrdButton";
 const { Title, Paragraph } = Typography;
 
 export function RequirementDetailView() {
@@ -260,6 +261,7 @@ export function RequirementDetailView() {
           />
         </DetailCard>
       </Card>
+      <ExportPrdButton />
     </div>
   );
 }
