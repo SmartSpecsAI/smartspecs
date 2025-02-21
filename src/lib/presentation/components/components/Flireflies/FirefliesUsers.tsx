@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 
 const FirefliesUsers = () => {
+    const [userId, setUserId] = useState<string>('');
     const [user, setUser] = useState<{
         user_id: string;
         recent_transcript: string;
@@ -16,27 +17,38 @@ const FirefliesUsers = () => {
     } | null>(null);
     const [error, setError] = useState<string | null>(null);
 
-    useEffect(() => {
-        const fetchUser = async () => {
-            try {
-                const res = await fetch("/api/fireflies/users");
-                if (!res.ok) throw new Error("Error al obtener usuario");
+    const fetchUser = async (id: string) => {
+        try {
+            const res = await fetch(`/api/fireflies/users?userId=${id}`);
+            if (!res.ok) throw new Error("Error al obtener usuario");
 
-                const data = await res.json();
-                console.log("Respuesta de la API:", data);
-                setUser(data.data.user);
-            } catch (error: any) {
-                console.error("Error fetching user:", error);
-                setError(error.message);
-            }
-        };
+            const data = await res.json();
+            console.log("Respuesta de la API:", data);
+            setUser(data.data.user);
+        } catch (error: any) {
+            console.error("Error fetching user:", error);
+            setError(error.message);
+        }
+    };
 
-        fetchUser();
-    }, []);
+    const handleSearch = () => {
+        if (userId) {
+            fetchUser(userId);
+        }
+    };
 
     return (
         <div className="p-4">
             <h2 className="text-xl font-bold">Usuario de Fireflies</h2>
+
+            <input 
+                type="text" 
+                value={userId} 
+                onChange={(e) => setUserId(e.target.value)} 
+                placeholder="Ingrese ID de usuario" 
+                className="border p-2"
+            />
+            <button onClick={handleSearch} className="ml-2 p-2 bg-blue-500 text-white">Buscar</button>
 
             {error && <p className="text-red-500">Error: {error}</p>}
 

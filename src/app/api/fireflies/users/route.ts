@@ -1,7 +1,14 @@
 import { NextResponse } from "next/server";
 import axios from "axios";
 
-export async function GET() {
+export async function GET(request: Request) {
+  const url = new URL(request.url);
+  const userId = url.searchParams.get("userId");
+
+  if (!userId) {
+    return NextResponse.json({ error: "ID de usuario no proporcionado" }, { status: 400 });
+  }
+
   try {
     console.log("📢 Enviando solicitud a Fireflies API...");
 
@@ -11,11 +18,6 @@ export async function GET() {
       return NextResponse.json({ error: "API Key no configurada" }, { status: 500 });
     }
 
-    const url = "https://api.fireflies.ai/graphql";
-    const headers = {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${FIRELIES_API_KEY}`,
-    };
     const data = {
       query: `
         query User($userId: String!) {
@@ -32,10 +34,15 @@ export async function GET() {
           }
         }
       `,
-      variables: { userId: 'p3dCZLY1c5' }
+      variables: { userId }
     };
 
-    const response = await axios.post(url, data, { headers });
+    const response = await axios.post("https://api.fireflies.ai/graphql", data, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${FIRELIES_API_KEY}`,
+      },
+    });
 
     console.log("✅ Respuesta de Fireflies:", response.data);
     return NextResponse.json(response.data, { status: 200 });
