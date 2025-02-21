@@ -3,40 +3,56 @@
 import { useState, useEffect } from "react";
 
 const FirefliesUsers = () => {
-    const [users, setUsers] = useState<{ name: string; user_id: string }[]>([]);
+    const [user, setUser] = useState<{
+        user_id: string;
+        recent_transcript: string;
+        recent_meeting: string;
+        num_transcripts: number;
+        name: string;
+        minutes_consumed: number;
+        is_admin: boolean;
+        integrations: string[];
+        email: string;
+    } | null>(null);
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        const fetchUsers = async () => {
+        const fetchUser = async () => {
             try {
                 const res = await fetch("/api/fireflies/users");
-                if (!res.ok) throw new Error("Error al obtener usuarios");
+                if (!res.ok) throw new Error("Error al obtener usuario");
 
                 const data = await res.json();
-                setUsers(data.data.users);
+                console.log("Respuesta de la API:", data);
+                setUser(data.data.user);
             } catch (error: any) {
+                console.error("Error fetching user:", error);
                 setError(error.message);
             }
         };
 
-        fetchUsers();
+        fetchUser();
     }, []);
 
     return (
         <div className="p-4">
-            <h2 className="text-xl font-bold">Usuarios de Fireflies</h2>
+            <h2 className="text-xl font-bold">Usuario de Fireflies</h2>
 
             {error && <p className="text-red-500">Error: {error}</p>}
 
             <ul className="mt-4">
-                {users.length > 0 ? (
-                    users.map((user) => (
-                        <li key={user.user_id} className="p-2 border-b">
-                            {user.name} (ID: {user.user_id})
-                        </li>
-                    ))
+                {user ? (
+                    <>
+                        <li className="p-2 border-b">Nombre: {user.name}</li>
+                        <li className="p-2 border-b">Email: {user.email}</li>
+                        <li className="p-2 border-b">ID de Usuario: {user.user_id}</li>
+                        <li className="p-2 border-b">Transcripción Reciente: {user.recent_transcript}</li>
+                        <li className="p-2 border-b">Reunión Reciente: {user.recent_meeting}</li>
+                        <li className="p-2 border-b">Número de Transcripciones: {user.num_transcripts}</li>
+                        <li className="p-2 border-b">Minutos Consumidos: {user.minutes_consumed}</li>
+                    </>
                 ) : (
-                    <p>Cargando usuarios...</p>
+                    <p>Cargando usuario...</p>
                 )}
             </ul>
         </div>

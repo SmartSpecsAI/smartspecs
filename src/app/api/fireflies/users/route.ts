@@ -17,7 +17,22 @@ export async function GET() {
       Authorization: `Bearer ${FIRELIES_API_KEY}`,
     };
     const data = {
-      query: "{ users { name user_id } }",
+      query: `
+        query User($userId: String!) {
+          user(id: $userId) {
+            user_id
+            recent_transcript
+            recent_meeting
+            num_transcripts
+            name
+            minutes_consumed
+            is_admin
+            integrations
+            email
+          }
+        }
+      `,
+      variables: { userId: 'p3dCZLY1c5' }
     };
 
     const response = await axios.post(url, data, { headers });
