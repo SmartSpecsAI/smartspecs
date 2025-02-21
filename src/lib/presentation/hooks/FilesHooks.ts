@@ -1,10 +1,10 @@
 "use client";
 import { useState } from "react";
-import { useFilesContext } from "../contexts/FilesContext";
+import { useFiles } from "../slides/FilesSlide"; // Corrected import
 import { getInjection } from "@/smartspecs/di/container";
 
 export function useFilesData() {
-  const { file, setFile } = useFilesContext();
+  const { file, updateFile } = useFiles(); // Corrected usage
   const uploadFileUseCase = getInjection("IUploadFileUseCase");
   const transcriptAudioUseCase = getInjection("ITranscriptAudioUseCase");
   const getFileUrlUseCase = getInjection("IGetFileUrlUseCase");
@@ -59,7 +59,7 @@ export function useFilesData() {
 
   return {
     file,
-    setFile,
+    setFile: updateFile, // Corrected usage
     uploadFile,
     uploadedFiles,
     transcription,
