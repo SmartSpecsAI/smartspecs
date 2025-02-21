@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 const FirefliesUsers = () => {
     const [userId, setUserId] = useState<string>('');
@@ -32,41 +32,71 @@ const FirefliesUsers = () => {
     };
 
     const handleSearch = () => {
-        if (userId) {
-            fetchUser(userId);
-        }
+        if (userId) fetchUser(userId);
     };
 
     return (
-        <div className="p-4">
-            <h2 className="text-xl font-bold">Usuario de Fireflies</h2>
+        <div className="w-full p-6 mx-auto bg-white rounded-2xl shadow-lg border border-gray-200">
+            <h2 className="text-2xl font-bold text-gray-800 mb-4">👤 Información del Usuario</h2>
 
-            <input 
-                type="text" 
-                value={userId} 
-                onChange={(e) => setUserId(e.target.value)} 
-                placeholder="Ingrese ID de usuario" 
-                className="border p-2"
-            />
-            <button onClick={handleSearch} className="ml-2 p-2 bg-blue-500 text-white">Buscar</button>
+            <div className="flex gap-3 mb-6">
+                <input
+                    type="text"
+                    value={userId}
+                    onChange={(e) => setUserId(e.target.value)}
+                    placeholder="Ingrese ID de usuario"
+                    className="w-full p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    required
+                />
+                <button
+                    onClick={handleSearch}
+                    className="bg-blue-600 hover:bg-blue-700 transition-colors text-white px-4 py-2 rounded-lg font-medium shadow-md"
+                >
+                    🔍 Buscar
+                </button>
+            </div>
 
-            {error && <p className="text-red-500">Error: {error}</p>}
+            {error && <p className="text-red-500 font-semibold">{error}</p>}
 
-            <ul className="mt-4">
-                {user ? (
-                    <>
-                        <li className="p-2 border-b">Nombre: {user.name}</li>
-                        <li className="p-2 border-b">Email: {user.email}</li>
-                        <li className="p-2 border-b">ID de Usuario: {user.user_id}</li>
-                        <li className="p-2 border-b">Transcripción Reciente: {user.recent_transcript}</li>
-                        <li className="p-2 border-b">Reunión Reciente: {user.recent_meeting}</li>
-                        <li className="p-2 border-b">Número de Transcripciones: {user.num_transcripts}</li>
-                        <li className="p-2 border-b">Minutos Consumidos: {user.minutes_consumed}</li>
-                    </>
-                ) : (
-                    <p>Cargando usuario...</p>
-                )}
-            </ul>
+            {user && (
+                <div className="space-y-4">
+                    <div className="p-4 bg-gray-100 rounded-lg shadow-sm">
+                        <h3 className="font-semibold text-lg">{user.name}</h3>
+                        <p className="text-gray-500 text-sm">📩 {user.email}</p>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="p-4 bg-gray-50 rounded-lg border shadow-sm">
+                            <h4 className="font-semibold text-gray-700">📌 Detalles del Usuario</h4>
+                            <p className="text-sm text-gray-600">🆔 ID: {user.user_id}</p>
+                            <p className="text-sm text-gray-600">⏳ Minutos Consumidos: {user.minutes_consumed}</p>
+                            <p className="text-sm text-gray-600">
+                                🔑 Rol: <span className={user.is_admin ? "text-green-600 font-semibold" : "text-gray-600"}>{user.is_admin ? "Administrador" : "Usuario Normal"}</span>
+                            </p>
+                        </div>
+
+                        <div className="p-4 bg-gray-50 rounded-lg border shadow-sm">
+                            <h4 className="font-semibold text-gray-700">🔗 Integraciones Activas</h4>
+                            <ul className="max-h-24 overflow-auto text-sm text-gray-600">
+                                {user.integrations.length > 0 ? (
+                                    user.integrations.map((integration, index) => (
+                                        <li key={index} className="py-1 border-b">{integration}</li>
+                                    ))
+                                ) : (
+                                    <p className="text-gray-400">No hay integraciones</p>
+                                )}
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div className="p-4 bg-gray-50 rounded-lg border shadow-sm">
+                        <h4 className="font-semibold text-gray-700">📄 Transcripciones</h4>
+                        <p className="text-sm text-gray-600">📝 Última Transcripción: {user.recent_transcript || "No disponible"}</p>
+                        <p className="text-sm text-gray-600">📅 Última Reunión: {user.recent_meeting || "No disponible"}</p>
+                        <p className="text-sm text-gray-600">📊 Total Transcripciones: {user.num_transcripts}</p>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

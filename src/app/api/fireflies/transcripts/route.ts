@@ -1,7 +1,14 @@
 import { NextResponse } from "next/server";
 import axios from "axios";
 
-export async function GET() {
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const transcriptId = searchParams.get("id");
+
+  if (!transcriptId) {
+    return NextResponse.json({ error: "ID de transcripción no proporcionado" }, { status: 400 });
+  }
+
   try {
     console.log("📢 Enviando solicitud a Fireflies API...");
 
@@ -104,7 +111,7 @@ export async function GET() {
                 }
             }
         `,
-        variables: { transcriptId: '01JMJY50S1WJDDEP5SDW37YPEA' }
+        variables: { transcriptId }
     };
 
     const response = await axios.post(url, data, { headers });
