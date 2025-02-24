@@ -1,14 +1,17 @@
 import { useEffect } from "react";
-import { useProjectsData, useRequirementsData } from "@/smartspecs/lib/presentation";
+import {
+  useProjects,
+  useProjectsData,
+  useRequirementsData,
+} from "@/smartspecs/lib/presentation";
 
 export function useSmartspecsData() {
   const {
     projects,
     selectedProject,
-    setSelectedProject,
+    updateSelectedProject,
     isLoading: projectsLoading,
     error: projectsError,
-    refetch: refetchProjects,
   } = useProjectsData();
 
   const {
@@ -19,19 +22,19 @@ export function useSmartspecsData() {
   } = useRequirementsData();
 
   const handleRefresh = async () => {
-    await Promise.all([refetchProjects(), refetchRequirements()]);
+    await Promise.all([refetchRequirements()]);
   };
 
   useEffect(() => {
     if (projects[0]) {
-      setSelectedProject(projects[0]);
+      updateSelectedProject(projects[0]);
     }
   }, [projects]);
 
   return {
     projects,
     selectedProject,
-    setSelectedProject,
+    updateSelectedProject,
     projectsLoading,
     projectsError,
     requirements,
@@ -39,4 +42,4 @@ export function useSmartspecsData() {
     requirementsError,
     handleRefresh,
   };
-} 
+}
