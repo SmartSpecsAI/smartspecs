@@ -27,6 +27,12 @@ export const useAppSiderLogic = () => {
       label: "SmartSpecs",
       onClick: () => router.push("/smartspecs"),
     },
+    {
+      key: "projects",
+      icon: <FileDoneOutlined/>,
+      label: "Projects",
+      onClick: () => router.push("/projects"),
+    },
   ];
 
   return {
