@@ -15,9 +15,9 @@ const Modal: React.FC<{ isOpen: boolean; onClose: () => void; children: React.Re
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-primary/10 bg-opacity-50 flex justify-center items-center">
-      <div className="bg-background p-6 rounded-lg shadow-lg w-full max-w-md">
-        <button onClick={onClose} className="text-primary float-right">&times;</button>
+    <div className="fixed inset-0 bg-primary/10 bg-opacity-50 backdrop-blur-sm flex justify-center items-center transition-opacity duration-300">
+      <div className="bg-background p-6 rounded-xl shadow-2xl w-full max-w-md transform transition-transform duration-300">
+        <button onClick={onClose} className="text-primary float-right text-xl hover:text-primary/80 transition">&times;</button>
         {children}
       </div>
     </div>
