@@ -15,9 +15,9 @@ const Modal: React.FC<{ isOpen: boolean; onClose: () => void; children: React.Re
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
-      <div className="bg-white p-4 rounded shadow-lg w-full max-w-md">
-        <button onClick={onClose} className="text-red-500 float-right">&times;</button>
+    <div className="fixed inset-0 bg-primary/10 bg-opacity-50 flex justify-center items-center">
+      <div className="bg-background p-6 rounded-lg shadow-lg w-full max-w-md">
+        <button onClick={onClose} className="text-primary float-right">&times;</button>
         {children}
       </div>
     </div>
@@ -70,7 +70,7 @@ const ProjectsView: React.FC = () => {
               value={newProject.title}
               onChange={handleInputChange}
               placeholder="Project Title"
-              className="border border-secondary p-2 w-full mb-2 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+              className="border border-primary p-2 w-full mb-2 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
               required
             />
             <input
@@ -79,7 +79,7 @@ const ProjectsView: React.FC = () => {
               value={newProject.client}
               onChange={handleInputChange}
               placeholder="Client Name"
-              className="border border-secondary p-2 w-full mb-2 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+              className="border border-primary p-2 w-full mb-2 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
               required
             />
             <textarea
@@ -87,10 +87,10 @@ const ProjectsView: React.FC = () => {
               value={newProject.description}
               onChange={handleInputChange}
               placeholder="Project Description"
-              className="border border-secondary p-2 w-full mb-2 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+              className="border border-primary p-2 w-full mb-2 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
               required
             />
-            <button type="submit" className="bg-primary text-text p-3 w-full rounded-lg shadow-md hover:bg-secondary transition">Create Project</button>
+            <button type="submit" className="bg-primary text-background hover:bg-primary/80 p-3 w-full rounded-lg shadow-md transition">Create Project</button>
           </form>
         </Modal>
         {projects.length === 0 ? (
