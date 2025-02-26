@@ -38,3 +38,29 @@ body {
 @layer utilities {
 }
 
+/* 📌 Estilos personalizados para el menú */
+.ant-menu {
+  background-color: rgb(var(--background)) !important;
+}
+
+/* 🟡 Items normales */
+.ant-menu-item {
+  color: rgb(var(--primary)) !important;
+}
+
+/* 🟠 Hover de un item */
+.ant-menu-item:hover {
+  background-color: rgba(var(--primary), 0.1) !important;
+}
+
+/* 🔵 Item seleccionado */
+.ant-menu-item-selected {
+  background-color: rgb(var(--primary)) !important;
+  color: rgb(var(--background)) !important;
+}
+
+/* 🔵 Hover en item seleccionado */
+.ant-menu-item-selected:hover {
+  background-color: rgba(var(--primary), 0.9) !important;
+}
+

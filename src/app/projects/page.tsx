@@ -61,7 +61,7 @@ const ProjectsView: React.FC = () => {
       <div className="min-h-screen flex flex-col items-center gap-6 bg-background text-text">
         <h1 className="text-3xl font-extrabold mb-6">Projects</h1>
         {error && <p className="text-danger">{error}</p>}
-        <button onClick={() => setIsModalOpen(true)} className="bg-primary text-bg p-3 rounded-lg shadow-md hover:bg-secondary transition">Add New Project</button>
+        <button onClick={() => setIsModalOpen(true)} className="bg-primary text-background p-3 rounded-lg shadow-md hover:bg-secondary transition">Add New Project</button>
         <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
           <form onSubmit={handleSubmit} className="w-full">
             <input
@@ -98,7 +98,7 @@ const ProjectsView: React.FC = () => {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 w-full max-w-6xl">
             {projects.map((project: Project) => (
-              <div key={project.id || 'unknown'} className="bg-background shadow-md rounded-lg p-6 hover:shadow-lg transition-shadow">
+              <div key={project.id || 'unknown'} className="bg-background shadow-md rounded-lg p-6 hover:shadow-lg transition-shadow border border-primary">
                 <h2 className="font-semibold text-xl mb-2">{project.title}</h2>
                 <p className="text-sm text-text mb-1"><strong>Client:</strong> {project.client}</p>
                 <p className="text-sm text-text mb-1"><strong>Description:</strong> {project.description}</p>

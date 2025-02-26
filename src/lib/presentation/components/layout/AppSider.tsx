@@ -35,7 +35,7 @@ export const AppSider: React.FC<AppSiderProps> = ({ collapsed, setCollapsed, sel
       trigger={null}
       collapsible
       collapsed={collapsed}
-      className={`bg-background p-4 transition-all duration-300 ${collapsed ? 'w-24' : 'w-[300px] shadow-lg border-l-2'}`}
+      className={`bg-background p-4 transition-all duration-300 ${collapsed ? 'w-24' : 'w-[300px] shadow-lg border-r border-primary'}`}
       style={{ marginTop: '64px', position: 'fixed', height: 'calc(100vh - 64px)' }}
     >
       <div className="flex items-center justify-between p-4 border-b border-primary mb-2 ">
@@ -57,15 +57,11 @@ export const AppSider: React.FC<AppSiderProps> = ({ collapsed, setCollapsed, sel
       </div>
 
       <Menu
-        mode="inline"
-        className="border-end-0 text-text"
-        selectedKeys={selectedKeys}
-        items={menuItems}
-        style={{
-          backgroundColor: '#E6F4FF',
-        }}
-        theme={theme === 'dark' ? 'dark' : 'light'}
-      />
+  mode="inline"
+  selectedKeys={selectedKeys}
+  items={menuItems}
+  theme={theme === "dark" ? "dark" : "light"}
+/>
     </Sider>
   );
 };
