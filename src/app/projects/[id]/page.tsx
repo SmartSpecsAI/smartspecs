@@ -9,13 +9,19 @@ import {
   deleteProject,
   updateProject,
 } from "@/smartspecs/lib/presentation/redux/slices/ProjectsSlice";
+import {
+  fetchMeetingsByProjectId,
+  createMeeting,
+  Meeting,
+} from "@/smartspecs/lib/presentation/redux/slices/MeetingsSlice";
 import { usePathname } from "next/navigation";
+import Link from "next/link";
 
-// Hooks tipados
+// --------------------- HOOKS TIPADOS ---------------------
 const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
 const useAppDispatch = () => useDispatch<AppDispatch>();
 
-// Modal genérico
+// --------------------- MODAL CONFIRMAR ELIMINACIÓN ---------------------
 const ConfirmModal: React.FC<{
   isOpen: boolean;
   onClose: () => void;
@@ -57,40 +63,144 @@ const ConfirmModal: React.FC<{
   );
 };
 
+// --------------------- MODAL PARA CREAR REUNIÓN ---------------------
+const CreateMeetingModal: React.FC<{
+  isOpen: boolean;
+  onClose: () => void;
+  projectId: string;
+}> = ({ isOpen, onClose, projectId }) => {
+  const dispatch = useAppDispatch();
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [audioFile, setAudioFile] = useState<File | null>(null);
+
+  // Handler de archivo
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      setAudioFile(e.target.files[0]);
+    }
+  };
+
+  // Crear Reunión
+  const handleCreateMeeting = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await dispatch(
+      createMeeting({
+        projectId,
+        title,
+        description,
+        audioFile,
+      })
+    );
+    // Limpia y cierra
+    setTitle("");
+    setDescription("");
+    setAudioFile(null);
+    onClose();
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
+      <div className="bg-background p-6 rounded shadow-md w-full max-w-md relative">
+        <button
+          onClick={onClose}
+          className="absolute top-2 right-2 text-text text-xl font-bold"
+        >
+          &times;
+        </button>
+        <h2 className="text-2xl font-bold mb-4">Crear Nueva Reunión</h2>
+        <form onSubmit={handleCreateMeeting} className="space-y-4">
+          <div>
+            <label className="block font-semibold mb-1">Título:</label>
+            <input
+              type="text"
+              className="border w-full p-2 rounded text-black"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="Nombre de la reunión"
+              required
+            />
+          </div>
+          <div>
+            <label className="block font-semibold mb-1">Descripción:</label>
+            <textarea
+              className="border w-full p-2 rounded text-black"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Describe brevemente la reunión"
+            />
+          </div>
+          <div>
+            <label className="block font-semibold mb-1">Archivo de audio:</label>
+            <input
+              type="file"
+              accept="audio/*"
+              onChange={handleFileChange}
+              className="w-full"
+            />
+          </div>
+          <button
+            type="submit"
+            className="bg-primary text-background px-4 py-2 rounded"
+          >
+            Crear
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+};
+
+// --------------------- VISTA DE DETALLE DE PROYECTO ---------------------
 const ProjectDetail: React.FC = () => {
   const dispatch = useAppDispatch();
   const pathname = usePathname();
 
-  // Estado local para edición y modal
+  // Estado local
   const [isEditing, setIsEditing] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteSuccessMsg, setDeleteSuccessMsg] = useState("");
   const [updateSuccessMsg, setUpdateSuccessMsg] = useState("");
 
-  // Guardamos temporalmente la data del proyecto mientras editamos
-  const [formData, setFormData] = useState<Omit<Project, "id">>({
+  // Modal para crear reunión
+  const [showMeetingModal, setShowMeetingModal] = useState(false);
+
+  // Form para editar proyecto
+  const [formData, setFormData] = useState({
     title: "",
     client: "",
     description: "",
-    status: "pending",
+    status: "pending" as "pending" | "approved" | "rejected",
     createdAt: "",
     updatedAt: "",
   });
 
+  // Sacamos el ID del path
   const id = pathname ? pathname.split("/").pop() : null;
+
+  // Seleccionamos proyectos y meetings del store
   const { projects, loading, error } = useAppSelector((state) => state.projects);
+  const {
+    meetings,
+    loading: meetingsLoading,
+    error: meetingsError,
+  } = useAppSelector((state) => state.meetings);
 
   // Buscamos el proyecto en el store
   const project = projects.find((p: Project) => p.id === id);
 
-  // Si no está, lo traemos de Firestore
+  // Al montar: si no tenemos el proyecto en store, lo traemos
+  // y también traemos sus reuniones
   useEffect(() => {
-    if (id && !project) {
+    if (id) {
       dispatch(fetchProjectById(id));
+      dispatch(fetchMeetingsByProjectId(id));
     }
-  }, [id, project, dispatch]);
+  }, [id, dispatch]);
 
-  // Cada vez que cambie el proyecto y entres a modo edición, actualiza formData
+  // Cuando se activa "editar", llenamos formData con la info del proyecto
   useEffect(() => {
     if (project && isEditing) {
       setFormData({
@@ -104,7 +214,7 @@ const ProjectDetail: React.FC = () => {
     }
   }, [project, isEditing]);
 
-  // Función para confirmar borrado
+  // Para confirmar borrado
   const handleConfirmDelete = async () => {
     if (!project) return;
     await dispatch(deleteProject(project.id));
@@ -112,53 +222,61 @@ const ProjectDetail: React.FC = () => {
     setDeleteSuccessMsg("¡Proyecto eliminado con éxito!");
   };
 
-  // Función para iniciar edición
+  // Para iniciar edición
   const handleEdit = () => {
     setIsEditing(true);
     setUpdateSuccessMsg("");
     setDeleteSuccessMsg("");
   };
 
-  // Función para cancelar edición
+  // Para cancelar edición
   const handleCancelEdit = () => {
     setIsEditing(false);
     setUpdateSuccessMsg("");
     setDeleteSuccessMsg("");
   };
 
-  // Función para guardar cambios
+  // Para guardar cambios en el proyecto
   const handleSaveEdit = async () => {
     if (!project) return;
-    // Actualizamos la fecha
     const now = new Date().toISOString();
     const updatedData = {
       ...formData,
       updatedAt: now,
     };
-    // Hacemos dispatch a la acción de updateProject
+    // Actualizamos en firestore
     await dispatch(updateProject({ id: project.id, updatedData }));
     setIsEditing(false);
     setUpdateSuccessMsg("¡Proyecto actualizado con éxito!");
   };
 
-  // Manejador para inputs en modo edición
+  // Para inputs del proyecto
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  if (loading) {
-    return <p className="text-center mt-5">Cargando proyecto...</p>;
+  // Filtramos las reuniones de este proyecto
+  const projectMeetings = meetings.filter((m) => m.projectId === id);
+
+  // Render loading
+  if (loading || meetingsLoading) {
+    return <p className="text-center mt-5">Cargando datos...</p>;
   }
 
-  if (error) {
-    return <p className="text-center mt-5 text-red-500">{error}</p>;
+  // Render error
+  if (error || meetingsError) {
+    return (
+      <p className="text-center mt-5 text-red-500">
+        {error || meetingsError}
+      </p>
+    );
   }
 
+  // Si ya se borró o no existe
   if (!project) {
-    // Si ya se eliminó, podemos mostrar el mensaje de éxito
     if (deleteSuccessMsg) {
       return (
         <div className="p-4">
@@ -168,9 +286,6 @@ const ProjectDetail: React.FC = () => {
     }
     return <p className="text-center mt-5">Proyecto no encontrado</p>;
   }
-
-  // Si el proyecto aún existe, pero se eliminó en la BD, en teoría ya no vendría en la lista
-  // pero asumiremos que se mantiene en store hasta recargar.
 
   return (
     <div className="min-h-screen flex flex-col items-center gap-4 bg-background text-text p-4">
@@ -182,8 +297,8 @@ const ProjectDetail: React.FC = () => {
         <p className="text-green-600 font-bold">{updateSuccessMsg}</p>
       )}
 
+      {/* ---------------- SECCIÓN A: DETALLE DEL PROYECTO ---------------- */}
       {isEditing ? (
-        // ---------------------- MODO EDICIÓN ----------------------
         <div className="w-full max-w-md border p-4 rounded shadow bg-background">
           <label className="block mb-2 font-semibold">Título:</label>
           <input
@@ -192,6 +307,7 @@ const ProjectDetail: React.FC = () => {
             value={formData.title}
             onChange={handleChange}
           />
+
           <label className="block mb-2 font-semibold">Cliente:</label>
           <input
             className="border w-full mb-4 p-2 rounded text-black"
@@ -199,6 +315,7 @@ const ProjectDetail: React.FC = () => {
             value={formData.client}
             onChange={handleChange}
           />
+
           <label className="block mb-2 font-semibold">Descripción:</label>
           <textarea
             className="border w-full mb-4 p-2 rounded text-black"
@@ -206,18 +323,20 @@ const ProjectDetail: React.FC = () => {
             value={formData.description}
             onChange={handleChange}
           />
+
           <label className="block mb-2 font-semibold">Estado:</label>
           <select
             className="border w-full mb-4 p-2 rounded text-black"
             name="status"
             value={formData.status}
-            onChange={(e) => handleChange(e as unknown as React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>)}
+            onChange={handleChange}
           >
             <option value="pending">pending</option>
             <option value="approved">approved</option>
             <option value="rejected">rejected</option>
           </select>
-          {/* Botones de Guardar / Cancelar */}
+
+          {/* Botones guardar / cancelar */}
           <div className="flex gap-4 mt-4">
             <button
               className="bg-primary text-background px-4 py-2 rounded"
@@ -234,17 +353,16 @@ const ProjectDetail: React.FC = () => {
           </div>
         </div>
       ) : (
-        // ---------------------- MODO LECTURA ----------------------
         <div className="bg-background p-6 rounded-xl shadow-md max-w-md w-full">
           <h1 className="text-3xl font-extrabold mb-4">{project.title}</h1>
           <p className="mb-1">
-            <strong>Client:</strong> {project.client}
+            <strong>Cliente:</strong> {project.client}
           </p>
           <p className="mb-1">
-            <strong>Description:</strong> {project.description}
+            <strong>Descripción:</strong> {project.description}
           </p>
           <p className="mb-1">
-            <strong>Status:</strong> {project.status}
+            <strong>Estado:</strong> {project.status}
           </p>
           <p className="mb-1">
             <strong>Created At:</strong>{" "}
@@ -254,7 +372,8 @@ const ProjectDetail: React.FC = () => {
             <strong>Updated At:</strong>{" "}
             {new Date(project.updatedAt).toLocaleDateString()}
           </p>
-          <div className="flex gap-4 mt-4">
+
+          <div className="flex flex-wrap gap-4 mt-4">
             <button
               className="bg-primary text-background px-4 py-2 rounded"
               onClick={handleEdit}
@@ -267,11 +386,17 @@ const ProjectDetail: React.FC = () => {
             >
               Eliminar
             </button>
+            <button
+              className="bg-secondary text-background px-4 py-2 rounded"
+              onClick={() => setShowMeetingModal(true)}
+            >
+              Agregar Reunión
+            </button>
           </div>
         </div>
       )}
 
-      {/* Modal de confirmación de eliminar */}
+      {/* MODAL DE CONFIRMACIÓN DE ELIMINAR */}
       <ConfirmModal
         isOpen={showDeleteModal}
         onClose={() => setShowDeleteModal(false)}
@@ -279,6 +404,47 @@ const ProjectDetail: React.FC = () => {
         title="¿Eliminar proyecto?"
         message="¿Estás seguro de que deseas eliminar este proyecto?"
       />
+
+      {/* MODAL PARA CREAR REUNIÓN */}
+      <CreateMeetingModal
+        isOpen={showMeetingModal}
+        onClose={() => setShowMeetingModal(false)}
+        projectId={project.id}
+      />
+
+      {/* ---------------- SECCIÓN B: LISTA DE REUNIONES ---------------- */}
+      <div className="bg-background p-6 rounded-xl shadow-md max-w-2xl w-full mt-8">
+        <h2 className="text-2xl font-bold mb-4">Reuniones</h2>
+        {projectMeetings.length === 0 ? (
+          <p>No hay reuniones registradas para este proyecto</p>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {projectMeetings.map((meeting: Meeting) => (
+              <Link key={meeting.id} href={`/meetings/${meeting.id}`}>
+                <div className="border p-4 rounded shadow-sm hover:shadow-md transition cursor-pointer">
+                  <h3 className="font-semibold text-lg">{meeting.title}</h3>
+                  <p className="text-sm mb-1">
+                    <strong>Fecha:</strong>{" "}
+                    {new Date(meeting.date).toLocaleString()}
+                  </p>
+                  <p className="text-sm mb-1">
+                    <strong>Descripción:</strong> {meeting.description}
+                  </p>
+                  {meeting.audioId ? (
+                    <p className="text-sm text-green-800">
+                      <strong>Audio Subido:</strong> {meeting.audioId}
+                    </p>
+                  ) : (
+                    <p className="text-sm text-gray-600">
+                      <em>Sin audio</em>
+                    </p>
+                  )}
+                </div>
+              </Link>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 };
