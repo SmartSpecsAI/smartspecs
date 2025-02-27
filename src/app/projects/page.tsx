@@ -1,23 +1,34 @@
-'use client';
+"use client";
 
-import React, { useEffect, useState } from 'react';
-import { useDispatch, useSelector, TypedUseSelectorHook } from 'react-redux';
-import { fetchProjects, createProject } from '../../lib/presentation/redux/slices/ProjectsSlice';
-import { RootState } from '../../lib/presentation/redux/store';
-import type { Project } from '../../lib/presentation/redux/slices/ProjectsSlice';
-import { AppDispatch } from '../../lib/presentation/redux/store';
+import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector, TypedUseSelectorHook } from "react-redux";
+import Link from "next/link";
+import { AppDispatch } from "@/smartspecs/lib/presentation/redux/store";
+import { RootState } from "@/smartspecs/lib/presentation/redux/store";
+import { fetchProjects } from "@/smartspecs/lib/presentation/redux/slices/ProjectsSlice";
+import { createProject, Project } from "@/smartspecs/lib/presentation/redux/slices/ProjectsSlice";
 
-// Use Typed Dispatch and Selector
+// Hooks tipados
 const useAppDispatch = () => useDispatch<AppDispatch>();
 const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
 
-const Modal: React.FC<{ isOpen: boolean; onClose: () => void; children: React.ReactNode }> = ({ isOpen, onClose, children }) => {
+// Modal simple
+const Modal: React.FC<{
+  isOpen: boolean;
+  onClose: () => void;
+  children: React.ReactNode;
+}> = ({ isOpen, onClose, children }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-primary/10 bg-opacity-50 backdrop-blur-sm flex justify-center items-center transition-opacity duration-300">
-      <div className="bg-background p-6 rounded-xl shadow-2xl w-full max-w-md transform transition-transform duration-300">
-        <button onClick={onClose} className="text-primary float-right text-xl hover:text-primary/80 transition">&times;</button>
+    <div className="fixed inset-0 bg-primary/10 bg-opacity-50 backdrop-blur-sm flex justify-center items-center">
+      <div className="bg-background p-6 rounded-xl shadow-2xl w-full max-w-md relative">
+        <button
+          onClick={onClose}
+          className="text-primary absolute top-3 right-3 text-2xl hover:text-primary/80"
+        >
+          &times;
+        </button>
         {children}
       </div>
     </div>
@@ -25,92 +36,143 @@ const Modal: React.FC<{ isOpen: boolean; onClose: () => void; children: React.Re
 };
 
 const ProjectsView: React.FC = () => {
-    const dispatch = useAppDispatch();
-    const { projects, loading, error } = useAppSelector((state) => state.projects);
-    const [newProject, setNewProject] = useState<Omit<Project, 'id'>>({
-      title: '',
-      client: '',
-      description: '',
-      status: 'pending',
-      createdAt: '',
-      updatedAt: '',
-    });
-    const [isModalOpen, setIsModalOpen] = useState(false);
-  
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-      const { name, value } = e.target;
-      setNewProject({ ...newProject, [name]: value });
-    };
-  
-    const handleSubmit = (e: React.FormEvent) => {
-      e.preventDefault();
-      const timestamp = new Date().toISOString();
-      dispatch(createProject({ ...newProject, createdAt: timestamp, updatedAt: timestamp }));
-      setNewProject({ title: '', client: '', description: '', status: 'pending', createdAt: '', updatedAt: '' });
-      setIsModalOpen(false);
-    };
-  
-    useEffect(() => {
-      dispatch(fetchProjects());
-    }, [dispatch]);
-  
-    // Evitar renderizar la lista hasta que los datos estén listos
-    if (loading) return <p className="text-center mt-5">Loading projects...</p>;
-  
-    return (
-      <div className="min-h-screen flex flex-col items-center gap-6 bg-background text-text">
-        <h1 className="text-3xl font-extrabold mb-6">Projects</h1>
-        {error && <p className="text-danger">{error}</p>}
-        <button onClick={() => setIsModalOpen(true)} className="bg-primary text-background p-3 rounded-lg shadow-md hover:bg-secondary transition">Add New Project</button>
-        <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
-          <form onSubmit={handleSubmit} className="w-full">
-            <input
-              type="text"
-              name="title"
-              value={newProject.title}
-              onChange={handleInputChange}
-              placeholder="Project Title"
-              className="border border-primary p-2 w-full mb-2 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
-              required
-            />
-            <input
-              type="text"
-              name="client"
-              value={newProject.client}
-              onChange={handleInputChange}
-              placeholder="Client Name"
-              className="border border-primary p-2 w-full mb-2 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
-              required
-            />
-            <textarea
-              name="description"
-              value={newProject.description}
-              onChange={handleInputChange}
-              placeholder="Project Description"
-              className="border border-primary p-2 w-full mb-2 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
-              required
-            />
-            <button type="submit" className="bg-primary text-background hover:bg-primary/80 p-3 w-full rounded-lg shadow-md transition">Create Project</button>
-          </form>
-        </Modal>
-        {projects.length === 0 ? (
-          <p>No hay proyectos disponibles</p>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 w-full max-w-6xl">
-            {projects.map((project: Project) => (
-              <div key={project.id || 'unknown'} className="bg-background shadow-md rounded-lg p-6 hover:shadow-lg transition-shadow border border-primary">
-                <h2 className="font-semibold text-xl mb-2">{project.title}</h2>
-                <p className="text-sm text-text mb-1"><strong>Client:</strong> {project.client}</p>
-                <p className="text-sm text-text mb-1"><strong>Description:</strong> {project.description}</p>
-                <p className="text-sm text-text mb-1"><strong>Status:</strong> {project.status}</p>
-                <p className="text-sm text-text mb-1"><strong>Created At:</strong> {new Date(project.createdAt).toLocaleDateString()}</p>
-                <p className="text-sm text-text"><strong>Updated At:</strong> {new Date(project.updatedAt).toLocaleDateString()}</p>
-                <p className="text-sm text-text mb-1"><strong>ID:</strong> {project.id}</p>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-    );
+  const dispatch = useAppDispatch();
+  const { projects, loading, error } = useAppSelector((state) => state.projects);
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [newProject, setNewProject] = useState<Omit<Project, "id">>({
+    title: "",
+    client: "",
+    description: "",
+    status: "pending",
+    createdAt: "",
+    updatedAt: "",
+  });
+
+  // Maneja cambios en los inputs
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = e.target;
+    setNewProject({ ...newProject, [name]: value });
   };
-export default ProjectsView; 
+
+  // Envía el nuevo proyecto a Firebase
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const timestamp = new Date().toISOString();
+    dispatch(
+      createProject({
+        ...newProject,
+        createdAt: timestamp,
+        updatedAt: timestamp,
+      })
+    );
+    // Limpia el formulario y cierra modal
+    setNewProject({
+      title: "",
+      client: "",
+      description: "",
+      status: "pending",
+      createdAt: "",
+      updatedAt: "",
+    });
+    setIsModalOpen(false);
+  };
+
+  // Al montar, busca todos los proyectos
+  useEffect(() => {
+    dispatch(fetchProjects());
+  }, [dispatch]);
+
+  if (loading) {
+    return <p className="text-center mt-5">Loading projects...</p>;
+  }
+
+  return (
+    <div className="min-h-screen flex flex-col items-center gap-6 bg-background text-text">
+      <h1 className="text-3xl font-extrabold mb-6">Projects</h1>
+      {error && <p className="text-danger">{error}</p>}
+
+      <button
+        onClick={() => setIsModalOpen(true)}
+        className="bg-primary text-background p-3 rounded-lg shadow-md hover:bg-secondary transition"
+      >
+        Add New Project
+      </button>
+
+      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
+        <form onSubmit={handleSubmit} className="w-full">
+          <input
+            type="text"
+            name="title"
+            value={newProject.title}
+            onChange={handleInputChange}
+            placeholder="Project Title"
+            className="border border-primary p-2 w-full mb-2 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+            required
+          />
+          <input
+            type="text"
+            name="client"
+            value={newProject.client}
+            onChange={handleInputChange}
+            placeholder="Client Name"
+            className="border border-primary p-2 w-full mb-2 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+            required
+          />
+          <textarea
+            name="description"
+            value={newProject.description}
+            onChange={handleInputChange}
+            placeholder="Project Description"
+            className="border border-primary p-2 w-full mb-2 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+            required
+          />
+          <button
+            type="submit"
+            className="bg-primary text-background hover:bg-primary/80 p-3 w-full rounded-lg shadow-md transition"
+          >
+            Create Project
+          </button>
+        </form>
+      </Modal>
+
+      {projects.length === 0 ? (
+        <p>No hay proyectos disponibles</p>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 w-full max-w-6xl">
+          {projects.map((project: Project) => (
+            <Link key={project.id} href={`/projects/${project.id}`}>
+              <div className="bg-background shadow-md rounded-lg p-6 hover:shadow-lg transition-shadow border border-primary cursor-pointer">
+                <h2 className="font-semibold text-xl mb-2">{project.title}</h2>
+                <p className="text-sm text-text mb-1">
+                  <strong>Client:</strong> {project.client}
+                </p>
+                <p className="text-sm text-text mb-1">
+                  <strong>Description:</strong> {project.description}
+                </p>
+                <p className="text-sm text-text mb-1">
+                  <strong>Status:</strong> {project.status}
+                </p>
+                <p className="text-sm text-text mb-1">
+                  <strong>Created At:</strong>{" "}
+                  {new Date(project.createdAt).toLocaleDateString()}
+                </p>
+                <p className="text-sm text-text mb-1">
+                  <strong>Updated At:</strong>{" "}
+                  {new Date(project.updatedAt).toLocaleDateString()}
+                </p>
+                <p className="text-sm text-text mb-1">
+                  <strong>ID:</strong> {project.id}
+                </p>
+              </div>
+            </Link>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default ProjectsView;
