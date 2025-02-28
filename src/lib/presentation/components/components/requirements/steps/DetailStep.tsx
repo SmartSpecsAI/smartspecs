@@ -29,7 +29,7 @@ export const DetailsStep: React.FC<DetailsStepProps> = ({ form, project }) => (
       label="Client Representative"
       rules={[
         {
-          required: true,
+          required: false,
           message: "Please select a client representative!",
         },
       ]}
