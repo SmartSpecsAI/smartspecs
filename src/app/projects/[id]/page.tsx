@@ -16,6 +16,7 @@ import {
 } from "@/smartspecs/lib/presentation/redux/slices/MeetingsSlice";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
+import { RequirementModal } from "@/smartspecs/lib/presentation/components/components/requirements/RequirementModal";
 
 // --------------------- HOOKS TIPADOS ---------------------
 const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
@@ -63,96 +64,6 @@ const ConfirmModal: React.FC<{
   );
 };
 
-// --------------------- MODAL PARA CREAR REUNIÓN ---------------------
-const CreateMeetingModal: React.FC<{
-  isOpen: boolean;
-  onClose: () => void;
-  projectId: string;
-}> = ({ isOpen, onClose, projectId }) => {
-  const dispatch = useAppDispatch();
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [audioFile, setAudioFile] = useState<File | null>(null);
-
-  // Handler de archivo
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0) {
-      setAudioFile(e.target.files[0]);
-    }
-  };
-
-  // Crear Reunión
-  const handleCreateMeeting = async (e: React.FormEvent) => {
-    e.preventDefault();
-    await dispatch(
-      createMeeting({
-        projectId,
-        title,
-        description,
-        audioFile,
-      })
-    );
-    // Limpia y cierra
-    setTitle("");
-    setDescription("");
-    setAudioFile(null);
-    onClose();
-  };
-
-  if (!isOpen) return null;
-
-  return (
-    <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
-      <div className="bg-background p-6 rounded shadow-md w-full max-w-md relative">
-        <button
-          onClick={onClose}
-          className="absolute top-2 right-2 text-text text-xl font-bold"
-        >
-          &times;
-        </button>
-        <h2 className="text-2xl font-bold mb-4">Crear Nueva Reunión</h2>
-        <form onSubmit={handleCreateMeeting} className="space-y-4">
-          <div>
-            <label className="block font-semibold mb-1">Título:</label>
-            <input
-              type="text"
-              className="border w-full p-2 rounded text-black"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="Nombre de la reunión"
-              required
-            />
-          </div>
-          <div>
-            <label className="block font-semibold mb-1">Descripción:</label>
-            <textarea
-              className="border w-full p-2 rounded text-black"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="Describe brevemente la reunión"
-            />
-          </div>
-          <div>
-            <label className="block font-semibold mb-1">Archivo de audio:</label>
-            <input
-              type="file"
-              accept="audio/*"
-              onChange={handleFileChange}
-              className="w-full"
-            />
-          </div>
-          <button
-            type="submit"
-            className="bg-primary text-background px-4 py-2 rounded"
-          >
-            Crear
-          </button>
-        </form>
-      </div>
-    </div>
-  );
-};
-
 // --------------------- VISTA DE DETALLE DE PROYECTO ---------------------
 const ProjectDetail: React.FC = () => {
   const dispatch = useAppDispatch();
@@ -163,9 +74,6 @@ const ProjectDetail: React.FC = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteSuccessMsg, setDeleteSuccessMsg] = useState("");
   const [updateSuccessMsg, setUpdateSuccessMsg] = useState("");
-
-  // Modal para crear reunión
-  const [showMeetingModal, setShowMeetingModal] = useState(false);
 
   // Form para editar proyecto
   const [formData, setFormData] = useState({
@@ -386,12 +294,7 @@ const ProjectDetail: React.FC = () => {
             >
               Eliminar
             </button>
-            <button
-              className="bg-secondary text-background px-4 py-2 rounded"
-              onClick={() => setShowMeetingModal(true)}
-            >
-              Agregar Reunión
-            </button>
+            <RequirementModal triggerButtonText="Create Meeting"></RequirementModal>
           </div>
         </div>
       )}
@@ -403,13 +306,6 @@ const ProjectDetail: React.FC = () => {
         onConfirm={handleConfirmDelete}
         title="¿Eliminar proyecto?"
         message="¿Estás seguro de que deseas eliminar este proyecto?"
-      />
-
-      {/* MODAL PARA CREAR REUNIÓN */}
-      <CreateMeetingModal
-        isOpen={showMeetingModal}
-        onClose={() => setShowMeetingModal(false)}
-        projectId={project.id}
       />
 
       {/* ---------------- SECCIÓN B: LISTA DE REUNIONES ---------------- */}
