@@ -1,17 +1,11 @@
 "use client";
-import { useEffect } from "react";
 import { Card, Row, Col, Tag, Button, Skeleton, Empty } from "antd";
 import { ReloadOutlined } from "@ant-design/icons";
-import {
-  Dropdown,
-  DropdownItem,
-  RequirementModal,
-  useProjectsData,
-  useRequirementsData,
-  useFilesData,
-} from "@/smartspecs/lib/presentation";
+import { Dropdown, DropdownItem, RequirementModal } from "@/smartspecs/lib/presentation";
 import { useRouter } from "next/navigation";
 import { colorByStatus, stringToStatus } from "../../domain";
+import { useSmartspecsData } from "../../hooks/useSmartspecsData";
+import { StatusTag } from "../components/common/StatusTag";
 
 export function SmartspecsView() {
   const router = useRouter();
@@ -19,23 +13,13 @@ export function SmartspecsView() {
     projects,
     selectedProject,
     setSelectedProject,
-    isLoading: projectsLoading,
-    error: projectsError,
-    refetch: refetchProjects,
-  } = useProjectsData();
-
-  const {
+    projectsLoading,
+    projectsError,
     requirements,
-    isLoading: requirementsLoading,
-    error: requirementsError,
-    refetch: refetchRequirements,
-  } = useRequirementsData();
-
-  const { file } = useFilesData();
-
-  const handleRefresh = async () => {
-    await Promise.all([refetchProjects(), refetchRequirements()]);
-  };
+    requirementsLoading,
+    requirementsError,
+    handleRefresh,
+  } = useSmartspecsData();
 
   const items = projects.map((project) => ({
     label: project.name ?? "",
@@ -56,12 +40,6 @@ export function SmartspecsView() {
     }
   };
 
-  useEffect(() => {
-    if (projects[0]) {
-      setSelectedProject(projects[0]);
-    }
-  }, [projects]);
-
   if (projects.length == 0 || projectsLoading) {
     return (
       <div>
@@ -75,7 +53,7 @@ export function SmartspecsView() {
 
   if (projectsError) {
     return (
-      <div className="text-red-500">
+      <div className="text-error">
         Error loading projects: {projectsError}
       </div>
     );
@@ -83,7 +61,7 @@ export function SmartspecsView() {
 
   return (
     <div>
-      <div className="flex justify-between w-100 mb-3">
+      <div className="flex justify-between w-100 mb-3 text-text">
         <div className="flex">
           <Dropdown
             items={items}
@@ -95,6 +73,8 @@ export function SmartspecsView() {
             onClick={handleRefresh}
             loading={projectsLoading || requirementsLoading}
             shape="circle"
+            className="ml-2 hover:shadow-md transition-shadow duration-200 border border-gray-200"
+            size="middle"
           />
         </div>
         <RequirementModal />
@@ -113,7 +93,7 @@ export function SmartspecsView() {
             </Col>
           ))
         ) : requirementsError ? (
-          <div className="text-red-500">
+          <div className="text-error">
             Error loading requirements: {requirementsError}
           </div>
         ) : requirements.length === 0 ? (
@@ -124,7 +104,6 @@ export function SmartspecsView() {
           </Col>
         ) : (
           requirements.map((requirement) => {
-            const status = stringToStatus(requirement.status);
             return (
               <Col xs={24} md={12} lg={8} key={requirement.id}>
                 <Card
@@ -133,19 +112,18 @@ export function SmartspecsView() {
                   onClick={() => router.push(`/smartspecs/${requirement.id}`)}
                 >
                   <p>{requirement.description}</p>
-                  <p className="text-gray-700">
+                  <p>
                     Created: {requirement.createdAt.toDate().toLocaleString()}
                     <br />
                     Updated: {requirement.updatedAt.toDate().toLocaleString()}
                     <br />
                     <b>Client Rep:</b> {requirement.clientRepName}
                   </p>
-                  <Tag
-                    color={status ? colorByStatus(status) : "default"}
+                  <StatusTag
+                    type="status"
+                    value={requirement.status}
                     className="rounded-lg"
-                  >
-                    {requirement.status.replace("_", " ").toUpperCase()}
-                  </Tag>
+                  />
                 </Card>
               </Col>
             );

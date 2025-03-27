@@ -1,10 +1,9 @@
 "use client";
 import { useEffect, useState } from "react";
-import { useProjects } from "../contexts/ProjectsContext";
+import { useProjects } from "../slides/ProjectsSlide";
 import { getInjection } from "@/smartspecs/di/container";
 import { Requirement } from "@/smartspecs/lib/domain";
-import { useRequirements } from "../contexts";
-import { get } from "http";
+import { useRequirements } from "../slides";
 
 export function useRequirementsData() {
   const getAllRequirementsByProjectUseCase = getInjection(
@@ -21,7 +20,7 @@ export function useRequirementsData() {
   const rejectRequirementUseCase = getInjection("IRejectRequirementUseCase");
   const { selectedProject } = useProjects();
 
-  const { requirements, setRequirements } = useRequirements();
+  const { requirements, updateRequirements } = useRequirements();
   const [error, setError] = useState<string | null>(null);
   const [selectedRequirement, setSelectedRequirement] =
     useState<Requirement | null>(null);
@@ -44,7 +43,7 @@ export function useRequirementsData() {
       const requirementsData = await getAllRequirementsByProjectUseCase.execute(
         selectedProject.id
       );
-      setRequirements(requirementsData);
+      updateRequirements(requirementsData);
     } catch (err) {
       setError(
         err instanceof Error ? err.message : "Failed to fetch requirements"
@@ -61,7 +60,7 @@ export function useRequirementsData() {
     setLoadingMap((prev) => ({ ...prev, getRequirementById: true }));
     setError(null);
     try {
-      let requirement = requirements.find((req) => req.id === id);
+      let requirement = requirements.find((req: Requirement) => req.id === id);
       if (!requirement) {
         if (!selectedProject) throw new Error("Requirement not found");
         const result = await getRequirementByIdUseCase.execute(
@@ -95,7 +94,7 @@ export function useRequirementsData() {
         requirement
       );
       const updatedRequirements = [...requirements, newRequirement];
-      setRequirements(updatedRequirements);
+      updateRequirements(updatedRequirements);
     } catch (err) {
       setError(
         err instanceof Error ? err.message : "Failed to create requirement"
@@ -116,10 +115,10 @@ export function useRequirementsData() {
         projectId,
         updatedData
       );
-      const updatedRequirements = requirements.map((req) =>
+      const updatedRequirements = requirements.map((req: Requirement) =>
         req.id === id ? updatedRequirement : req
       );
-      setRequirements(updatedRequirements);
+      updateRequirements(updatedRequirements);
       setSelectedRequirement(updatedRequirement);
     } catch (err) {
       setError(
@@ -139,12 +138,14 @@ export function useRequirementsData() {
         selectedProject.id,
         requirementId
       );
-      const updatedRequirements = requirements.map((req) =>
+      const updatedRequirements = requirements.map((req: Requirement) =>
         req.id === requirementId ? approvedRequirement : req
       );
-      setRequirements(updatedRequirements);
+      updateRequirements(updatedRequirements);
       setSelectedRequirement(approvedRequirement);
-      return updatedRequirements.filter((req) => req.id === requirementId)[0];
+      return updatedRequirements.filter(
+        (req: Requirement) => req.id === requirementId
+      )[0];
     } catch (err) {
       setError(
         err instanceof Error ? err.message : "Failed to approve requirement"
@@ -163,12 +164,14 @@ export function useRequirementsData() {
         selectedProject.id,
         requirementId
       );
-      const updatedRequirements = requirements.map((req) =>
+      const updatedRequirements = requirements.map((req: Requirement) =>
         req.id === requirementId ? rejectedRequirement : req
       );
-      setRequirements(updatedRequirements);
+      updateRequirements(updatedRequirements);
       setSelectedRequirement(rejectedRequirement);
-      return updatedRequirements.filter((req) => req.id === requirementId)[0];
+      return updatedRequirements.filter(
+        (req: Requirement) => req.id === requirementId
+      )[0];
     } catch (err) {
       setError(
         err instanceof Error ? err.message : "Failed to reject requirement"
@@ -189,7 +192,6 @@ export function useRequirementsData() {
 
   return {
     requirements,
-    setRequirements,
     selectedRequirement,
     isLoading: loadingMap.fetchRequirements, // Return fetchRequirements loader as default
     isLoadingObject,

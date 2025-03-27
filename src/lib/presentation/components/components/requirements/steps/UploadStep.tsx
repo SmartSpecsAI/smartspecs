@@ -6,6 +6,10 @@ import {
   ClockCircleOutlined,
 } from "@ant-design/icons";
 import { useState, useCallback, useEffect } from "react";
+import useUploadLogic from "@/smartspecs/lib/presentation/hooks/useUploadLogic";
+import { InfoTag } from "../../../common/InfoTag";
+import { StandardButton } from "../../../common/StandardButton";
+import { IconButton } from "../../../common/IconButton";
 
 interface FileInfo {
   name: string;
@@ -33,55 +37,15 @@ const UploadHint = () => (
 );
 
 export const UploadStep: React.FC<UploadStepProps> = ({ uploadProps }) => {
-  const [audioUrl, setAudioUrl] = useState<string | null>(null);
-  const [showAudio, setShowAudio] = useState(false);
-  const [fileInfo, setFileInfo] = useState<FileInfo | null>(null);
-  const [showConfirm, setShowConfirm] = useState(false);
-
-  useEffect(() => {
-    if (!uploadProps.file) {
-      return resetState();
-    }
-
-    const url = URL.createObjectURL(uploadProps.file);
-    setAudioUrl(url);
-    handleAudioLoad(uploadProps.file, url);
-    setShowAudio(true);
-  }, [uploadProps.file]);
-
-  const resetState = useCallback(() => {
-    setAudioUrl(null);
-    setShowAudio(false);
-    setFileInfo(null);
-    setShowConfirm(false);
-  }, []);
-
-  const handleAudioLoad = useCallback((file: File, url: string) => {
-    const audio = new Audio(url);
-    audio.addEventListener("loadedmetadata", () => {
-      setFileInfo({
-        name: file.name,
-        duration: audio.duration,
-      });
-    });
-  }, []);
-
-  const handleUploadChange = useCallback(
-    async (info: any) => {
-      if (info.file.status === "done") {
-        const file = info.file.originFileObj;
-        const url = URL.createObjectURL(file);
-
-        setAudioUrl(url);
-        handleAudioLoad(file, url);
-        setShowAudio(true);
-        await uploadProps.onChange?.(info);
-      } else if (info.fileList.length === 0) {
-        resetState();
-      }
-    },
-    [uploadProps, handleAudioLoad, resetState]
-  );
+  const {
+    audioUrl,
+    showAudio,
+    fileInfo,
+    showConfirm,
+    resetState,
+    handleUploadChange,
+    setShowConfirm,
+  } = useUploadLogic(uploadProps);
 
   const formatDuration = useCallback((seconds: number): string => {
     if (seconds < 60) {
@@ -113,28 +77,22 @@ export const UploadStep: React.FC<UploadStepProps> = ({ uploadProps }) => {
         <div>
           {fileInfo && (
             <div className="mb-3 bg-gray-100 p-4 rounded-lg">
-              <Title level={5} className="mb-2 text-blue-500">
+              <Title level={5} className="mb-2 text-primary">
                 Audio File Details
               </Title>
               <div className="flex flex-wrap gap-2">
-                <Tag
+                <InfoTag
                   icon={<SoundOutlined />}
                   color="blue"
-                  style={{ whiteSpace: "normal", height: "auto" }}
-                >
-                  <Text strong className="mr-2">
-                    File:
-                  </Text>
-                  <Text style={{ wordBreak: "break-word" }}>
-                    {fileInfo.name}
-                  </Text>
-                </Tag>
-                <Tag icon={<ClockCircleOutlined />} color="cyan">
-                  <Text strong className="mr-2">
-                    Duration:
-                  </Text>
-                  <Text>{formatDuration(fileInfo.duration)}</Text>
-                </Tag>
+                  label="File"
+                  value={fileInfo.name}
+                />
+                <InfoTag
+                  icon={<ClockCircleOutlined />}
+                  color="cyan"
+                  label="Duration"
+                  value={formatDuration(fileInfo.duration)}
+                />
               </div>
             </div>
           )}
@@ -151,14 +109,13 @@ export const UploadStep: React.FC<UploadStepProps> = ({ uploadProps }) => {
                 <Text type="warning" strong>
                   Not sure about this file?
                 </Text>
-                <Button
+                <IconButton
                   type="primary"
                   ghost
-                  icon={<UploadOutlined className="me-2" />}
+                  icon={<UploadOutlined />}
                   onClick={handleUploadNewClick}
-                >
-                  Upload New Audio
-                </Button>
+                  label="Upload New Audio"
+                />
               </>
             ) : (
               <>
@@ -166,16 +123,15 @@ export const UploadStep: React.FC<UploadStepProps> = ({ uploadProps }) => {
                   Are you sure you want to replace the current audio file?
                 </Text>
                 <div className="flex gap-2">
-                  <Button type="primary" onClick={resetState}>
+                  <StandardButton buttonVariant="primary" onClick={resetState}>
                     Yes
-                  </Button>
-                  <Button
-                    type="primary"
-                    ghost
+                  </StandardButton>
+                  <StandardButton
+                    buttonVariant="secondary"
                     onClick={() => setShowConfirm(false)}
                   >
                     No
-                  </Button>
+                  </StandardButton>
                 </div>
               </>
             )}

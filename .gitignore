@@ -32,6 +32,13 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+.env.local
+.env.development.local
+.env.production.local
+.env.test.local
+
+# Firebase Admin SDK private key (nunca se debe subir)
+src/app/smartspecs57b-firebase-adminsdk-ua8vu-d4cae3e4dc.json
 
 # vercel
 .vercel

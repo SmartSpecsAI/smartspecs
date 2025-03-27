@@ -1,5 +1,5 @@
 "use client";
-import React, { ReactNode, useState, useEffect, useRef } from "react";
+import React, { ReactNode } from "react";
 import { Avatar, Input } from "antd";
 import {
   CaretDownFilled,
@@ -7,6 +7,7 @@ import {
   CloseCircleFilled,
   SearchOutlined,
 } from "@ant-design/icons";
+import { useDropdown } from "../../hooks/useDropdown";
 
 export interface DropdownItem {
   value: string;
@@ -25,35 +26,20 @@ export const Dropdown: React.FC<DropdownProps> = ({
   onSelect,
   selectedItem,
 }) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [searchText, setSearchText] = useState("");
-  const dropdownRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node)
-      ) {
-        setIsOpen(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, []);
-
-  const filteredItems = items.filter((item) =>
-    item.label.toLowerCase().includes(searchText.toLowerCase())
-  );
+  const {
+    isOpen,
+    setIsOpen,
+    searchText,
+    setSearchText,
+    dropdownRef,
+    filteredItems,
+  } = useDropdown(items, onSelect, selectedItem);
 
   return (
     <div
       ref={dropdownRef}
-      className="d-inline-block me-3 py-1 px-2 dropdown"
-      style={{ background: "#fff", borderRadius: "60px" }}
+      className="d-inline-block me-3 py-1 px-2 dropdown dark:text-background"
+      style={{ borderRadius: "60px", color: "black", backgroundColor: "white" }}
     >
       <a
         className={`dropdown-project-toggle dropdown-toggle flex gap-2 items-center px-1 ${
@@ -91,7 +77,7 @@ export const Dropdown: React.FC<DropdownProps> = ({
             />
           </div>
 
-          {filteredItems.map((item) => (
+          {filteredItems.map((item: DropdownItem) => (
             <a
               key={item.value}
               className={`d-flex align-items-center fw-normal dropdown-item ${
