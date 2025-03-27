@@ -12,10 +12,7 @@ import {
   where,
 } from "firebase/firestore";
 import { firestore } from "@/smartspecs/lib/config/firebase-settings";
-
-// NEW: Ajusta si tienes un .env con la ruta real
-const FASTAPI_URL = "http://localhost:8000"; 
-// Ejemplo: process.env.NEXT_PUBLIC_FASTAPI_URL || "..."
+import { callFastAPI } from "@/smartspecs/lib/services/api"; // <-- IMPORTA tu helper
 
 export interface Requirement {
   id: string;
@@ -40,7 +37,10 @@ const initialState: RequirementState = {
   error: null,
 };
 
-// --- Acciones asíncronas para Firestore (ORIGINALS) ---
+// -----------------------------------------------------
+// Firestore-based calls (mantienen tu lógica original):
+// -----------------------------------------------------
+
 export const fetchAllRequirements = createAsyncThunk(
   "requirements/fetchAllRequirements",
   async (_, { rejectWithValue }) => {
@@ -52,7 +52,7 @@ export const fetchAllRequirements = createAsyncThunk(
           const data = doc.data();
           return {
             id: doc.id,
-            projectId: data.projectId || data.project_id, // manejar ambos por si acaso
+            projectId: data.projectId || data.project_id,
             title: data.title || "Untitled",
             description: data.description || "",
             priority: data.priority || "medium",
@@ -144,10 +144,9 @@ export const createRequirement = createAsyncThunk(
   }
 );
 
-/** 
- * (ORIGINAL) Actualiza requerimiento directamente en Firestore.
- * Queda aquí por compatibilidad, pero si deseas que también 
- * se actualice ChromaDB, usa la versión "PUT /requirements/:id".
+/**
+ * (ORIGINAL) Actualiza requerimiento directamente en Firestore,
+ * sin usar la API.
  */
 export const updateRequirementFirestoreDirect = createAsyncThunk(
   "requirements/updateRequirementFirestoreDirect",
@@ -175,8 +174,8 @@ export const updateRequirementFirestoreDirect = createAsyncThunk(
 );
 
 /**
- * (ORIGINAL) Elimina requerimiento directamente en Firestore.
- * Igual que arriba, no toca ChromaDB.
+ * (ORIGINAL) Elimina requerimiento directamente de Firestore,
+ * sin usar la API.
  */
 export const deleteRequirementFirestoreDirect = createAsyncThunk(
   "requirements/deleteRequirementFirestoreDirect",
@@ -228,10 +227,16 @@ export const fetchRequirementById = createAsyncThunk(
   }
 );
 
+// -----------------------------------------------------
+// API-based calls (Firestore + ChromaDB) via FastAPI
+// -----------------------------------------------------
+
 /* 
-  NEW: updateRequirement y deleteRequirement con llamadas a nuestra API de FastAPI,
-  la cual se encargará de actualizar/eliminar tanto en Firestore como en ChromaDB.
+  NEW + UPDATED:
+  Sustituimos el fetch manual por callFastAPI en updateRequirement y deleteRequirement
 */
+
+// UPDATED: updateRequirement con callFastAPI
 export const updateRequirement = createAsyncThunk(
   "requirements/updateRequirement",
   async (
@@ -239,23 +244,11 @@ export const updateRequirement = createAsyncThunk(
     { rejectWithValue }
   ) => {
     try {
-      const res = await fetch(`${FASTAPI_URL}/requirements/${id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...updatedData, 
-          // Asegúrate de incluir fields que FastAPI necesita, 
-          // ej. title, description, priority. 
-          // No uses "id", el ID va en la URL
-        }),
-      });
+      // Llamamos a la API con PUT
+      const updatedReq = await callFastAPI(`requirements/${id}`, "PUT", updatedData);
 
-      if (!res.ok) {
-        throw new Error(`Error actualizando requerimiento con ID: ${id}`);
-      }
-
-      const updatedReq = await res.json();
-      // returned "updatedReq" debería tener un shape similar a Requirement.
+      // updatedReq: la API regresa un objeto con las propiedades del requerimiento actualizado
+      // Retornamos un nuevo obj. con { id, ...updatedReq } para integrarlo en Redux
       return {
         id,
         ...updatedReq,
@@ -267,17 +260,16 @@ export const updateRequirement = createAsyncThunk(
   }
 );
 
+// UPDATED: deleteRequirement con callFastAPI
 export const deleteRequirement = createAsyncThunk(
   "requirements/deleteRequirement",
   async (id: string, { rejectWithValue }) => {
     try {
-      const res = await fetch(`${FASTAPI_URL}/requirements/${id}`, {
-        method: "DELETE",
-      });
-      if (!res.ok) {
-        throw new Error(`Error eliminando requerimiento con ID: ${id}`);
-      }
-      return id; // Devolvemos el ID para poder quitarlo del store.
+      // Llamamos a la API con DELETE
+      await callFastAPI(`requirements/${id}`, "DELETE");
+
+      // Devuelve el id para que Redux lo quite del store
+      return id;
     } catch (error) {
       console.error("Error deleteRequirement (FastAPI):", error);
       return rejectWithValue("Error al eliminar requerimiento en Firestore + ChromaDB");
@@ -285,6 +277,9 @@ export const deleteRequirement = createAsyncThunk(
   }
 );
 
+// -----------------------------------------------------
+// Slice
+// -----------------------------------------------------
 const requirementSlice = createSlice({
   name: "requirements",
   initialState,
@@ -313,7 +308,7 @@ const requirementSlice = createSlice({
         state.error = action.payload as string;
       })
 
-      // (ORIGINAL) Actualizar requerimiento directo en Firestore
+      // (ORIGINAL) Actualizar en Firestore
       .addCase(updateRequirementFirestoreDirect.fulfilled, (state, action) => {
         const { id } = action.payload as Requirement;
         const index = state.requirements.findIndex((r) => r.id === id);
@@ -325,7 +320,7 @@ const requirementSlice = createSlice({
         state.error = action.payload as string;
       })
 
-      // (ORIGINAL) Eliminar requerimiento directo en Firestore
+      // (ORIGINAL) Eliminar en Firestore
       .addCase(deleteRequirementFirestoreDirect.fulfilled, (state, action: PayloadAction<string>) => {
         state.requirements = state.requirements.filter((r) => r.id !== action.payload);
       })
@@ -352,7 +347,7 @@ const requirementSlice = createSlice({
         state.error = action.payload as string;
       })
 
-      // NEW: Actualizar requerimiento (Firestore + Chroma) vía FastAPI
+      // Actualizar requerimiento (Firestore + Chroma) vía FastAPI
       .addCase(updateRequirement.fulfilled, (state, action) => {
         const updatedReq = action.payload as Requirement;
         const index = state.requirements.findIndex((r) => r.id === updatedReq.id);
@@ -364,7 +359,7 @@ const requirementSlice = createSlice({
         state.error = action.payload as string;
       })
 
-      // NEW: Eliminar requerimiento (Firestore + Chroma) vía FastAPI
+      // Eliminar requerimiento (Firestore + Chroma) vía FastAPI
       .addCase(deleteRequirement.fulfilled, (state, action: PayloadAction<string>) => {
         state.requirements = state.requirements.filter((r) => r.id !== action.payload);
       })
