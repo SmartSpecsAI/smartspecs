@@ -68,14 +68,7 @@ const ProjectDetail: React.FC = () => {
         <ProjectForm project={project} onCancel={handleCancelEdit} onSaveSuccess={handleSaveSuccess} />
       ) : (
         <div className="w-full">
-          <ProjectInfo
-            title={project.title}
-            client={project.client}
-            description={project.description}
-            status={project.status}
-            createdAt={project.createdAt}
-            updatedAt={project.updatedAt}
-          />
+          <ProjectInfo project={project} />
           <div className="flex justify-end gap-4 mt-4">
             <button
               className="bg-blue-500 text-white px-4 py-2 rounded"

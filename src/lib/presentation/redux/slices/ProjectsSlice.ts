@@ -179,6 +179,26 @@ export const fetchProjectById = createAsyncThunk(
   }
 );
 
+// 6. Alimentar el contexto del proyecto a ChromaDB
+export const updateProjectContext = createAsyncThunk(
+  "projects/updateProjectContext",
+  async (project: Project, { rejectWithValue }) => {
+    try {
+      await callFastAPI("add-project-context", "POST", {
+        project_id: project.id,
+        project_title: project.title,
+        project_description: project.description,
+        client_name: project.client,
+      });
+      await callDifyWorkflow();
+      return project.id;
+    } catch (error) {
+      console.error("❌ Error actualizando contexto:", error);
+      return rejectWithValue("Error al alimentar contexto del proyecto");
+    }
+  }
+);
+
 const projectSlice = createSlice({
   name: "projects",
   initialState,
