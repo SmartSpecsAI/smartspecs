@@ -22,12 +22,14 @@ const ProjectDetail: React.FC = () => {
     error,
     meetingsError,
     requirementsError,
-    // handleConfirmDelete,
+    handleConfirmDelete,
     handleEdit,
     handleCancelEdit,
     handleSaveSuccess,
     setShowMeetingModal,
     showMeetingModal,
+    handleDeleteAllMeetings,
+    isDeletingMeetings,
   } = useProjectDetail();
 
   console.log(requirements);
@@ -70,24 +72,35 @@ const ProjectDetail: React.FC = () => {
         <div className="w-full">
           <ProjectInfo project={project} />
           <div className="flex justify-end gap-4 mt-4">
-            <button
+            {/* <button
               className="bg-blue-500 text-white px-4 py-2 rounded"
               onClick={handleEdit}
             >
               Editar
-            </button>
+            </button> */}
             <button
               className="bg-green-500 text-white px-4 py-2 rounded"
               onClick={() => setShowMeetingModal(true)}
             >
               Agregar Reunión
             </button>
-            {/* <button
+            <button
               className="bg-red-500 text-white px-4 py-2 rounded"
-              onClick={handleConfirmDelete}
+              onClick={handleDeleteAllMeetings}
+              disabled={isDeletingMeetings}
             >
-              Eliminar
-            </button> */}
+              {isDeletingMeetings ? (
+                <>
+                  <svg className="animate-spin h-5 w-5 text-white inline-block mr-2" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="white" strokeWidth="4" fill="none" />
+                    <path className="opacity-75" fill="white" d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 11-8 8z" />
+                  </svg>
+                  Eliminando...
+                </>
+              ) : (
+                "Eliminar Reuniones"
+              )}
+            </button>
           </div>
         </div>
       )}

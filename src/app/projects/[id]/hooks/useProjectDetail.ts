@@ -10,6 +10,7 @@ import {
 } from "@/smartspecs/lib/presentation/redux/slices/ProjectsSlice";
 import {
   fetchMeetingsByProjectId,
+  deleteMeeting,
 } from "@/smartspecs/lib/presentation/redux/slices/MeetingsSlice";
 import {
   fetchAllRequirements,
@@ -29,6 +30,7 @@ export const useProjectDetail = () => {
   const [updateSuccessMsg, setUpdateSuccessMsg] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [showMeetingModal, setShowMeetingModal] = useState(false);
+  const [isDeletingMeetings, setIsDeletingMeetings] = useState(false);
 
   const id = pathname ? pathname.split("/").pop() : null;
 
@@ -81,6 +83,33 @@ export const useProjectDetail = () => {
 
   const projectMeetings = meetings.filter((m) => m.projectId === id);
 
+  const handleDeleteAllMeetings = async () => {
+    if (!id) return;
+    try {
+      setIsDeletingMeetings(true);
+      
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_LOCAL_BASE_URL}/meetings/clear`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Error al eliminar las reuniones');
+      }
+
+      // Refresh meetings list
+      await dispatch(fetchMeetingsByProjectId(id));
+      alert("✅ Todas las reuniones han sido eliminadas correctamente");
+    } catch (error) {
+      console.error("❌ Error eliminando reuniones:", error);
+      alert("❌ Error al eliminar las reuniones");
+    } finally {
+      setIsDeletingMeetings(false);
+    }
+  };
+
   return {
     isEditing,
     showDeleteModal,
@@ -102,5 +131,7 @@ export const useProjectDetail = () => {
     handleEdit,
     handleCancelEdit,
     handleSaveSuccess,
+    handleDeleteAllMeetings,
+    isDeletingMeetings,
   };
 };

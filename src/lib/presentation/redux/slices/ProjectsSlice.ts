@@ -184,13 +184,13 @@ export const updateProjectContext = createAsyncThunk(
   "projects/updateProjectContext",
   async (project: Project, { rejectWithValue }) => {
     try {
-      await callFastAPI("add-project-context", "POST", {
+      await callFastAPI("context/upsert", "POST", [{
         project_id: project.id,
         project_title: project.title,
         project_description: project.description,
         client_name: project.client,
-      });
-      await callDifyWorkflow();
+      }]);
+      // await callDifyWorkflow();
       return project.id;
     } catch (error) {
       console.error("❌ Error actualizando contexto:", error);

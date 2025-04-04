@@ -75,14 +75,21 @@ export const createMeeting = createAsyncThunk(
       const newMeetingId = docRef.id;
 
       // 2️⃣ Enviar a la API de FastAPI (ChromaDB)
-      await callFastAPI("add-meeting", "POST", {
-        project_id: projectId,
-        meeting_id: newMeetingId,
-        transcription,
-        metadata: { title, description, date: new Date().toISOString() },
-      });
+      await callFastAPI("meetings/upsert", "POST", [
+        {
+          id: `${newMeetingId}-1`,
+          meeting_id: newMeetingId,
+          text: transcription,
+          metadata: {
+            title,
+            description,
+            date: new Date().toISOString(),
+            project_id: projectId,
+          },
+        },
+      ]);
 
-      await callDifyWorkflow();
+      await callDifyWorkflow(newMeetingId, transcription);
 
       return {
         id: newMeetingId,
@@ -183,7 +190,6 @@ export const updateMeeting = createAsyncThunk(
         });
       }
 
-      await callDifyWorkflow();
 
       return { id: meetingId, ...updatedData };
     } catch (error) {
@@ -203,8 +209,6 @@ export const deleteMeeting = createAsyncThunk(
 
       // Eliminar en API de FastAPI
       await callFastAPI("delete-meeting", "DELETE", { meeting_id: meetingId });
-
-      await callDifyWorkflow();
 
       return meetingId;
     } catch (error) {
