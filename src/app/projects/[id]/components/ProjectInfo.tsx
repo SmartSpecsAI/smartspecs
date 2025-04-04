@@ -4,7 +4,6 @@ import { useDispatch } from "react-redux";
 import { AppDispatch } from "@/smartspecs/lib/presentation/redux/store";
 import { updateProjectContext } from "@/smartspecs/lib/presentation/redux/slices/ProjectsSlice";
 import { Project } from "@/smartspecs/lib/presentation/redux/slices/ProjectsSlice";
-import { callFastAPI } from "@/smartspecs/lib/services/api";
 
 interface ProjectInfoProps {
   project?: Project;
@@ -32,14 +31,20 @@ const ProjectInfo: React.FC<ProjectInfoProps> = ({ project }) => {
   const handleResetDB = async () => {
     try {
       setResettingDB(true);
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/reset-db`, {
+  
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_LOCAL_BASE_URL}/context/clear`, {
         method: "DELETE",
+        headers: {
+          "Content-Type": "application/json", // buena práctica, aunque no haya body
+        },
       });
-
+  
+      const data = await response.json();
+  
       if (!response.ok) {
-        throw new Error("Falló el reset");
+        throw new Error(data?.detail || "Falló el reset");
       }
-
+  
       alert("🗑️ Base de datos vectorial reiniciada correctamente");
     } catch (error) {
       console.error("❌ Error reseteando la DB:", error);
@@ -63,9 +68,7 @@ const ProjectInfo: React.FC<ProjectInfoProps> = ({ project }) => {
       <p className="text-sm text-gray-500">Updated At: {project.updatedAt}</p>
 
       <div className="flex gap-4 mt-6">
-        <button className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Editar</button>
-        <button className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">Agregar Reunión</button>
-        
+
         <button
           onClick={handleFeedContext}
           className="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600 flex items-center gap-2"
@@ -96,7 +99,7 @@ const ProjectInfo: React.FC<ProjectInfoProps> = ({ project }) => {
               Reiniciando...
             </>
           ) : (
-            "Reset DB"
+            "Reset Context"
           )}
         </button>
       </div>
