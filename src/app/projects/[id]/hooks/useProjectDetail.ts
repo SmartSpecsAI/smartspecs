@@ -10,7 +10,6 @@ import {
 } from "@/smartspecs/lib/presentation/redux/slices/ProjectsSlice";
 import {
   fetchMeetingsByProjectId,
-  deleteMeeting,
 } from "@/smartspecs/lib/presentation/redux/slices/MeetingsSlice";
 import {
   fetchAllRequirements,

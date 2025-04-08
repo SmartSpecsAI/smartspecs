@@ -22,8 +22,6 @@ const ProjectDetail: React.FC = () => {
     error,
     meetingsError,
     requirementsError,
-    handleConfirmDelete,
-    handleEdit,
     handleCancelEdit,
     handleSaveSuccess,
     setShowMeetingModal,
@@ -109,11 +107,15 @@ const ProjectDetail: React.FC = () => {
         isOpen={showMeetingModal}
         onClose={() => setShowMeetingModal(false)}
         projectId={project.id}
+        projectTitle={project.title}
+        projectDescription={project.description}
+        projectClient={project.client}
+        requirementsList={requirements}
       />
 
       <div className="bg-background p-6 rounded-xl shadow-md w-full mt-8">
         <h2 className="text-2xl font-bold mb-4">Reuniones</h2>
-        <MeetingList meetings={projectMeetings} projectId={project.id} />
+        <MeetingList meetings={projectMeetings} />
       </div>
 
       <div className="bg-background p-6 rounded-xl shadow-md w-full mt-8">

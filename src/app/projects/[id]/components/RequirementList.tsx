@@ -78,9 +78,6 @@ const RequirementList: React.FC<RequirementListProps> = ({ requirements }) => {
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               Prioridad
             </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Estado
-            </th>
             {/* NEW - Columna de acciones */}
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               Acciones
@@ -138,11 +135,6 @@ const RequirementList: React.FC<RequirementListProps> = ({ requirements }) => {
                   ) : (
                     <div className="text-sm text-gray-900">{requirement.priority}</div>
                   )}
-                </td>
-
-                {/* Estado (solo visual en este ejemplo) */}
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm text-gray-900">{requirement.status}</div>
                 </td>
 
                 {/* NEW - Botones de acción */}

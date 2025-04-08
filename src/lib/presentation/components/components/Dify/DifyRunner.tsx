@@ -1,55 +1,81 @@
 "use client";
 import { useState } from "react";
-import { useDispatch } from "react-redux";
-import { AppDispatch } from "@/smartspecs/lib/presentation/redux/store";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  AppDispatch,
+  RootState,
+} from "@/smartspecs/lib/presentation/redux/store";
 import { fetchAllRequirements } from "@/smartspecs/lib/presentation/redux/slices/RequirementsSlice";
+import { callDifyWorkflow } from "@/smartspecs/lib/utils/dify";
+import { Meeting } from "@/smartspecs/lib/presentation/redux/slices/MeetingsSlice";
+import { Requirement } from "@/smartspecs/lib/presentation/redux/slices/RequirementsSlice";
+import { Project } from "@/smartspecs/lib/presentation/redux/slices/ProjectsSlice";
 
-const useAppDispatch = () => useDispatch<AppDispatch>();
+/** Props: pasamos el proyecto y la reunión a procesar */
+interface ExecuteWorkflowButtonProps {
+  projectId: string;
+  meetingId: string;
+}
 
-const ExecuteWorkflowButton = () => {
+const ExecuteWorkflowButton: React.FC<ExecuteWorkflowButtonProps> = ({
+  projectId,
+  meetingId,
+}) => {
+  const dispatch = useDispatch<AppDispatch>();
   const [loading, setLoading] = useState(false);
-  const dispatch = useAppDispatch();
 
+  /* ───────── Datos desde Redux ───────── */
+  const project = useSelector<RootState, Project | undefined>((state) =>
+    state.projects.projects.find((p) => p.id === projectId)
+  );
+
+  const meeting = useSelector<RootState, Meeting | undefined>((state) =>
+    state.meetings.meetings.find((m) => m.meetingId === meetingId)
+  );
+
+  const requirements = useSelector<RootState, Requirement[]>((state) =>
+    state.requirements.requirements.filter((r) => r.projectId === projectId)
+  );
+
+  /* ───────── Ejecutar workflow ───────── */
   const executeWorkflow = async () => {
+    if (!project || !meeting) {
+      alert("Proyecto o reunión no encontrados en el store");
+      return;
+    }
+
     setLoading(true);
-
     try {
-      console.log("🚀 Enviando solicitud a /api/workflow...");
-      const res = await fetch("/api/workflow", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({}), // 🔥 Ahora enviamos un JSON válido
-      });
+      await callDifyWorkflow(
+        project.id,
+        meeting.meetingId,
+        project.title,
+        project.description,
+        project.client,
+        meeting.meetingTitle,
+        meeting.meetingDescription,
+        meeting.meetingTranscription,
+        requirements
+      );
 
-      console.log("📡 Respuesta recibida:", res.status, res.statusText);
-      if (!res.ok) {
-        const errorText = await res.text(); // Obtener el mensaje de error
-        throw new Error(`Error HTTP: ${res.status} - ${errorText}`);
-      }
-
-      const data = await res.json();
-      console.log("✅ Respuesta del workflow:", data);
-    } catch (error) {
-      console.error("❌ Error ejecutando el workflow:", error);
+      // refrescamos requerimientos tras el workflow
+      dispatch(fetchAllRequirements());
+    } catch (err) {
+      console.error("❌ Error ejecutando workflow:", err);
+      alert("Error ejecutando el workflow. Revisa la consola para más detalles.");
     } finally {
       setLoading(false);
-      // Fetch updated requirements after workflow execution
-      dispatch(fetchAllRequirements());
     }
   };
 
   return (
-    <div className="p-4 border rounded-lg shadow-md">
-      <button
-        onClick={executeWorkflow}
-        disabled={loading}
-        className="px-4 py-2 bg-blue-500 text-white rounded"
-      >
-        {loading ? "Ejecutando..." : "Ejecutar Flujo"}
-      </button>
-    </div>
+    <button
+      onClick={executeWorkflow}
+      disabled={loading}
+      className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
+    >
+      {loading ? "Ejecutando..." : "Ejecutar Flujo"}
+    </button>
   );
 };
 

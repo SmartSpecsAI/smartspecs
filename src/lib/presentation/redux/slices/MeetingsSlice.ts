@@ -1,4 +1,3 @@
-// Redux Slice para gestionar reuniones (Firestore + ChromaDB)
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import {
   collection,
@@ -13,22 +12,28 @@ import {
   deleteDoc,
 } from "firebase/firestore";
 import { firestore } from "@/smartspecs/lib/config/firebase-settings";
-import { callFastAPI } from "@/smartspecs/lib/services/api";
 import { callDifyWorkflow } from "@/smartspecs/lib/utils/dify";
 
-// Interfaz base de una reunión
+/* ─────────────────────────────────────────────
+ *  Tipos y estado
+ * ────────────────────────────────────────────*/
 export interface Meeting {
-  id: string;
+  id?: string; // id local
+  meetingId: string; // id Firestore
   projectId: string;
-  title: string;
-  date: string;
-  description: string;
-  transcription: string;
-  requirements: string[];
+  meetingTitle: string;
+  meetingDescription: string;
+  meetingTranscription: string;
+  requirements: object[];
   createdAt?: string;
+  updatedAt?: string;
+  date?: string;
+  /* Datos devueltos por Dify */
+  updatedRequirementsList?: object[];
+  newRequirementsList?: object[];
+  newProjectContext?: string;
 }
 
-// Estado inicial del slice
 interface MeetingState {
   meetings: Meeting[];
   loading: boolean;
@@ -41,198 +46,254 @@ const initialState: MeetingState = {
   error: null,
 };
 
-// ✅ Crear reunión en Firestore y enviar a la API de FastAPI
+/* ─────────────────────────────────────────────
+ *  Thunks
+ * ────────────────────────────────────────────*/
 export const createMeeting = createAsyncThunk(
   "meetings/createMeeting",
   async (
     {
       projectId,
-      title,
-      description,
-      transcription,
+      projectTitle,
+      projectDescription,
+      projectClient,
+      meetingTitle,
+      meetingDescription,
+      meetingTranscription,
+      requirementsList,
     }: {
       projectId: string;
-      title: string;
-      description: string;
-      transcription: string;
+      projectTitle: string;
+      projectDescription: string;
+      projectClient: string;
+      meetingTitle: string;
+      meetingDescription: string;
+      meetingTranscription: string;
+      requirementsList: object[];
     },
     { rejectWithValue }
   ) => {
     try {
       const timestamp = Timestamp.now();
-      const newMeetingData = {
+
+      /* 1️⃣ Guardar la reunión en Firestore */
+      const docRef = await addDoc(collection(firestore, "meetings"), {
         projectId,
-        title,
-        description,
-        transcription,
-        requirements: [],
-        date: timestamp,
+        meetingTitle,
+        meetingDescription,
+        meetingTranscription,
+        updatedAt: timestamp,
         createdAt: timestamp,
-      };
+      });
 
-      // 1️⃣ Guardar en Firestore
-      const docRef = await addDoc(collection(firestore, "meetings"), newMeetingData);
-      const newMeetingId = docRef.id;
+      const meetingId = docRef.id;
 
-      // 2️⃣ Enviar a la API de FastAPI (ChromaDB)
-      await callFastAPI("meetings/upsert", "POST", [
-        {
-          id: `${newMeetingId}-1`,
-          meeting_id: newMeetingId,
-          text: transcription,
-          metadata: {
-            title,
-            description,
-            date: new Date().toISOString(),
-            project_id: projectId,
-          },
-        },
-      ]);
+      /* 2️⃣ Ejecutar el workflow de Dify */
+      let updatedRequirementsList: object[] = [];
+      let newRequirementsList: object[] = [];
+      let newProjectContext: string | undefined;
 
-      await callDifyWorkflow(newMeetingId, transcription);
+      try {
+        const wf = await callDifyWorkflow(
+          projectId,
+          meetingId,
+          projectTitle,
+          projectDescription,
+          projectClient,
+          meetingTitle,
+          meetingDescription,
+          meetingTranscription,
+          requirementsList
+        );
+
+        updatedRequirementsList = wf?.updatedRequirementsList ?? [];
+        newRequirementsList = wf?.newRequirementsList ?? [];
+        newProjectContext = wf?.newProjectContext;
+      } catch (wfErr) {
+        console.error("⚠️  Workflow falló, la reunión se creó igual:", wfErr);
+      }
 
       return {
-        id: newMeetingId,
-        ...newMeetingData,
-        date: timestamp.toDate().toISOString(),
+        id: meetingId,
+        meetingId,
+        projectId,
+        meetingTitle,
+        meetingDescription,
+        meetingTranscription,
+        updatedRequirementsList,
+        newRequirementsList,
+        newProjectContext,
+        requirements: [],
         createdAt: timestamp.toDate().toISOString(),
+        updatedAt: timestamp.toDate().toISOString(),
       } as Meeting;
-    } catch (error) {
-      console.error("❌ Error creando reunión:", error);
+    } catch (err) {
+      console.error("❌ Error creando reunión:", err);
       return rejectWithValue("Error al crear la reunión");
     }
   }
 );
 
-// ✅ Obtener reuniones por proyecto desde Firestore
+/* ✅ Obtener reuniones por proyecto */
 export const fetchMeetingsByProjectId = createAsyncThunk(
   "meetings/fetchMeetingsByProjectId",
   async (projectId: string, { rejectWithValue }) => {
     try {
-      const q = query(collection(firestore, "meetings"), where("projectId", "==", projectId));
-      const querySnapshot = await getDocs(q);
+      const q = query(
+        collection(firestore, "meetings"),
+        where("projectId", "==", projectId)
+      );
+      const snap = await getDocs(q);
 
-      const meetings: Meeting[] = querySnapshot.docs.map((docSnap) => {
-        const data = docSnap.data();
+      const meetings: Meeting[] = snap.docs.map((d) => {
+        const data = d.data();
         return {
-          id: docSnap.id,
+          id: d.id,
+          meetingId: d.id,
           projectId: data.projectId,
-          title: data.title,
-          description: data.description || "",
-          transcription: data.transcription || "",
-          requirements: data.requirements || [],
-          date: data.date instanceof Timestamp ? data.date.toDate().toISOString() : data.date,
-          createdAt: data.createdAt instanceof Timestamp ? data.createdAt.toDate().toISOString() : data.createdAt,
+          meetingTitle: data.meetingTitle ?? data.title ?? "",
+          meetingDescription: data.meetingDescription ?? data.description ?? "",
+          meetingTranscription:
+            data.meetingTranscription ?? data.transcription ?? "",
+          requirements: data.requirements ?? [],
+          createdAt:
+            data.createdAt instanceof Timestamp
+              ? data.createdAt.toDate().toISOString()
+              : data.createdAt,
+          updatedAt:
+            data.updatedAt instanceof Timestamp
+              ? data.updatedAt.toDate().toISOString()
+              : data.updatedAt,
         };
       });
 
       return meetings;
-    } catch (error) {
-      console.error("❌ Error obteniendo reuniones:", error);
+    } catch (err) {
+      console.error("❌ Error obteniendo reuniones:", err);
       return rejectWithValue("Error al obtener reuniones");
     }
   }
 );
 
-// ✅ Obtener reunión específica desde Firestore
+/* ✅ Obtener reunión por ID */
 export const fetchMeetingById = createAsyncThunk(
   "meetings/fetchMeetingById",
   async (meetingId: string, { rejectWithValue }) => {
     try {
-      console.log(`🔍 Buscando reunión en Firestore: ${meetingId}`);
+      const ref = doc(firestore, "meetings", meetingId);
+      const snap = await getDoc(ref);
 
-      const docRef = doc(firestore, "meetings", meetingId);
-      const snapshot = await getDoc(docRef);
+      if (!snap.exists()) return rejectWithValue("Reunión no encontrada");
 
-      if (!snapshot.exists()) {
-        return rejectWithValue("Reunión no encontrada");
-      }
-
-      const data = snapshot.data();
+      const data = snap.data();
       return {
-        id: snapshot.id,
+        id: snap.id,
+        meetingId: snap.id,
         projectId: data.projectId,
-        title: data.title,
-        description: data.description || "",
-        transcription: data.transcription || "",
-        requirements: data.requirements || [],
-        date: data.date instanceof Timestamp ? data.date.toDate().toISOString() : data.date,
-        createdAt: data.createdAt instanceof Timestamp ? data.createdAt.toDate().toISOString() : data.createdAt,
-      };
-    } catch (error) {
-      console.error("❌ Error obteniendo reunión:", error);
+        meetingTitle: data.meetingTitle ?? data.title ?? "",
+        meetingDescription: data.meetingDescription ?? data.description ?? "",
+        meetingTranscription:
+          data.meetingTranscription ?? data.transcription ?? "",
+        requirements: data.requirements ?? [],
+        createdAt:
+          data.createdAt instanceof Timestamp
+            ? data.createdAt.toDate().toISOString()
+            : data.createdAt,
+        updatedAt:
+          data.updatedAt instanceof Timestamp
+            ? data.updatedAt.toDate().toISOString()
+            : data.updatedAt,
+      } as Meeting;
+    } catch (err) {
+      console.error("❌ Error obteniendo reunión:", err);
       return rejectWithValue("Error al obtener reunión");
     }
   }
 );
 
-// ✅ Actualizar reunión en Firestore y API de FastAPI
+/* 🔄 Actualizar */
 export const updateMeeting = createAsyncThunk(
   "meetings/updateMeeting",
   async (
-    { meetingId, updatedData }: { meetingId: string; updatedData: Partial<Meeting> },
+    {
+      meetingId,
+      updatedData,
+    }: { meetingId: string; updatedData: Partial<Meeting> },
     { rejectWithValue }
   ) => {
     try {
-      const meetingRef = doc(firestore, "meetings", meetingId);
-      await updateDoc(meetingRef, updatedData);
-
-      // Si la transcripción cambia, actualizarla en la API
-      if (updatedData.transcription) {
-        await callFastAPI("update-meeting", "PUT", {
-          meeting_id: meetingId,
-          transcription: updatedData.transcription,
-          metadata: {
-            title: updatedData.title || "",
-            description: updatedData.description || "",
-            date: new Date().toISOString(),
-          },
-        });
-      }
-
-
-      return { id: meetingId, ...updatedData };
-    } catch (error) {
-      console.error("❌ Error actualizando reunión:", error);
+      await updateDoc(doc(firestore, "meetings", meetingId), updatedData);
+      return { meetingId, updatedData };
+    } catch (err) {
+      console.error("❌ Error actualizando reunión:", err);
       return rejectWithValue("Error al actualizar reunión");
     }
   }
 );
 
-// ⚠️ Eliminar reunión en Firestore y API de FastAPI
+/* 🗑️ Eliminar */
 export const deleteMeeting = createAsyncThunk(
   "meetings/deleteMeeting",
   async (meetingId: string, { rejectWithValue }) => {
     try {
-      const meetingRef = doc(firestore, "meetings", meetingId);
-      await deleteDoc(meetingRef);
-
-      // Eliminar en API de FastAPI
-      await callFastAPI("delete-meeting", "DELETE", { meeting_id: meetingId });
-
+      await deleteDoc(doc(firestore, "meetings", meetingId));
       return meetingId;
-    } catch (error) {
-      console.error("❌ Error eliminando reunión:", error);
+    } catch (err) {
+      console.error("❌ Error eliminando reunión:", err);
       return rejectWithValue("Error al eliminar reunión");
     }
   }
 );
 
-// 📌 Configuración del slice de Redux
+/* ─────────────────────────────────────────────
+ *  Slice
+ * ────────────────────────────────────────────*/
 const meetingsSlice = createSlice({
   name: "meetings",
   initialState,
   reducers: {},
   extraReducers: (builder) => {
+    /* loaders */
     builder
-      .addCase(fetchMeetingById.fulfilled, (state, action: PayloadAction<Meeting>) => {
-        state.meetings.push(action.payload);
+      .addCase(fetchMeetingsByProjectId.pending, (st) => {
+        st.loading = true;
+        st.error = null;
       })
-      .addCase(fetchMeetingsByProjectId.fulfilled, (state, action: PayloadAction<Meeting[]>) => {
-        state.meetings = action.payload;
+      .addCase(fetchMeetingsByProjectId.fulfilled, (st, a: PayloadAction<Meeting[]>) => {
+        st.loading = false;
+        st.meetings = a.payload;
+      })
+      .addCase(fetchMeetingsByProjectId.rejected, (st, a) => {
+        st.loading = false;
+        st.error = a.payload as string;
       });
+
+    /* get one */
+    builder.addCase(fetchMeetingById.fulfilled, (st, a: PayloadAction<Meeting>) => {
+      const idx = st.meetings.findIndex((m) => m.meetingId === a.payload.meetingId);
+      idx === -1 ? st.meetings.push(a.payload) : (st.meetings[idx] = a.payload);
+    });
+
+    /* create */
+    builder
+      .addCase(createMeeting.fulfilled, (st, a: PayloadAction<Meeting>) => {
+        st.meetings.push(a.payload);
+      })
+      .addCase(createMeeting.rejected, (st, a) => {
+        st.error = a.payload as string;
+      });
+
+    /* update */
+    builder.addCase(updateMeeting.fulfilled, (st, a) => {
+      const idx = st.meetings.findIndex((m) => m.meetingId === a.payload.meetingId);
+      if (idx !== -1) st.meetings[idx] = { ...st.meetings[idx], ...a.payload.updatedData };
+    });
+
+    /* delete */
+    builder.addCase(deleteMeeting.fulfilled, (st, a: PayloadAction<string>) => {
+      st.meetings = st.meetings.filter((m) => m.meetingId !== a.payload);
+    });
   },
 });
 
-// Exportar el reducer y funciones
 export default meetingsSlice.reducer;

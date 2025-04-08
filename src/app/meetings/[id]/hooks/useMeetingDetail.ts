@@ -28,7 +28,7 @@ export const useMeetingDetail = () => {
     (state: RootState) => state.meetings
   );
 
-  const meeting = meetings.find((m) => m.id === meetingId);
+  const meeting = meetings.find((m) => m.meetingId === meetingId);
 
   useEffect(() => {
     if (meetingId && !meeting) {
@@ -39,9 +39,9 @@ export const useMeetingDetail = () => {
   useEffect(() => {
     if (meeting && isEditing) {
       setFormData({
-        title: meeting.title,
-        description: meeting.description,
-        transcription: meeting.transcription || "",
+        title: meeting.meetingTitle,
+        description: meeting.meetingDescription,
+        transcription: meeting.meetingTranscription || "",
       });
     }
   }, [meeting, isEditing]);
@@ -56,19 +56,19 @@ export const useMeetingDetail = () => {
   const handleSaveEdit = async () => {
     if (!meeting) return;
     const updatedData = {
-      title: formData.title,
-      description: formData.description,
-      transcription: formData.transcription,
+      meetingTitle: formData.title,
+      meetingDescription: formData.description,
+      meetingTranscription: formData.transcription,
     };
     await dispatch(
-      updateMeeting({ meetingId: meeting.id, updatedData })
+      updateMeeting({ meetingId: meeting.meetingId, updatedData })
     );
     setIsEditing(false);
   };
 
   const handleConfirmDelete = async () => {
     if (!meeting) return;
-    await dispatch(deleteMeeting(meeting.id));
+    await dispatch(deleteMeeting(meeting.meetingId));
     setShowDeleteModal(false);
     router.push("/projects");
   };

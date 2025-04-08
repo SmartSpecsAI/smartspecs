@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "@/smartspecs/lib/presentation/redux/store";
 import { createMeeting, fetchMeetingsByProjectId } from "@/smartspecs/lib/presentation/redux/slices/MeetingsSlice";
+import { updateProject } from "@/smartspecs/lib/presentation/redux/slices/ProjectsSlice";
+import { updateRequirement, createRequirement } from "@/smartspecs/lib/presentation/redux/slices/RequirementsSlice";
 
 const useAppDispatch = () => useDispatch<AppDispatch>();
 
@@ -9,32 +11,71 @@ const CreateMeetingModal: React.FC<{
   isOpen: boolean;
   onClose: () => void;
   projectId: string;
-}> = ({ isOpen, onClose, projectId }) => {
+  projectTitle: string;
+  projectDescription: string;
+  projectClient: string;
+  requirementsList: object[];
+}> = ({ isOpen, onClose, projectId, projectTitle, projectDescription, projectClient, requirementsList }) => {
   const dispatch = useAppDispatch();
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [transcription, setTranscription] = useState("");
+  const [meetingTitle, setMeetingTitle] = useState("");
+  const [meetingDescription, setMeetingDescription] = useState("");
+  const [meetingTranscription, setMeetingTranscription] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   // Crear Reunión
   const handleCreateMeeting = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    await dispatch(
+    const result = await dispatch(
       createMeeting({
-        projectId,
-        title,
-        description,
-        transcription,
+        projectId: projectId,
+        projectTitle: projectTitle,
+        projectDescription: projectDescription,
+        projectClient: projectClient,
+        meetingTitle: meetingTitle,
+        meetingDescription: meetingDescription,
+        meetingTranscription: meetingTranscription,
+        requirementsList: requirementsList,
       })
     );
+
+    if (result.meta.requestStatus === 'fulfilled') {
+      const { newProjectContext, updatedRequirementsList, newRequirementsList } = result.payload as any;
+      
+      // Actualizar descripción del proyecto
+      await dispatch(updateProject({
+        id: projectId,
+        updatedData: { description: newProjectContext }
+      }));
+
+      // Actualizar requerimientos existentes
+      if (updatedRequirementsList && updatedRequirementsList.length > 0) {
+        for (const requirement of updatedRequirementsList) {
+          await dispatch(updateRequirement({
+            id: requirement.id,
+            updatedData: requirement
+          }));
+        }
+      }
+
+      // Crear nuevos requerimientos
+      if (newRequirementsList && newRequirementsList.length > 0) {
+        for (const requirement of newRequirementsList) {
+          await dispatch(createRequirement({
+            ...requirement,
+            projectId: projectId
+          }));
+        }
+      }
+    }
+
     // Vuelve a cargar las reuniones después de crear una nueva
     await dispatch(fetchMeetingsByProjectId(projectId));
     setIsLoading(false);
     // Limpia y cierra
-    setTitle("");
-    setDescription("");
-    setTranscription("");
+    setMeetingTitle("");
+    setMeetingDescription("");
+    setMeetingTranscription("");
     onClose();
   };
 
@@ -56,8 +97,8 @@ const CreateMeetingModal: React.FC<{
             <input
               type="text"
               className="border w-full p-2 rounded text-black"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
+              value={meetingTitle}
+              onChange={(e) => setMeetingTitle(e.target.value)}
               placeholder="Nombre de la reunión"
               required
             />
@@ -66,8 +107,8 @@ const CreateMeetingModal: React.FC<{
             <label className="block font-semibold mb-1">Descripción:</label>
             <textarea
               className="border w-full p-2 rounded text-black"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
+              value={meetingDescription}
+              onChange={(e) => setMeetingDescription(e.target.value)}
               placeholder="Describe brevemente la reunión"
             />
           </div>
@@ -75,8 +116,8 @@ const CreateMeetingModal: React.FC<{
             <label className="block font-semibold mb-1">Transcripción:</label>
             <textarea
               className="border w-full p-2 rounded text-black min-h-[200px]"
-              value={transcription}
-              onChange={(e) => setTranscription(e.target.value)}
+              value={meetingTranscription}
+              onChange={(e) => setMeetingTranscription(e.target.value)}
               placeholder="Ingresa la transcripción de la reunión"
             />
           </div>

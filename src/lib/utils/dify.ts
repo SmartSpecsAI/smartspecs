@@ -1,31 +1,83 @@
-export async function callDifyWorkflow(meeting_id: string, transcription: string) {
-    try {
-      const response = await fetch("api/workflow", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer app-rzwqQqa5S3jhOrNrrjIt2KD2`,
-        },
-        body: JSON.stringify({
-          inputs: {
-            meeting_id,
-            query_context: "¿Cuál es el objetivo del proyecto?",
-            query_meetings: "¿Qué decisiones se tomaron?",
-            query_requirements: "¿Qué requerimientos pidió el cliente?",
-            meeting_transcription: transcription,
-          },
-        }),
-      });
-  
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Error al ejecutar workflow: ${response.status} - ${errorText}`);
-      }
-  
-      const data = await response.json();
-      console.log("✅ Workflow ejecutado con éxito:", data);
-      return data;
-    } catch (err) {
-      console.error("❌ Error llamando al workflow de Dify:", err);
+/**
+ * Lanza el workflow de Dify con toda la info del proyecto y la reunión.
+ * Se comunica con /api/workflow (API interna del backend Next.js).
+ * 
+ * Devuelve: {
+ *   updatedRequirementsList: Requirement[],
+ *   newRequirementsList: Requirement[],
+ *   newProjectContext: string
+ * }
+ */
+export async function callDifyWorkflow(
+  projectId: string,
+  meetingId: string,
+  projectTitle: string,
+  projectDescription: string,
+  projectClient: string,
+  meetingTitle: string,
+  meetingDescription: string,
+  meetingTranscription: string,
+  requirementsList: object[]
+): Promise<{
+  updatedRequirementsList: object[];
+  newRequirementsList: object[];
+  newProjectContext: string;
+}> {
+  try {
+    // 🧠 Preparamos el payload
+    const payload: any = {
+      user: projectClient || "frontend-app",
+      inputs: {
+        project_id: projectId,
+        project_title: projectTitle,
+        project_description: projectDescription,
+        project_client: projectClient,
+        meeting_id: meetingId,
+        meeting_title: meetingTitle,
+        meeting_description: meetingDescription,
+        meeting_transcription: meetingTranscription,
+        requirements_list: JSON.stringify(requirementsList),
+      },
+    };
+
+    // 🚀 Llamamos al endpoint local
+    const res = await fetch("/api/workflow", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+
+    if (!res.ok) {
+      const txt = await res.text();
+      throw new Error(`❌ Workflow error: ${res.status} – ${txt}`);
     }
+
+    const data = await res.json();
+    console.log("✅ Dify workflow raw result:", data);
+
+    const outputs = data.data?.outputs || {};
+
+    return {
+      updatedRequirementsList: parseJSONSafely(outputs.updated_requirements_list),
+      newRequirementsList: parseJSONSafely(outputs.new_requirements_list),
+      newProjectContext: outputs.new_project_context ?? "",
+    };
+  } catch (err) {
+    console.error("❌ callDifyWorkflow failed:", err);
+    throw err;
   }
+}
+
+/**
+ * Parsea un string JSON de forma segura y devuelve un array.
+ */
+function parseJSONSafely(input: string | any): any[] {
+  if (typeof input !== "string") return Array.isArray(input) ? input : [];
+  try {
+    const parsed = JSON.parse(input);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (err) {
+    console.warn("⚠️ Error parsing JSON string:", input);
+    return [];
+  }
+}
