@@ -1,43 +1,54 @@
-import React from "react";
+"use client";
 import Link from "next/link";
+import React from "react";
 import { Meeting } from "@/smartspecs/lib/presentation/redux/slices/MeetingsSlice";
 
-interface MeetingListProps {
+interface Props {
   meetings: Meeting[];
-  projectId: string;
 }
 
-const MeetingList: React.FC<MeetingListProps> = ({ meetings, projectId }) => {
-  if (meetings.length === 0) {
-    return <p>No hay reuniones registradas para este proyecto</p>;
+const MeetingList: React.FC<Props> = ({ meetings }) => {
+  if (!meetings.length) {
+    return <p className="text-center">No hay reuniones registradas para este proyecto.</p>;
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-      {meetings.map((meeting: Meeting) => (
-        <Link key={meeting.id} href={`/meetings/${meeting.id}`}>
-          <div className="border p-4 rounded shadow-sm hover:shadow-md transition cursor-pointer">
-            <h3 className="font-semibold text-lg">{meeting.title}</h3>
-            <p className="text-sm mb-1">
-              <strong>Fecha:</strong> {new Date(meeting.date).toLocaleString()}
-            </p>
-            <p className="text-sm mb-1">
-              <strong>Descripción:</strong> {meeting.description}
-            </p>
-            {meeting.transcription ? (
-              <p className="text-sm text-green-800">
-                <strong>Transcripción:</strong> {meeting.transcription.substring(0, 50)}...
-              </p>
-            ) : (
-              <p className="text-sm text-gray-600">
-                <em>Sin transcripción</em>
-              </p>
-            )}
-          </div>
-        </Link>
-      ))}
+    <div className="overflow-x-auto">
+      <table className="min-w-full divide-y divide-gray-200 bg-white shadow-md rounded">
+        <thead className="bg-gray-50">
+          <tr>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+              Título
+            </th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+              Descripción
+            </th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+              Acciones
+            </th>
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-gray-200">
+          {meetings.map((m) => (
+            <tr key={m.meetingId} className="hover:bg-gray-50">
+              <td className="px-6 py-4 whitespace-nowrap">{m.meetingTitle}</td>
+              <td className="px-6 py-4 whitespace-nowrap">
+                {m.meetingDescription || "—"}
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap">
+                <Link
+                  href={`/meetings/${m.meetingId}`}
+                  className="text-primary hover:underline"
+                >
+                  Ver detalle
+                </Link>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 };
 
-export default MeetingList; 
+export default MeetingList;

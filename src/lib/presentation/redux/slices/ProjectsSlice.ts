@@ -8,12 +8,8 @@ import {
   deleteDoc,
   doc,
   getDoc,
-  query,
-  where,
 } from "firebase/firestore";
 import { firestore } from "@/smartspecs/lib/config/firebase-settings";
-import { callFastAPI } from "@/smartspecs/lib/services/api";
-import { callDifyWorkflow } from "@/smartspecs/lib/utils/dify";
 
 export interface Project {
   id: string;
@@ -36,8 +32,6 @@ const initialState: ProjectState = {
   loading: false,
   error: null,
 };
-
-
 
 // 1. Obtener todos los proyectos
 export const fetchProjects = createAsyncThunk(
@@ -83,18 +77,6 @@ export const createProject = createAsyncThunk(
       // 1) Creamos el documento en Firestore
       const docRef = await addDoc(collection(firestore, "projects"), newProject);
 
-      // 2) Llamamos a la API para agregar el contexto del proyecto a la base vectorial
-      await callFastAPI("add-project-context", "POST", {
-        project_id: docRef.id,
-        project_title: newProject.title,
-        project_description: newProject.description,
-        client_name: newProject.client,
-      });
-
-      // 3) Llamamos al workflow de Dify inmediatamente después de crearlo
-      //    (Por si el workflow necesita el ID del proyecto).
-      await callDifyWorkflow();
-
       return { id: docRef.id, ...newProject };
     } catch (error) {
       console.error("Error creating project:", error);
@@ -111,14 +93,31 @@ export const updateProject = createAsyncThunk(
     { rejectWithValue }
   ) => {
     try {
-      // 1) Actualizamos en Firestore
       const projectRef = doc(firestore, "projects", id);
-      await updateDoc(projectRef, updatedData);
+      const snapshot = await getDoc(projectRef);
+      
+      if (!snapshot.exists()) {
+        return rejectWithValue("El proyecto no existe");
+      }
 
-      // 2) Llamamos al workflow Dify tras actualizar el proyecto
-      await callDifyWorkflow();
+      // Añadir updatedAt si no está incluido en updatedData
+      const updateData = {
+        ...updatedData,
+        updatedAt: Timestamp.now()
+      };
 
-      return { id, ...updatedData };
+      await updateDoc(projectRef, updateData);
+
+      const updatedSnapshot = await getDoc(projectRef);
+      const data = updatedSnapshot.data();
+
+      return {
+        id: updatedSnapshot.id,
+        ...data,
+        updatedAt: data?.updatedAt instanceof Timestamp ? 
+          data.updatedAt.toDate().toISOString() : 
+          data?.updatedAt
+      };
     } catch (error) {
       console.error("Error updating project:", error);
       return rejectWithValue("Error al actualizar el proyecto");
@@ -134,9 +133,6 @@ export const deleteProject = createAsyncThunk(
       // 1) Borrar el proyecto en Firestore
       const projectRef = doc(firestore, "projects", id);
       await deleteDoc(projectRef);
-
-      // 2) Llamar al workflow de Dify tras eliminar el proyecto
-      await callDifyWorkflow();
 
       return id;
     } catch (error) {
@@ -175,26 +171,6 @@ export const fetchProjectById = createAsyncThunk(
     } catch (error) {
       console.error("Error obteniendo proyecto por ID:", error);
       return rejectWithValue("Error al obtener proyecto por ID");
-    }
-  }
-);
-
-// 6. Alimentar el contexto del proyecto a ChromaDB
-export const updateProjectContext = createAsyncThunk(
-  "projects/updateProjectContext",
-  async (project: Project, { rejectWithValue }) => {
-    try {
-      await callFastAPI("context/upsert", "POST", [{
-        project_id: project.id,
-        project_title: project.title,
-        project_description: project.description,
-        client_name: project.client,
-      }]);
-      // await callDifyWorkflow();
-      return project.id;
-    } catch (error) {
-      console.error("❌ Error actualizando contexto:", error);
-      return rejectWithValue("Error al alimentar contexto del proyecto");
     }
   }
 );

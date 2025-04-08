@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "@/smartspecs/lib/presentation/redux/store";
-import { updateProjectContext } from "@/smartspecs/lib/presentation/redux/slices/ProjectsSlice";
+import { updateProject } from "@/smartspecs/lib/presentation/redux/slices/ProjectsSlice";
 import { Project } from "@/smartspecs/lib/presentation/redux/slices/ProjectsSlice";
 
 interface ProjectInfoProps {
@@ -14,11 +14,11 @@ const ProjectInfo: React.FC<ProjectInfoProps> = ({ project }) => {
   const [loadingContext, setLoadingContext] = useState(false);
   const [resettingDB, setResettingDB] = useState(false);
 
-  const handleFeedContext = async () => {
+  const handleFeedContext = async (projectId: string, projectTitle: string, projectDescription: string, projectClient: string) => {
     if (!project) return;
     try {
       setLoadingContext(true);
-      await dispatch(updateProjectContext(project)).unwrap();
+      await dispatch(updateProject({ id: projectId, updatedData: { title: projectTitle, description: projectDescription, client: projectClient } })).unwrap();
       alert("✅ Contexto del proyecto actualizado en ChromaDB");
     } catch (error) {
       console.error("❌ Error alimentando contexto:", error);
@@ -70,7 +70,7 @@ const ProjectInfo: React.FC<ProjectInfoProps> = ({ project }) => {
       <div className="flex gap-4 mt-6">
 
         <button
-          onClick={handleFeedContext}
+          onClick={() => handleFeedContext(project.id, project.title, project.description, project.client)}
           className="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600 flex items-center gap-2"
         >
           {loadingContext ? (
