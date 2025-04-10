@@ -1,4 +1,4 @@
-import LoadingSpinner from "@/smartspecs/app-lib/ components/common/LoadingSpinner";
+import LoadingSpinner from "@/smartspecs/app-lib/components/common/LoadingSpinner";
 import { Project } from "@/smartspecs/app-lib/interfaces/project";
 
 interface ProjectInfoProps {
@@ -6,6 +6,7 @@ interface ProjectInfoProps {
 }
 
 const ProjectInfo: React.FC<ProjectInfoProps> = ({ project }) => {
+  
   if (!project) {
     return <LoadingSpinner title="Cargando información del proyecto..." />;
   }

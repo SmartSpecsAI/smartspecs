@@ -1,8 +1,7 @@
 "use client";
 import Link from "next/link";
 import React from "react";
-import { Meeting } from "@/smartspecs/app-lib/redux/slices/MeetingsSlice";
-
+import { Meeting } from "@/smartspecs/app-lib/interfaces/meeting";
 interface Props {
   meetings: Meeting[];
 }

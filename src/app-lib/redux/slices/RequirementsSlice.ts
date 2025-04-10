@@ -139,8 +139,8 @@ export const getRequirement = createAsyncThunk(
 );
 
 // Obtener requerimientos por proyecto
-export const fetchRequirementsByProject = createAsyncThunk(
-  "requirements/fetchRequirementsByProject",
+export const getRequirementsByProject = createAsyncThunk(
+  "requirements/getRequirementsByProject",
   async (projectId: string, { rejectWithValue }) => {
     try {
       const q = query(
@@ -244,15 +244,15 @@ const requirementSlice = createSlice({
       })
 
       // Obtener por proyecto
-      .addCase(fetchRequirementsByProject.fulfilled, (state, action: PayloadAction<Requirement[]>) => {
+      .addCase(getRequirementsByProject.fulfilled, (state, action: PayloadAction<Requirement[]>) => {
         state.requirements = action.payload;
         state.loading = false;
       })
-      .addCase(fetchRequirementsByProject.pending, (state) => {
+      .addCase(getRequirementsByProject.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(fetchRequirementsByProject.rejected, (state, action) => {
+      .addCase(getRequirementsByProject.rejected, (state, action) => {
         state.error = action.payload as string;
         state.loading = false;
       });

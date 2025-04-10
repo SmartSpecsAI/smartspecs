@@ -16,16 +16,7 @@ import {
   toISODate,
 } from "@/smartspecs/app-lib/utils/firestoreTimeStamps";
 import { firestore } from "@/smartspecs/lib/config/firebase-settings";
-
-export interface Meeting {
-  id: string;
-  title: string;
-  description: string;
-  transcription: string;
-  createdAt: string;
-  updatedAt: string;
-  projectId: string;
-}
+import { Meeting } from "../../interfaces/meeting";
 
 interface MeetingState {
   meetings: Meeting[];
@@ -127,9 +118,9 @@ export const getMeeting = createAsyncThunk(
       return {
         id: snap.id,
         projectId: data.projectId,
-        title: data.title ?? "",
-        description: data.description ?? "",
-        transcription: data.transcription ?? "",
+        title: data.title,
+        description: data.description,
+        transcription: data.transcription,
         createdAt: toISODate(data.createdAt),
         updatedAt: toISODate(data.updatedAt),
       } as Meeting;

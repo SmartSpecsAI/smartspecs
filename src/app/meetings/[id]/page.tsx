@@ -1,33 +1,33 @@
 "use client";
 
-import MeetingInfo from './components/MeetingInfo';
-import { useMeetingDetail } from "../../../app-lib/hooks/useMeetingDetail";
-import LoadingSpinner from '@/smartspecs/app-lib/ components/common/LoadingSpinner';
-import ErrorMessage from '@/smartspecs/app-lib/ components/messages/ErrorMessage';
-import ConfirmModal from '@/smartspecs/app-lib/ components/modals/ConfirmModal';
-import MeetingForm from '@/smartspecs/app-lib/ components/forms/MeetingForm';
+import React from "react";
+import MeetingInfo from "./components/MeetingInfo";
+import { useMeetingDetail } from "../../../app-lib/hooks/meetings/useMeetingDetail";
+import LoadingSpinner from "@/smartspecs/app-lib/components/common/LoadingSpinner";
+import ErrorMessage from "@/smartspecs/app-lib/components/messages/ErrorMessage";
+import ConfirmModal from "@/smartspecs/app-lib/components/modals/ConfirmModal";
+import MeetingForm from "@/smartspecs/app-lib/components/forms/MeetingForm";
 
 const MeetingDetail: React.FC = () => {
   const {
+    meeting,
+    loading,
+    error,
     isEditing,
     setIsEditing,
     showDeleteModal,
     setShowDeleteModal,
-    formData,
-    handleChange,
-    handleSaveEdit,
     handleConfirmDelete,
-    loading,
-    error,
-    meeting,
   } = useMeetingDetail();
 
   if (loading) {
     return <LoadingSpinner title="Cargando reunión..." />;
   }
+
   if (error) {
     return <ErrorMessage message={error} />;
   }
+
   if (!meeting) {
     return <ErrorMessage message="Reunión no encontrada" />;
   }
@@ -38,10 +38,7 @@ const MeetingDetail: React.FC = () => {
 
       {isEditing ? (
         <MeetingForm
-          formData={formData}
-          handleChange={handleChange}
-          handleSaveEdit={handleSaveEdit}
-          setIsEditing={setIsEditing}
+          meeting={meeting}
           onCancel={() => setIsEditing(false)}
           onSaveSuccess={() => setIsEditing(false)}
         />

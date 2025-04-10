@@ -1,9 +1,8 @@
-import React, { useState, useEffect } from "react";
-import { useDispatch } from "react-redux";
-import { AppDispatch } from "@/smartspecs/app-lib/redux/store";
-import { createProject, updateProject } from "@/smartspecs/app-lib/redux/slices/ProjectsSlice";
+// src/app-lib/components/forms/ProjectForm.tsx
+
+import React from "react";
 import { Project } from "@/smartspecs/app-lib/interfaces/project";
-const useAppDispatch = () => useDispatch<AppDispatch>();
+import { useProjectForm } from "@/smartspecs/app-lib/hooks/projects/useProjectForm";
 
 interface ProjectFormProps {
   onCancel: () => void;
@@ -12,54 +11,11 @@ interface ProjectFormProps {
 }
 
 const ProjectForm: React.FC<ProjectFormProps> = ({ onCancel, project, onSaveSuccess }) => {
-  const dispatch = useAppDispatch();
-  const [formData, setFormData] = useState<Omit<Project, "id">>({
-    title: "",
-    client: "",
-    description: "",
-    createdAt: "",
-    updatedAt: "",
+  const { formData, handleInputChange, handleSubmit } = useProjectForm({
+    project,
+    onSaveSuccess,
+    onCancel,
   });
-
-  useEffect(() => {
-    if (project) {
-      setFormData({
-        title: project.title,
-        client: project.client,
-        description: project.description,
-        createdAt: project.createdAt,
-        updatedAt: project.updatedAt,
-      });
-    }
-  }, [project]);
-
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const timestamp = new Date().toISOString();
-    
-    if (project) {
-      dispatch(updateProject({
-        id: project.id,
-        updatedData: {
-          ...formData,
-          updatedAt: timestamp,
-        }
-      }));
-      onSaveSuccess?.("Proyecto actualizado exitosamente");
-    } else {
-      dispatch(createProject(formData));
-      onSaveSuccess?.("Proyecto creado exitosamente");
-    }
-    
-    onCancel();
-  };
 
   return (
     <form onSubmit={handleSubmit} className="w-full">
@@ -99,4 +55,4 @@ const ProjectForm: React.FC<ProjectFormProps> = ({ onCancel, project, onSaveSucc
   );
 };
 
-export default ProjectForm; 
+export default ProjectForm;

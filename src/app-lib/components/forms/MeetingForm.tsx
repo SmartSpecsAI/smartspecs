@@ -1,26 +1,24 @@
 import React from "react";
-import { useMeetingForm } from "@/smartspecs/app-lib/hooks/useMeetingForm";
+import { Meeting } from "@/smartspecs/app-lib/interfaces/meeting";
+import { useMeetingForm } from "@/smartspecs/app-lib/hooks/meetings/useMeetingForm";
 
 interface MeetingFormProps {
   onCancel: () => void;
   onSaveSuccess?: () => void;
+
+  // Si es edición, pasamos la meeting
+  meeting?: Meeting;
+
+  // Si es creación, pasamos lo siguiente
   projectId?: string;
   projectTitle?: string;
   projectDescription?: string;
   projectClient?: string;
   requirementsList?: object[];
-  formData?: {
-    title: string;
-    description: string;
-    transcription: string;
-  };
-  handleChange?: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
-  handleSaveEdit?: () => Promise<void>;
-  setIsEditing?: (value: boolean) => void;
-  isEditing?: boolean;
 }
 
 const MeetingForm: React.FC<MeetingFormProps> = ({
+  meeting,
   onCancel,
   onSaveSuccess,
   projectId,
@@ -28,68 +26,73 @@ const MeetingForm: React.FC<MeetingFormProps> = ({
   projectDescription,
   projectClient,
   requirementsList,
-  formData,
-  handleChange,
-  handleSaveEdit,
-  setIsEditing,
-  isEditing = false,
 }) => {
   const {
-    meetingTitle,
-    setMeetingTitle,
-    meetingDescription,
-    setMeetingDescription,
-    meetingTranscription,
-    setMeetingTranscription,
+    title,
+    setTitle,
+    description,
+    setDescription,
+    transcription,
+    setTranscription,
     isLoading,
-    handleCreateMeeting,
+    handleSubmit,
   } = useMeetingForm({
-    formData,
+    meeting,
     projectId,
     projectTitle,
     projectDescription,
     projectClient,
     requirementsList,
-    isEditing,
     onSaveSuccess,
     onCancel,
-    handleSaveEdit,
-    setIsEditing,
   });
 
+  // Para indicar si es edición en la UI
+  const isEditMode = !!meeting;
+
   return (
-    <form onSubmit={handleCreateMeeting} className="space-y-6 w-full mx-auto p-6 bg-white rounded-lg shadow-lg">
+    <form
+      onSubmit={handleSubmit}
+      className="space-y-6 w-full mx-auto p-6 bg-white rounded-lg shadow-lg"
+    >
       <div className="space-y-2">
         <label className="block text-sm font-medium text-gray-700">Título:</label>
         <input
           type="text"
           className="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-primary focus:border-primary transition-colors duration-200"
-          value={isEditing ? formData?.title : meetingTitle}
-          onChange={isEditing ? handleChange : (e) => setMeetingTitle(e.target.value)}
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
           placeholder="Nombre de la reunión"
           required
         />
       </div>
+
       <div className="space-y-2">
-        <label className="block text-sm font-medium text-gray-700">Descripción:</label>
+        <label className="block text-sm font-medium text-gray-700">
+          Descripción:
+        </label>
         <textarea
           className="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-primary focus:border-primary transition-colors duration-200"
-          value={isEditing ? formData?.description : meetingDescription}
-          onChange={isEditing ? handleChange : (e) => setMeetingDescription(e.target.value)}
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
           placeholder="Describe brevemente la reunión"
           rows={3}
         />
       </div>
+
       <div className="space-y-2">
-        <label className="block text-sm font-medium text-gray-700">Transcripción:</label>
+        <label className="block text-sm font-medium text-gray-700">
+          Transcripción:
+        </label>
         <textarea
           className="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-primary focus:border-primary transition-colors duration-200"
-          value={isEditing ? formData?.transcription : meetingTranscription}
-          onChange={isEditing ? handleChange : (e) => setMeetingTranscription(e.target.value)}
+          value={transcription}
+          onChange={(e) => setTranscription(e.target.value)}
           placeholder="Ingresa la transcripción de la reunión"
           rows={6}
         />
       </div>
+
       <div className="flex gap-4 justify-end pt-4">
         <button
           type="button"
@@ -103,11 +106,17 @@ const MeetingForm: React.FC<MeetingFormProps> = ({
           className="px-6 py-2 text-sm font-medium text-white bg-primary rounded-md hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
           disabled={isLoading}
         >
-          {isLoading ? (isEditing ? "Guardando..." : "Creando...") : (isEditing ? "Guardar" : "Crear")}
+          {isLoading
+            ? isEditMode
+              ? "Guardando..."
+              : "Creando..."
+            : isEditMode
+            ? "Guardar"
+            : "Crear"}
         </button>
       </div>
     </form>
   );
 };
 
-export default MeetingForm; 
+export default MeetingForm;

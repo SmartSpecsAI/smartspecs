@@ -3,7 +3,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { usePathname, useRouter } from "next/navigation";
 import {
   getMeeting,
-  updateMeeting,
   deleteMeeting,
 } from "@/smartspecs/app-lib/redux/slices/MeetingsSlice";
 import { AppDispatch, RootState } from "@/smartspecs/app-lib/redux/store";
@@ -16,74 +15,38 @@ export const useMeetingDetail = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
-  const [formData, setFormData] = useState({
-    title: "",
-    description: "",
-    transcription: "",
-  });
-
   const meetingId = pathname ? pathname.split("/").pop() : null;
 
   const { meetings, loading, error } = useSelector(
     (state: RootState) => state.meetings
   );
 
+  // Buscamos la reunión en el store
   const meeting = meetings.find((m) => m.id === meetingId);
 
+  // Si no está en el store, la cargamos
   useEffect(() => {
     if (meetingId && !meeting) {
       dispatch(getMeeting(meetingId));
     }
   }, [meetingId, meeting, dispatch]);
 
-  useEffect(() => {
-    if (meeting && isEditing) {
-      setFormData({
-        title: meeting.title,
-        description: meeting.description,
-        transcription: meeting.transcription || "",
-      });
-    }
-  }, [meeting, isEditing]);
-
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleSaveEdit = async () => {
-    if (!meeting) return;
-    const updatedData = {
-      title: formData.title,
-      description: formData.description,
-      transcription: formData.transcription,
-    };
-    await dispatch(
-      updateMeeting({ id: meeting.id, updatedData })
-    );
-    setIsEditing(false);
-  };
-
+  // Manejo de eliminar la reunión
   const handleConfirmDelete = async () => {
     if (!meeting) return;
     await dispatch(deleteMeeting(meeting.id));
     setShowDeleteModal(false);
-    router.push("/projects");
+    router.push("/projects"); // Redirige luego de eliminar
   };
 
   return {
+    meeting,
+    loading,
+    error,
     isEditing,
     setIsEditing,
     showDeleteModal,
     setShowDeleteModal,
-    formData,
-    handleChange,
-    handleSaveEdit,
     handleConfirmDelete,
-    loading,
-    error,
-    meeting,
   };
-}; 
+};

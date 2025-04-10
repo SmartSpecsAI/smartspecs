@@ -1,14 +1,14 @@
 "use client";
 
 import React, { useState } from "react";
-import Modal from "@/smartspecs/app-lib/ components/modals/Modal";
-import { useProjects } from "../../app-lib/hooks/useProjects";
+import Modal from "@/smartspecs/app-lib/components/modals/Modal";
+import { useProjects } from "../../app-lib/hooks/projects/useProjects";
 import ProjectsHeader from "./components/ProjectsHeader";
 import ErrorState from "./components/ErrorState";
 import EmptyState from "./components/EmptyState";
 import ProjectsList from "./components/ProjectsList";
-import LoadingSpinner from "@/smartspecs/app-lib/ components/common/LoadingSpinner";
-import ProjectForm from "@/smartspecs/app-lib/ components/forms/ProjectForm";
+import LoadingSpinner from "@/smartspecs/app-lib/components/common/LoadingSpinner";
+import ProjectForm from "@/smartspecs/app-lib/components/forms/ProjectForm";
 
 const ProjectsView: React.FC = () => {
   const { projects, loading, error } = useProjects();
