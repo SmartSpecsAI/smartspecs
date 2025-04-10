@@ -7,6 +7,7 @@ export const useRequirementList = () => {
   const [tempTitle, setTempTitle] = useState("");
   const [tempDescription, setTempDescription] = useState("");
   const [tempPriority, setTempPriority] = useState<"low" | "medium" | "high">("medium");
+  const [tempStatus, setTempStatus] = useState<"pending" | "in_progress" | "completed">("pending");
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
@@ -21,6 +22,7 @@ export const useRequirementList = () => {
             title: tempTitle,
             description: tempDescription,
             priority: tempPriority,
+            status: tempStatus,
           },
         })
       );
@@ -30,6 +32,7 @@ export const useRequirementList = () => {
       setTempTitle(req.title);
       setTempDescription(req.description);
       setTempPriority(req.priority);
+      setTempStatus(req.status);
     }
   };
 
@@ -55,10 +58,12 @@ export const useRequirementList = () => {
     tempTitle,
     tempDescription,
     tempPriority,
+    tempStatus,
     showDeleteModal,
     setTempTitle,
     setTempDescription,
     setTempPriority,
+    setTempStatus,
     handleEditClick,
     handleDeleteClick,
     confirmDelete,

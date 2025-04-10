@@ -4,7 +4,6 @@ import React from "react";
 import { useProjectDetail } from "../../../app-lib/hooks/useProjectDetail";
 import ProjectForm from "../../../app-lib/ components/forms/ProjectForm";
 import MeetingList from "../../../app-lib/ components/lists/MeetingList";
-import RequirementList from "../../../app-lib/ components/lists/RequirementList";
 import ProjectInfo from "./components/ProjectInfo";
 import Modal from "@/smartspecs/app-lib/ components/modals/Modal";
 import LoadingSpinner from "@/smartspecs/app-lib/ components/common/LoadingSpinner";
@@ -12,6 +11,7 @@ import ErrorMessage from "@/smartspecs/app-lib/ components/messages/ErrorMessage
 import SuccessMessage from "@/smartspecs/app-lib/ components/messages/SuccessMessage";
 import { Requirement } from "@/smartspecs/app-lib/redux/slices/RequirementsSlice";
 import MeetingForm from "@/smartspecs/app-lib/ components/forms/MeetingForm";
+import RequirementList from "@/smartspecs/app-lib/ components/lists/requirements-list/RequirementList";
 
 const ProjectDetail: React.FC = () => {
   const {

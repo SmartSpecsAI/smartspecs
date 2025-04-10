@@ -1,7 +1,7 @@
 import React from 'react';
 import { Requirement } from '@/smartspecs/app-lib/redux/slices/RequirementsSlice';
-import { useRequirementList } from '../../hooks/useRequirementList';
-import ConfirmModal from '../modals/ConfirmModal';
+import { useRequirementList } from '../../../hooks/useRequirementList';
+import ConfirmModal from '../../modals/ConfirmModal';
 import RequirementRow from './RequirementRow';
 
 interface RequirementListProps {
@@ -14,10 +14,12 @@ const RequirementList: React.FC<RequirementListProps> = ({ requirements }) => {
     tempTitle,
     tempDescription,
     tempPriority,
+    tempStatus,
     showDeleteModal,
     setTempTitle,
     setTempDescription,
     setTempPriority,
+    setTempStatus,
     handleEditClick,
     handleDeleteClick,
     confirmDelete,
@@ -37,16 +39,22 @@ const RequirementList: React.FC<RequirementListProps> = ({ requirements }) => {
       <table className="min-w-full divide-y divide-gray-200">
         <thead className="bg-gray-50">
           <tr>
-            <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+            <th className="w-12 px-1 py-2 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
+              #
+            </th>
+            <th className="w-1/4 px-2 py-2 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
               Título
             </th>
-            <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+            <th className="w-2/5 px-2 py-2 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
               Descripción
             </th>
-            <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+            <th className="w-24 px-2 py-2 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
               Prioridad
             </th>
-            <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+            <th className="w-24 px-2 py-2 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+              Estado
+            </th>
+            <th className="w-20 px-2 py-2 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
               Acciones
             </th>
           </tr>
@@ -61,9 +69,11 @@ const RequirementList: React.FC<RequirementListProps> = ({ requirements }) => {
               tempTitle={tempTitle}
               tempDescription={tempDescription}
               tempPriority={tempPriority}
+              tempStatus={tempStatus}
               onTitleChange={setTempTitle}
               onDescriptionChange={setTempDescription}
               onPriorityChange={setTempPriority}
+              onStatusChange={setTempStatus}
               onEditClick={() => handleEditClick(requirement)}
               onDeleteClick={() => handleDeleteClick(requirement.id)}
             />
