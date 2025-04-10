@@ -16,9 +16,8 @@ export interface Project {
   title: string;
   client: string;
   description: string;
-  createdAt: string; 
+  createdAt: string;
   updatedAt: string;
-  status: "pending" | "approved" | "rejected";
 }
 
 interface ProjectState {
@@ -33,59 +32,23 @@ const initialState: ProjectState = {
   error: null,
 };
 
-// 1. Obtener todos los proyectos
-export const fetchProjects = createAsyncThunk(
-  "projects/fetchProjects",
-  async (_, { rejectWithValue }) => {
-    try {
-      const querySnapshot = await getDocs(collection(firestore, "projects"));
-      if (!querySnapshot.empty) {
-        const projects = querySnapshot.docs.map((doc) => {
-          const data = doc.data();
-          return {
-            id: doc.id,
-            title: data.title || "Untitled",
-            client: data.client || "Unknown",
-            description: data.description || "",
-            createdAt:
-              data.createdAt instanceof Timestamp
-                ? data.createdAt.toDate().toISOString()
-                : data.createdAt,
-            updatedAt:
-              data.updatedAt instanceof Timestamp
-                ? data.updatedAt.toDate().toISOString()
-                : data.updatedAt,
-            status: data.status || "pending",
-          } as Project;
-        });
-        return projects;
-      } else {
-        return [];
-      }
-    } catch (error) {
-      console.error("Error fetching projects:", error);
-      return rejectWithValue("Error al obtener proyectos");
-    }
-  }
-);
-
-// 2. Crear un nuevo proyecto
+// Crear Proyecto
 export const createProject = createAsyncThunk(
   "projects/createProject",
   async (newProject: Omit<Project, "id">, { rejectWithValue }) => {
     try {
-      // 1) Creamos el documento en Firestore
       const docRef = await addDoc(collection(firestore, "projects"), newProject);
 
       return { id: docRef.id, ...newProject };
     } catch (error) {
-      console.error("Error creating project:", error);
+      console.error("Error al crear el proyecto:", error);
+
       return rejectWithValue("Error al crear el proyecto");
     }
   }
 );
 
-// 3. Actualizar un proyecto
+// Actualizar Proyecto
 export const updateProject = createAsyncThunk(
   "projects/updateProject",
   async (
@@ -94,13 +57,12 @@ export const updateProject = createAsyncThunk(
   ) => {
     try {
       const projectRef = doc(firestore, "projects", id);
+
       const snapshot = await getDoc(projectRef);
-      
       if (!snapshot.exists()) {
         return rejectWithValue("El proyecto no existe");
       }
 
-      // Añadir updatedAt si no está incluido en updatedData
       const updateData = {
         ...updatedData,
         updatedAt: Timestamp.now()
@@ -114,50 +76,54 @@ export const updateProject = createAsyncThunk(
       return {
         id: updatedSnapshot.id,
         ...data,
-        updatedAt: data?.updatedAt instanceof Timestamp ? 
-          data.updatedAt.toDate().toISOString() : 
+        updatedAt: data?.updatedAt instanceof Timestamp ?
+          data.updatedAt.toDate().toISOString() :
           data?.updatedAt
       };
     } catch (error) {
-      console.error("Error updating project:", error);
+      console.error("Error al actualizar el proyecto:", error);
       return rejectWithValue("Error al actualizar el proyecto");
     }
   }
 );
 
-// 4. Eliminar un proyecto
+// Eliminar Proyecto
 export const deleteProject = createAsyncThunk(
   "projects/deleteProject",
   async (id: string, { rejectWithValue }) => {
     try {
-      // 1) Borrar el proyecto en Firestore
       const projectRef = doc(firestore, "projects", id);
+
       await deleteDoc(projectRef);
 
       return id;
     } catch (error) {
-      console.error("Error deleting project:", error);
+      console.error("Error al eliminar el proyecto:", error);
+
       return rejectWithValue("Error al eliminar el proyecto");
     }
   }
 );
 
-// 5. Obtener un proyecto por ID
-export const fetchProjectById = createAsyncThunk(
-  "projects/fetchProjectById",
+// Obtener Proyecto
+export const getProject = createAsyncThunk(
+  "projects/getProject",
   async (projectId: string, { rejectWithValue }) => {
     try {
       const projectRef = doc(firestore, "projects", projectId);
+
       const snapshot = await getDoc(projectRef);
       if (!snapshot.exists()) {
         return rejectWithValue("El proyecto no existe");
       }
+
       const data = snapshot.data();
+
       return {
         id: snapshot.id,
-        title: data.title || "Untitled",
-        client: data.client || "Unknown",
-        description: data.description || "",
+        title: data.title,
+        client: data.client,
+        description: data.description,
         createdAt:
           data.createdAt instanceof Timestamp
             ? data.createdAt.toDate().toISOString()
@@ -166,11 +132,54 @@ export const fetchProjectById = createAsyncThunk(
           data.updatedAt instanceof Timestamp
             ? data.updatedAt.toDate().toISOString()
             : data.updatedAt,
-        status: data.status || "pending",
       } as Project;
+
     } catch (error) {
       console.error("Error obteniendo proyecto por ID:", error);
+
       return rejectWithValue("Error al obtener proyecto por ID");
+    }
+  }
+);
+
+// Obtener Todos los Proyectos
+export const getProjects = createAsyncThunk(
+  "projects/getProjects",
+  async (_, { rejectWithValue }) => {
+    try {
+      const querySnapshot = await getDocs(collection(firestore, "projects"));
+
+      if (!querySnapshot.empty) {
+        const projects = querySnapshot.docs.map((doc) => {
+
+          const data = doc.data();
+
+          return {
+            id: doc.id,
+            title: data.title,
+            client: data.client,
+            description: data.description,
+            createdAt:
+              data.createdAt instanceof Timestamp
+                ? data.createdAt.toDate().toISOString()
+                : data.createdAt,
+            updatedAt:
+              data.updatedAt instanceof Timestamp
+                ? data.updatedAt.toDate().toISOString()
+                : data.updatedAt,
+          } as Project;
+
+        });
+
+        return projects;
+
+      } else {
+        return [];
+      }
+    } catch (error) {
+      console.error("Error al obtener proyectos:", error);
+
+      return rejectWithValue("Error al obtener proyectos");
     }
   }
 );
@@ -181,21 +190,44 @@ const projectSlice = createSlice({
   reducers: {},
   extraReducers: (builder) => {
     builder
-      // Obtener lista de proyectos
-      .addCase(fetchProjects.pending, (state) => {
+      // ===== GET PROJECT =====
+      .addCase(getProject.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(fetchProjects.fulfilled, (state, action: PayloadAction<Project[]>) => {
+      .addCase(getProject.fulfilled, (state, action: PayloadAction<Project>) => {
         state.loading = false;
-        state.projects = action.payload;
+        const idx = state.projects.findIndex((p) => p.id === action.payload.id);
+        if (idx !== -1) {
+          state.projects[idx] = action.payload;
+        } else {
+          state.projects.push(action.payload);
+        }
       })
-      .addCase(fetchProjects.rejected, (state, action) => {
+      .addCase(getProject.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
       })
 
-      // Crear proyecto
+      // ===== GET PROJECTS =====
+      .addCase(getProjects.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(getProjects.fulfilled, (state, action: PayloadAction<Project[]>) => {
+        state.loading = false;
+        state.projects = action.payload;
+      })
+      .addCase(getProjects.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      })
+
+      // ===== CREATE PROJECT =====
+      .addCase(createProject.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
       .addCase(createProject.fulfilled, (state, action: PayloadAction<Project>) => {
         state.projects.push(action.payload);
       })
@@ -203,7 +235,11 @@ const projectSlice = createSlice({
         state.error = action.payload as string;
       })
 
-      // Actualizar proyecto
+      // ===== UPDATE PROJECT =====
+      .addCase(updateProject.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
       .addCase(updateProject.fulfilled, (state, action) => {
         const { id } = action.payload as Project;
         const index = state.projects.findIndex((p) => p.id === id);
@@ -215,30 +251,15 @@ const projectSlice = createSlice({
         state.error = action.payload as string;
       })
 
-      // Eliminar proyecto
+      // ===== DELETE PROJECT =====
+      .addCase(deleteProject.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
       .addCase(deleteProject.fulfilled, (state, action: PayloadAction<string>) => {
         state.projects = state.projects.filter((p) => p.id !== action.payload);
       })
       .addCase(deleteProject.rejected, (state, action) => {
-        state.error = action.payload as string;
-      })
-
-      // Obtener proyecto por ID
-      .addCase(fetchProjectById.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(fetchProjectById.fulfilled, (state, action: PayloadAction<Project>) => {
-        state.loading = false;
-        const idx = state.projects.findIndex((p) => p.id === action.payload.id);
-        if (idx !== -1) {
-          state.projects[idx] = action.payload;
-        } else {
-          state.projects.push(action.payload);
-        }
-      })
-      .addCase(fetchProjectById.rejected, (state, action) => {
-        state.loading = false;
         state.error = action.payload as string;
       });
   },

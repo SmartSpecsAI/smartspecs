@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useDispatch, useSelector, TypedUseSelectorHook } from "react-redux";
 import { AppDispatch } from "@/smartspecs/app-lib/redux/store";
 import { RootState } from "@/smartspecs/app-lib/redux/store";
-import { fetchProjects } from "@/smartspecs/app-lib/redux/slices/ProjectsSlice";
+import { getProjects } from "@/smartspecs/app-lib/redux/slices/ProjectsSlice";
 
 // Hooks tipados
 const useAppDispatch = () => useDispatch<AppDispatch>();
@@ -14,7 +14,7 @@ export const useProjects = () => {
 
   // Al montar, busca todos los proyectos
   useEffect(() => {
-    dispatch(fetchProjects());
+    dispatch(getProjects());
   }, [dispatch]);
 
   return { projects, loading, error };
