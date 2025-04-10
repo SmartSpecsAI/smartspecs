@@ -8,25 +8,26 @@ const ConfirmModal: React.FC<{
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
-      <div className="bg-background p-6 rounded shadow-md w-3/4 relative">
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 animate-fadeIn">
+      <div className="bg-background p-8 rounded-xl shadow-2xl w-full max-w-md relative animate-slideUp">
         <button
           onClick={onClose}
-          className="absolute top-2 right-2 text-text text-xl font-bold"
+          className="absolute top-4 right-4 text-text hover:text-primary transition-colors duration-200 text-2xl font-light"
+          aria-label="Close modal"
         >
           &times;
         </button>
-        <h2 className="text-xl font-bold mb-2">{title || "Confirmar"}</h2>
-        <p className="mb-4">{message || "¿Estás seguro de continuar?"}</p>
-        <div className="flex gap-3 justify-end">
+        <h2 className="text-2xl font-bold mb-4 text-text">{title || "Confirmar"}</h2>
+        <p className="mb-6 text-text/80">{message || "¿Estás seguro de continuar?"}</p>
+        <div className="flex gap-4 justify-end">
           <button
-            className="bg-gray-300 text-text px-4 py-2 rounded"
+            className="px-6 py-2.5 rounded-lg bg-gray-100 hover:bg-gray-200 text-text font-medium transition-colors duration-200"
             onClick={onClose}
           >
             No
           </button>
           <button
-            className="bg-primary text-background px-4 py-2 rounded"
+            className="px-6 py-2.5 rounded-lg bg-primary hover:bg-primary/90 text-background font-medium transition-colors duration-200"
             onClick={() => {
               onConfirm();
             }}

@@ -6,10 +6,12 @@ import ProjectForm from "../../../app-lib/ components/forms/ProjectForm";
 import MeetingList from "../../../app-lib/ components/lists/MeetingList";
 import RequirementList from "../../../app-lib/ components/lists/RequirementList";
 import ProjectInfo from "./components/ProjectInfo";
-import CreateMeetingModal from "../../../app-lib/ components/modals/CreateMeetingModal";
+import Modal from "@/smartspecs/app-lib/ components/modals/Modal";
 import LoadingSpinner from "@/smartspecs/app-lib/ components/common/LoadingSpinner";
 import ErrorMessage from "@/smartspecs/app-lib/ components/messages/ErrorMessage";
 import SuccessMessage from "@/smartspecs/app-lib/ components/messages/SuccessMessage";
+import { Requirement } from "@/smartspecs/app-lib/redux/slices/RequirementsSlice";
+import MeetingForm from "@/smartspecs/app-lib/ components/forms/MeetingForm";
 
 const ProjectDetail: React.FC = () => {
   const {
@@ -20,8 +22,6 @@ const ProjectDetail: React.FC = () => {
     projectMeetings,
     requirements,
     loading,
-    meetingsLoading,
-    requirementsLoading,
     error,
     meetingsError,
     requirementsError,
@@ -96,15 +96,17 @@ const ProjectDetail: React.FC = () => {
         </div>
       )}
 
-      <CreateMeetingModal
-        isOpen={showMeetingModal}
-        onClose={() => setShowMeetingModal(false)}
-        projectId={project.id}
-        projectTitle={project.title}
-        projectDescription={project.description}
-        projectClient={project.client}
-        requirementsList={requirements}
-      />
+      <Modal isOpen={showMeetingModal} onClose={() => setShowMeetingModal(false)}>
+        <MeetingForm
+          onCancel={() => setShowMeetingModal(false)}
+          onSaveSuccess={() => setShowMeetingModal(false)}
+          projectId={project.id}
+          projectTitle={project.title}
+          projectDescription={project.description}
+          projectClient={project.client}
+          requirementsList={requirements as Requirement[]}
+        />
+      </Modal>
 
       <div className="bg-background p-6 rounded-xl shadow-md w-full mt-8">
         <h2 className="text-2xl font-bold mb-4">Reuniones</h2>
