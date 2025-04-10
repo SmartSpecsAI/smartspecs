@@ -10,7 +10,7 @@ export function useProjectsData() {
   const [error, setError] = useState<string | null>(null);
   const getAllProjectsUseCase = getInjection("IGetAllProjectsUseCase");
 
-  const fetchProjects = async () => {
+  const getProjects = async () => {
     setIsLoading(true);
     setError(null);
     try {
@@ -29,7 +29,7 @@ export function useProjectsData() {
   useEffect(() => {
     if (isLoading || projects.length > 0) return;
     const fetch = async () => {
-      await fetchProjects();
+      await getProjects();
     };
     fetch();
   }, [isLoading, projects, updateProjects, updateSelectedProject]);
@@ -40,6 +40,6 @@ export function useProjectsData() {
     selectedProject,
     isLoading,
     error,
-    refetch: fetchProjects,
+    refetch: getProjects,
   };
 }

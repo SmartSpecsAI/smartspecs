@@ -5,7 +5,7 @@ import { useSelector, TypedUseSelectorHook, useDispatch } from "react-redux";
 import { RootState, AppDispatch } from "@/smartspecs/app-lib/redux/store";
 import {
   Project,
-  fetchProjectById,
+  getProject,
   deleteProject,
 } from "@/smartspecs/app-lib/redux/slices/ProjectsSlice";
 import {
@@ -41,7 +41,7 @@ export const useProjectDetail = () => {
 
   useEffect(() => {
     if (id) {
-      dispatch(fetchProjectById(id));
+      dispatch(getProject(id));
       dispatch(fetchMeetingsByProjectId(id));
       dispatch(fetchAllRequirements());
     }
