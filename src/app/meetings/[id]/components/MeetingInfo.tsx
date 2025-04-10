@@ -1,4 +1,3 @@
-import React from "react";
 import { Meeting } from "@/smartspecs/app-lib/redux/slices/MeetingsSlice";
 
 const MeetingInfo: React.FC<{
@@ -6,28 +5,43 @@ const MeetingInfo: React.FC<{
   setIsEditing: (value: boolean) => void,
   setShowDeleteModal: (value: boolean) => void
 }> = ({ meeting, setIsEditing, setShowDeleteModal }) => (
-  <div className="border rounded p-4 max-w-md w-full">
-    <p className="text-lg mb-2">
-      <strong>Título:</strong> {meeting.meetingTitle}
-    </p>
-    <p className="mb-2">
-      <strong>Descripción:</strong> {meeting.meetingDescription}
-    </p>
-    <p className="mb-2">
-      <strong>Fecha:</strong> {meeting.createdAt ? new Date(meeting.createdAt).toLocaleString() : "Sin fecha"}
-    </p>
-    <p className="mb-2">
-      <strong>Transcripción:</strong> {meeting.meetingTranscription ? <span className="whitespace-pre-wrap">{meeting.meetingTranscription}</span> : <em>No hay transcripción</em>}
-    </p>
-    <div className="flex gap-4 mt-4">
+  <div className="border border-gray-200 rounded-lg p-6 w-full shadow-sm hover:shadow-md transition-shadow duration-200 bg-white">
+    <div className="space-y-4">
+      <div className="border-b pb-4">
+        <h2 className="text-xl font-semibold text-gray-800 mb-2">{meeting.meetingTitle}</h2>
+        <p className="text-gray-600 text-sm">
+          {meeting.createdAt ? new Date(meeting.createdAt).toLocaleString() : "Sin fecha"}
+        </p>
+      </div>
+      
+      <div className="space-y-3">
+        <div>
+          <h3 className="text-sm font-medium text-gray-500 mb-1">Descripción</h3>
+          <p className="text-gray-700">{meeting.meetingDescription}</p>
+        </div>
+        
+        <div>
+          <h3 className="text-sm font-medium text-gray-500 mb-1">Transcripción</h3>
+          <div className="bg-gray-50 p-3 rounded-md">
+            {meeting.meetingTranscription ? (
+              <p className="text-gray-700 whitespace-pre-wrap">{meeting.meetingTranscription}</p>
+            ) : (
+              <p className="text-gray-400 italic">No hay transcripción</p>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div className="flex gap-3 mt-6">
       <button
-        className="bg-primary text-background px-4 py-2 rounded"
+        className="flex-1 bg-primary text-white px-4 py-2 rounded-md hover:bg-primary/90 transition-colors duration-200 font-medium"
         onClick={() => setIsEditing(true)}
       >
         Editar
       </button>
       <button
-        className="bg-danger text-background px-4 py-2 rounded"
+        className="flex-1 bg-danger text-white px-4 py-2 rounded-md hover:bg-danger/90 transition-colors duration-200 font-medium"
         onClick={() => setShowDeleteModal(true)}
       >
         Eliminar
