@@ -1,11 +1,11 @@
 "use client";
 
-import MeetingForm from '../../../app-lib/ components/forms/MeetingForm';
 import MeetingInfo from './components/MeetingInfo';
 import { useMeetingDetail } from "../../../app-lib/hooks/useMeetingDetail";
 import LoadingSpinner from '@/smartspecs/app-lib/ components/common/LoadingSpinner';
 import ErrorMessage from '@/smartspecs/app-lib/ components/messages/ErrorMessage';
 import ConfirmModal from '@/smartspecs/app-lib/ components/modals/ConfirmModal';
+import MeetingForm from '@/smartspecs/app-lib/ components/forms/MeetingForm';
 const MeetingDetail: React.FC = () => {
   const {
     isEditing,
@@ -41,6 +41,8 @@ const MeetingDetail: React.FC = () => {
           handleChange={handleChange}
           handleSaveEdit={handleSaveEdit}
           setIsEditing={setIsEditing}
+          onCancel={() => setIsEditing(false)}
+          onSaveSuccess={() => setIsEditing(false)}
         />
       ) : (
         <MeetingInfo
