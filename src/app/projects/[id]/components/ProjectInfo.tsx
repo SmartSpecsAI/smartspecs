@@ -1,107 +1,42 @@
-"use client";
-import React, { useState } from "react";
-import { useDispatch } from "react-redux";
-import { AppDispatch } from "@/smartspecs/app-lib/redux/store";
-import { updateProject } from "@/smartspecs/app-lib/redux/slices/ProjectsSlice";
 import { Project } from "@/smartspecs/app-lib/redux/slices/ProjectsSlice";
+import LoadingSpinner from "@/smartspecs/app-lib/ components/common/LoadingSpinner";
 
 interface ProjectInfoProps {
   project?: Project;
 }
 
 const ProjectInfo: React.FC<ProjectInfoProps> = ({ project }) => {
-  const dispatch = useDispatch<AppDispatch>();
-  const [loadingContext, setLoadingContext] = useState(false);
-  const [resettingDB, setResettingDB] = useState(false);
-
-  const handleFeedContext = async (projectId: string, projectTitle: string, projectDescription: string, projectClient: string) => {
-    if (!project) return;
-    try {
-      setLoadingContext(true);
-      await dispatch(updateProject({ id: projectId, updatedData: { title: projectTitle, description: projectDescription, client: projectClient } })).unwrap();
-      alert("✅ Contexto del proyecto actualizado en ChromaDB");
-    } catch (error) {
-      console.error("❌ Error alimentando contexto:", error);
-      alert("❌ Error al alimentar el contexto del proyecto.");
-    } finally {
-      setLoadingContext(false);
-    }
-  };
-
-  const handleResetDB = async () => {
-    try {
-      setResettingDB(true);
-  
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_LOCAL_BASE_URL}/context/clear`, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json", // buena práctica, aunque no haya body
-        },
-      });
-  
-      const data = await response.json();
-  
-      if (!response.ok) {
-        throw new Error(data?.detail || "Falló el reset");
-      }
-  
-      alert("🗑️ Base de datos vectorial reiniciada correctamente");
-    } catch (error) {
-      console.error("❌ Error reseteando la DB:", error);
-      alert("❌ Error al reiniciar la base de datos");
-    } finally {
-      setResettingDB(false);
-    }
-  };
-
   if (!project) {
-    return <p className="text-center text-gray-500">Cargando información del proyecto...</p>;
+    return <LoadingSpinner title="Cargando información del proyecto..." />;
   }
 
   return (
-    <div className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
-      <h2 className="text-2xl font-bold mb-4">{project.title}</h2>
-      <p><strong>Cliente:</strong> {project.client}</p>
-      <p className="mt-2"><strong>Descripción:</strong> {project.description}</p>
-      <p className="mt-2"><strong>Estado:</strong> {project.status}</p>
-      <p className="mt-2 text-sm text-gray-500">Created At: {project.createdAt}</p>
-      <p className="text-sm text-gray-500">Updated At: {project.updatedAt}</p>
+    <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+      <div className="p-6">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-3xl font-bold text-gray-800">{project.title}</h2>
+        </div>
 
-      <div className="flex gap-4 mt-6">
+        <div className="space-y-4">
+          <div className="bg-gray-50 p-4 rounded-lg">
+            <h3 className="text-sm font-semibold text-gray-500 mb-1">Cliente</h3>
+            <p className="text-lg text-gray-800">{project.client}</p>
+          </div>
 
-        <button
-          onClick={() => handleFeedContext(project.id, project.title, project.description, project.client)}
-          className="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600 flex items-center gap-2"
-        >
-          {loadingContext ? (
-            <>
-              <svg className="animate-spin h-5 w-5 text-white" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="white" strokeWidth="4" fill="none" />
-                <path className="opacity-75" fill="white" d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 11-8 8z" />
-              </svg>
-              Alimentando...
-            </>
-          ) : (
-            "Alimentar Contexto"
-          )}
-        </button>
+          <div className="bg-gray-50 p-4 rounded-lg">
+            <h3 className="text-sm font-semibold text-gray-500 mb-1">Descripción</h3>
+            <p className="text-gray-800">{project.description}</p>
+          </div>
 
-        <button
-          onClick={handleResetDB}
-          className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 flex items-center gap-2"
-        >
-          {resettingDB ? (
-            <>
-              <svg className="animate-spin h-5 w-5 text-white" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="white" strokeWidth="4" fill="none" />
-                <path className="opacity-75" fill="white" d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 11-8 8z" />
-              </svg>
-              Reiniciando...
-            </>
-          ) : (
-            "Reset Context"
-          )}
-        </button>
+          <div className="flex items-center space-x-4 text-sm text-gray-500 mt-6">
+            <div>
+              <span className="font-medium">Creado:</span> {new Date(project.createdAt).toLocaleDateString()}
+            </div>
+            <div>
+              <span className="font-medium">Actualizado:</span> {new Date(project.updatedAt).toLocaleDateString()}
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

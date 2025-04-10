@@ -16,6 +16,7 @@ import MeetingForm from "@/smartspecs/app-lib/ components/forms/MeetingForm";
 const ProjectDetail: React.FC = () => {
   const {
     isEditing,
+    handleEdit,
     deleteSuccessMsg,
     updateSuccessMsg,
     project,
@@ -63,12 +64,12 @@ const ProjectDetail: React.FC = () => {
         <div className="w-full">
           <ProjectInfo project={project} />
           <div className="flex justify-end gap-4 mt-4">
-            {/* <button
-              className="bg-blue-500 text-white px-4 py-2 rounded"
+            <button
+              className="bg-primary text-white px-4 py-2 rounded"
               onClick={handleEdit}
             >
               Editar
-            </button> */}
+            </button>
             <button
               className="bg-green-500 text-white px-4 py-2 rounded"
               onClick={() => setShowMeetingModal(true)}

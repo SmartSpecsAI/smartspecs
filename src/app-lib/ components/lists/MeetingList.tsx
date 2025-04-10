@@ -9,36 +9,42 @@ interface Props {
 
 const MeetingList: React.FC<Props> = ({ meetings }) => {
   if (!meetings.length) {
-    return <p className="text-center">No hay reuniones registradas para este proyecto.</p>;
+    return (
+      <div className="text-center p-8 bg-gray-50 rounded-lg border border-gray-200">
+        <p className="text-gray-500">No hay reuniones registradas para este proyecto.</p>
+      </div>
+    );
   }
 
   return (
-    <div className="overflow-x-auto">
-      <table className="min-w-full divide-y divide-gray-200 bg-white shadow-md rounded">
+    <div className="overflow-x-auto rounded-lg border border-gray-200 shadow-sm">
+      <table className="min-w-full divide-y divide-gray-200">
         <thead className="bg-gray-50">
           <tr>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+            <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">
               Título
             </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+            <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">
               Descripción
             </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+            <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">
               Acciones
             </th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-gray-200">
+        <tbody className="bg-white divide-y divide-gray-200">
           {meetings.map((m) => (
-            <tr key={m.meetingId} className="hover:bg-gray-50">
-              <td className="px-6 py-4 whitespace-nowrap">{m.meetingTitle}</td>
-              <td className="px-6 py-4 whitespace-nowrap">
+            <tr key={m.meetingId} className="hover:bg-gray-50 transition-colors duration-150">
+              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                {m.meetingTitle}
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                 {m.meetingDescription || "—"}
               </td>
-              <td className="px-6 py-4 whitespace-nowrap">
+              <td className="px-6 py-4 whitespace-nowrap text-sm">
                 <Link
                   href={`/meetings/${m.meetingId}`}
-                  className="text-primary hover:underline"
+                  className="inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md text-primary bg-primary/10 hover:bg-primary/20 transition-colors duration-150"
                 >
                   Ver detalle
                 </Link>
