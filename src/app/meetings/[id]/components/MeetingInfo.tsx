@@ -1,5 +1,5 @@
 import React from "react";
-import { Meeting } from "@/smartspecs/lib/presentation/redux/slices/MeetingsSlice";
+import { Meeting } from "@/smartspecs/app-lib/redux/slices/MeetingsSlice";
 
 const MeetingInfo: React.FC<{
   meeting: Meeting,

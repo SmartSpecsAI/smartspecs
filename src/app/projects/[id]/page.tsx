@@ -1,12 +1,15 @@
 "use client";
 
 import React from "react";
-import { useProjectDetail } from "./hooks/useProjectDetail";
-import ProjectForm from "./components/ProjectForm";
-import MeetingList from "./components/MeetingList";
-import RequirementList from "./components/RequirementList";
+import { useProjectDetail } from "../../../app-lib/hooks/useProjectDetail";
+import ProjectForm from "../../../app-lib/ components/forms/ProjectForm";
+import MeetingList from "../../../app-lib/ components/lists/MeetingList";
+import RequirementList from "../../../app-lib/ components/lists/RequirementList";
 import ProjectInfo from "./components/ProjectInfo";
-import CreateMeetingModal from "./components/CreateMeetingModal";
+import CreateMeetingModal from "../../../app-lib/ components/modals/CreateMeetingModal";
+import LoadingSpinner from "@/smartspecs/app-lib/ components/common/LoadingSpinner";
+import ErrorMessage from "@/smartspecs/app-lib/ components/messages/ErrorMessage";
+import SuccessMessage from "@/smartspecs/app-lib/ components/messages/SuccessMessage";
 
 const ProjectDetail: React.FC = () => {
   const {
@@ -30,39 +33,29 @@ const ProjectDetail: React.FC = () => {
     isDeletingMeetings,
   } = useProjectDetail();
 
-  console.log(requirements);
-
-  if (loading || meetingsLoading || requirementsLoading) {
-    return <p className="text-center mt-5">Cargando datos...</p>;
+  if (loading) {
+    return <LoadingSpinner />;
   }
 
   if (error || meetingsError || requirementsError) {
-    return (
-      <p className="text-center mt-5 text-red-500">
-        {error || meetingsError || requirementsError}
-      </p>
-    );
+    return <ErrorMessage message={(error || meetingsError || requirementsError) || 'Ocurrió un error'} />;
   }
 
   if (!project) {
     if (deleteSuccessMsg) {
       return (
         <div className="p-4">
-          <p className="text-green-600 font-bold">{deleteSuccessMsg}</p>
+          <SuccessMessage message={deleteSuccessMsg} />
         </div>
       );
     }
-    return <p className="text-center mt-5">Proyecto no encontrado</p>;
+    return <ErrorMessage message="Proyecto no encontrado" />;
   }
 
   return (
     <div className="min-h-screen flex flex-col items-center gap-4 bg-background text-text p-4">
-      {deleteSuccessMsg && (
-        <p className="text-green-600 font-bold">{deleteSuccessMsg}</p>
-      )}
-      {updateSuccessMsg && (
-        <p className="text-green-600 font-bold">{updateSuccessMsg}</p>
-      )}
+      {deleteSuccessMsg && <SuccessMessage message={deleteSuccessMsg} />}
+      {updateSuccessMsg && <SuccessMessage message={updateSuccessMsg} />}
 
       {isEditing ? (
         <ProjectForm project={project} onCancel={handleCancelEdit} onSaveSuccess={handleSaveSuccess} />
@@ -121,9 +114,6 @@ const ProjectDetail: React.FC = () => {
       <div className="bg-background p-6 rounded-xl shadow-md w-full mt-8">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-2xl font-bold">Requerimientos</h2>
-          {/* <div className="flex gap-4">
-            <ExecuteWorkflowButton />
-          </div> */}
         </div>
         <RequirementList requirements={requirements} />
       </div>

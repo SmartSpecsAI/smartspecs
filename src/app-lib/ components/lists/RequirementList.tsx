@@ -1,6 +1,6 @@
-import { deleteRequirement, Requirement, updateRequirement } from "@/smartspecs/lib/presentation/redux/slices/RequirementsSlice";
+import { deleteRequirement, Requirement, updateRequirement } from "@/smartspecs/app-lib/redux/slices/RequirementsSlice";
 import React, { useState } from "react";
-import { useAppDispatch } from "./CreateMeetingModal";
+import { useAppDispatch } from "../modals/CreateMeetingModal";
 
 interface RequirementListProps {
   requirements: Requirement[];

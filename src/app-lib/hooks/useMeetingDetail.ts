@@ -5,8 +5,8 @@ import {
   fetchMeetingById,
   updateMeeting,
   deleteMeeting,
-} from "@/smartspecs/lib/presentation/redux/slices/MeetingsSlice";
-import { AppDispatch, RootState } from "@/smartspecs/lib/presentation/redux/store";
+} from "@/smartspecs/app-lib/redux/slices/MeetingsSlice";
+import { AppDispatch, RootState } from "@/smartspecs/app-lib/redux/store";
 
 export const useMeetingDetail = () => {
   const dispatch = useDispatch<AppDispatch>();
