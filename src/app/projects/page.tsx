@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import Modal from "@/smartspecs/lib/presentation/components/common/Modal";
+import Modal from "@/smartspecs/app-lib/ components/modals/Modal";
 import { useProjects } from "../../app-lib/hooks/useProjects";
 import ProjectsHeader from "./components/ProjectsHeader";
 import ErrorState from "./components/ErrorState";
