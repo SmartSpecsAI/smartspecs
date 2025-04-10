@@ -1,30 +1,23 @@
+// src/app-lib/hooks/meetings/useMeetingForm.ts
 import { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "@/smartspecs/app-lib/redux/store";
-
-// Importamos acciones CRUD del slice de Meetings
 import {
   createMeeting,
   updateMeeting,
   getMeetingsByProject,
 } from "@/smartspecs/app-lib/redux/slices/MeetingsSlice";
-
-// Importamos acciones CRUD para Requirements
-import {
-  updateRequirement,
-  createRequirement,
-} from "@/smartspecs/app-lib/redux/slices/RequirementsSlice";
-
-// Importamos la utilidad de Dify
-import { callDifyWorkflow } from "@/smartspecs/app-lib/utils/dify";
 import { Meeting } from "@/smartspecs/app-lib/interfaces/meeting";
-import { Priority, Status } from "../../interfaces/requirement";
+
+// Importamos nuestra nueva utilidad para Dify
+import { processDifyWorkflow } from "@/smartspecs/app-lib/utils/difyProcessor";
+import { Requirement } from "@/smartspecs/app-lib/interfaces/requirement";
 
 interface UseMeetingFormProps {
-  // Si existe meeting => Modo edición
+  // Modo edición
   meeting?: Meeting;
 
-  // Si es creación => necesitamos un projectId mínimo
+  // Modo creación
   projectId?: string;
   projectTitle?: string;
   projectDescription?: string;
@@ -68,19 +61,16 @@ export const useMeetingForm = ({
     try {
       if (meeting) {
         // === Modo Edición ===
-        const updatedData = {
-          title,
-          description,
-          transcription,
-        };
+        const updatedData = { title, description, transcription };
         const updateAction = await dispatch(
           updateMeeting({ id: meeting.id, updatedData })
         );
 
         if (updateAction.meta.requestStatus === "fulfilled") {
-          // Si quisieras volver a correr Dify en edición, podrías hacerlo aquí.
+          // Si quisieras llamar a Dify en edición, podrías hacerlo aquí:
+          // await processDifyWorkflow(...);
           onSaveSuccess?.();
-          onCancel(); // Cierra el form
+          onCancel();
         } else {
           console.error("Error actualizando la reunión");
         }
@@ -91,6 +81,7 @@ export const useMeetingForm = ({
           setIsLoading(false);
           return;
         }
+
         // 1) Creamos la reunión
         const createResult = await dispatch(
           createMeeting({
@@ -100,55 +91,28 @@ export const useMeetingForm = ({
             transcription,
           })
         );
+
         if (createResult.meta.requestStatus === "fulfilled") {
           const createdMeeting = createResult.payload as Meeting;
 
-          // 2) Llamamos al workflow de Dify
-          let updatedRequirementsList: any[] = [];
-          let newRequirementsList: any[] = [];
-          try {
-            const wfResp = await callDifyWorkflow(
-              projectId,
-              createdMeeting.id,
-              projectTitle || "",
-              projectDescription || "",
-              projectClient || "",
-              title,
-              description,
-              transcription,
-              requirementsList || []
-            );
-            updatedRequirementsList = wfResp?.updatedRequirementsList ?? [];
-            newRequirementsList = wfResp?.newRequirementsList ?? [];
-          } catch (error) {
-            console.error("⚠️ Error en el workflow de Dify:", error);
-          }
+          // 2) Llamamos al workflow de Dify en un util aparte
+          await processDifyWorkflow({
+            dispatch,
+            projectId,
+            meetingId: createdMeeting.id,
+            projectTitle: projectTitle || "",
+            projectDescription: projectDescription || "",
+            projectClient: projectClient || "",
+            meetingTitle: title,
+            meetingDescription: description,
+            meetingTranscription: transcription,
+            requirementsList: requirementsList as Requirement[],
+          });
 
-          // 3) Actualizamos o creamos requerimientos si Dify generó algo
-          if (updatedRequirementsList.length > 0) {
-            for (const req of updatedRequirementsList) {
-              await dispatch(updateRequirement({ id: req.id, updatedData: req }));
-            }
-          }
-          if (newRequirementsList.length > 0) {
-            for (const req of newRequirementsList) {
-              if (!req.title || !req.description) continue;
-
-              await dispatch(createRequirement({
-                ...req,
-                projectId,
-                title: req.title ?? "Requerimiento sin título",
-                description: req.description ?? "Requerimiento sin descripción",
-                priority: req.priority ?? Priority.MEDIUM,
-                status: req.status ?? Status.PENDING,
-              }));
-            }
-          }
-
-          // 4) Refrescamos la lista de reuniones del proyecto
+          // 3) Refrescamos la lista de reuniones
           await dispatch(getMeetingsByProject(projectId));
 
-          // 5) Reseteamos el formulario
+          // 4) Reseteamos
           setTitle("");
           setDescription("");
           setTranscription("");
