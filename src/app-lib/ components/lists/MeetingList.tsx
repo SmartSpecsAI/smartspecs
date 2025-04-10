@@ -34,16 +34,16 @@ const MeetingList: React.FC<Props> = ({ meetings }) => {
         </thead>
         <tbody className="bg-white divide-y divide-gray-200">
           {meetings.map((m) => (
-            <tr key={m.meetingId} className="hover:bg-gray-50 transition-colors duration-150">
+            <tr key={m.id} className="hover:bg-gray-50 transition-colors duration-150">
               <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                {m.meetingTitle}
+                {m.title}
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                {m.meetingDescription || "—"}
+                {m.description}
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm">
                 <Link
-                  href={`/meetings/${m.meetingId}`}
+                  href={`/meetings/${m.id}`}
                   className="inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md text-primary bg-primary/10 hover:bg-primary/20 transition-colors duration-150"
                 >
                   Ver detalle

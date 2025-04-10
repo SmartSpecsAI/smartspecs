@@ -1,36 +1,30 @@
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import {
   collection,
+  getDocs,
   addDoc,
-  Timestamp,
   updateDoc,
+  deleteDoc,
   doc,
   getDoc,
-  getDocs,
   query,
   where,
-  deleteDoc,
 } from "firebase/firestore";
+import {
+  getTimestampObject,
+  getUpdatedTimestamp,
+  toISODate,
+} from "@/smartspecs/app-lib/utils/firestoreTimeStamps";
 import { firestore } from "@/smartspecs/lib/config/firebase-settings";
-import { callDifyWorkflow } from "@/smartspecs/app-lib/utils/dify";
 
-/* ─────────────────────────────────────────────
- *  Tipos y estado
- * ────────────────────────────────────────────*/
 export interface Meeting {
-  id?: string; // id local
-  meetingId: string; // id Firestore
+  id: string;
+  title: string;
+  description: string;
+  transcription: string;
+  createdAt: string;
+  updatedAt: string;
   projectId: string;
-  meetingTitle: string;
-  meetingDescription: string;
-  meetingTranscription: string;
-  requirements: object[];
-  createdAt?: string;
-  updatedAt?: string;
-  date?: string;
-  /* Datos devueltos por Dify */
-  updatedRequirementsList?: object[];
-  newRequirementsList?: object[];
 }
 
 interface MeetingState {
@@ -45,254 +39,228 @@ const initialState: MeetingState = {
   error: null,
 };
 
-/* ─────────────────────────────────────────────
- *  Thunks
- * ────────────────────────────────────────────*/
+// Crear Reunión
 export const createMeeting = createAsyncThunk(
   "meetings/createMeeting",
   async (
-    {
-      projectId,
-      projectTitle,
-      projectDescription,
-      projectClient,
-      meetingTitle,
-      meetingDescription,
-      meetingTranscription,
-      requirementsList,
-    }: {
-      projectId: string;
-      projectTitle: string;
-      projectDescription: string;
-      projectClient: string;
-      meetingTitle: string;
-      meetingDescription: string;
-      meetingTranscription: string;
-      requirementsList: object[];
-    },
+    newMeeting: Omit<Meeting, "id" | "createdAt" | "updatedAt">,
     { rejectWithValue }
   ) => {
     try {
-      const timestamp = Timestamp.now();
-
-      /* 1️⃣ Guardar la reunión en Firestore */
+      const timestamps = getTimestampObject();
       const docRef = await addDoc(collection(firestore, "meetings"), {
-        projectId,
-        meetingTitle,
-        meetingDescription,
-        meetingTranscription,
-        updatedAt: timestamp,
-        createdAt: timestamp,
+        ...newMeeting,
+        ...timestamps,
       });
 
-      const meetingId = docRef.id;
-
-      /* 2️⃣ Ejecutar el workflow de Dify */
-      let updatedRequirementsList: object[] = [];
-      let newRequirementsList: object[] = [];
-
-      try {
-        const wf = await callDifyWorkflow(
-          projectId,
-          meetingId,
-          projectTitle,
-          projectDescription,
-          projectClient,
-          meetingTitle,
-          meetingDescription,
-          meetingTranscription,
-          requirementsList
-        );
-
-        console.log("🔄 Dify response:", wf);
-
-        updatedRequirementsList = wf?.updatedRequirementsList ?? [];
-        console.log("🔄 Updated requirements list:", updatedRequirementsList);
-        newRequirementsList = wf?.newRequirementsList ?? [];
-        console.log("🔄 New requirements list:", newRequirementsList);
-      } catch (wfErr) {
-        console.error("⚠️  Workflow falló, la reunión se creó igual:", wfErr);
-      }
-
       return {
-        id: meetingId,
-        meetingId,
-        projectId,
-        meetingTitle,
-        meetingDescription,
-        meetingTranscription,
-        updatedRequirementsList,
-        newRequirementsList,
-        requirements: [],
-        createdAt: timestamp.toDate().toISOString(),
-        updatedAt: timestamp.toDate().toISOString(),
+        id: docRef.id,
+        ...newMeeting,
+        createdAt: toISODate(timestamps.createdAt),
+        updatedAt: toISODate(timestamps.updatedAt),
       } as Meeting;
-    } catch (err) {
-      console.error("❌ Error creando reunión:", err);
+    } catch (error) {
+      console.error("❌ Error al crear la reunión:", error);
       return rejectWithValue("Error al crear la reunión");
     }
   }
 );
 
-/* ✅ Obtener reuniones por proyecto */
-export const fetchMeetingsByProjectId = createAsyncThunk(
-  "meetings/fetchMeetingsByProjectId",
-  async (projectId: string, { rejectWithValue }) => {
-    try {
-      const q = query(
-        collection(firestore, "meetings"),
-        where("projectId", "==", projectId)
-      );
-      const snap = await getDocs(q);
-
-      const meetings: Meeting[] = snap.docs.map((d) => {
-        const data = d.data();
-        return {
-          id: d.id,
-          meetingId: d.id,
-          projectId: data.projectId,
-          meetingTitle: data.meetingTitle ?? data.title ?? "",
-          meetingDescription: data.meetingDescription ?? data.description ?? "",
-          meetingTranscription:
-            data.meetingTranscription ?? data.transcription ?? "",
-          requirements: data.requirements ?? [],
-          createdAt:
-            data.createdAt instanceof Timestamp
-              ? data.createdAt.toDate().toISOString()
-              : data.createdAt,
-          updatedAt:
-            data.updatedAt instanceof Timestamp
-              ? data.updatedAt.toDate().toISOString()
-              : data.updatedAt,
-        };
-      });
-
-      return meetings;
-    } catch (err) {
-      console.error("❌ Error obteniendo reuniones:", err);
-      return rejectWithValue("Error al obtener reuniones");
-    }
-  }
-);
-
-/* ✅ Obtener reunión por ID */
-export const fetchMeetingById = createAsyncThunk(
-  "meetings/fetchMeetingById",
-  async (meetingId: string, { rejectWithValue }) => {
-    try {
-      const ref = doc(firestore, "meetings", meetingId);
-      const snap = await getDoc(ref);
-
-      if (!snap.exists()) return rejectWithValue("Reunión no encontrada");
-
-      const data = snap.data();
-      return {
-        id: snap.id,
-        meetingId: snap.id,
-        projectId: data.projectId,
-        meetingTitle: data.meetingTitle ?? data.title ?? "",
-        meetingDescription: data.meetingDescription ?? data.description ?? "",
-        meetingTranscription:
-          data.meetingTranscription ?? data.transcription ?? "",
-        requirements: data.requirements ?? [],
-        createdAt:
-          data.createdAt instanceof Timestamp
-            ? data.createdAt.toDate().toISOString()
-            : data.createdAt,
-        updatedAt:
-          data.updatedAt instanceof Timestamp
-            ? data.updatedAt.toDate().toISOString()
-            : data.updatedAt,
-      } as Meeting;
-    } catch (err) {
-      console.error("❌ Error obteniendo reunión:", err);
-      return rejectWithValue("Error al obtener reunión");
-    }
-  }
-);
-
-/* 🔄 Actualizar */
+// Actualizar Reunión
 export const updateMeeting = createAsyncThunk(
   "meetings/updateMeeting",
   async (
-    {
-      meetingId,
-      updatedData,
-    }: { meetingId: string; updatedData: Partial<Meeting> },
+    { id, updatedData }: { id: string; updatedData: Partial<Meeting> },
     { rejectWithValue }
   ) => {
     try {
-      await updateDoc(doc(firestore, "meetings", meetingId), updatedData);
-      return { meetingId, updatedData };
-    } catch (err) {
-      console.error("❌ Error actualizando reunión:", err);
-      return rejectWithValue("Error al actualizar reunión");
+      const timestamps = getUpdatedTimestamp();
+      const updateData = { ...updatedData, ...timestamps };
+
+      await updateDoc(doc(firestore, "meetings", id), updateData);
+
+      const snap = await getDoc(doc(firestore, "meetings", id));
+      const data = snap.data();
+
+      return {
+        id: snap.id,
+        projectId: data?.projectId ?? "",
+        title: data?.title ?? "",
+        description: data?.description ?? "",
+        transcription: data?.transcription ?? "",
+        createdAt: toISODate(data?.createdAt),
+        updatedAt: toISODate(data?.updatedAt),
+      } as Meeting;
+    } catch (error) {
+      console.error("❌ Error actualizando la reunión:", error);
+      return rejectWithValue("Error al actualizar la reunión");
     }
   }
 );
 
-/* 🗑️ Eliminar */
+// Eliminar reunión
 export const deleteMeeting = createAsyncThunk(
   "meetings/deleteMeeting",
   async (meetingId: string, { rejectWithValue }) => {
     try {
       await deleteDoc(doc(firestore, "meetings", meetingId));
       return meetingId;
-    } catch (err) {
-      console.error("❌ Error eliminando reunión:", err);
-      return rejectWithValue("Error al eliminar reunión");
+    } catch (error) {
+      console.error("❌ Error eliminando reunión:", error);
+      return rejectWithValue("Error al eliminar la reunión");
     }
   }
 );
 
-/* ─────────────────────────────────────────────
- *  Slice
- * ────────────────────────────────────────────*/
+// Obtener Reunión
+export const getMeeting = createAsyncThunk(
+  "meetings/getMeeting",
+  async (meetingId: string, { rejectWithValue }) => {
+    try {
+      const snap = await getDoc(doc(firestore, "meetings", meetingId));
+
+      if (!snap.exists()) {
+        return rejectWithValue("La reunión no existe");
+      }
+
+      const data = snap.data();
+      return {
+        id: snap.id,
+        projectId: data.projectId,
+        title: data.title ?? "",
+        description: data.description ?? "",
+        transcription: data.transcription ?? "",
+        createdAt: toISODate(data.createdAt),
+        updatedAt: toISODate(data.updatedAt),
+      } as Meeting;
+    } catch (error) {
+      console.error("❌ Error obteniendo reunión:", error);
+      return rejectWithValue("Error al obtener la reunión");
+    }
+  }
+);
+
+// Obtener todas las reuniones de un proyecto
+export const getMeetingsByProject = createAsyncThunk(
+  "meetings/getMeetingsByProject",
+  async (projectId: string, { rejectWithValue }) => {
+    try {
+      const q = query(
+        collection(firestore, "meetings"),
+        where("projectId", "==", projectId)
+      );
+
+      const snap = await getDocs(q);
+
+      const meetings: Meeting[] = snap.docs.map((doc) => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          projectId: data.projectId,
+          title: data.title ?? "",
+          description: data.description ?? "",
+          transcription: data.transcription ?? "",
+          createdAt: toISODate(data.createdAt),
+          updatedAt: toISODate(data.updatedAt),
+        };
+      });
+
+      return meetings;
+    } catch (error) {
+      console.error("❌ Error al obtener reuniones del proyecto:", error);
+      return rejectWithValue("Error al obtener reuniones");
+    }
+  }
+);
+
 const meetingsSlice = createSlice({
   name: "meetings",
   initialState,
   reducers: {},
   extraReducers: (builder) => {
-    /* loaders */
+    // ===================== CREATE MEETING =====================
     builder
-      .addCase(fetchMeetingsByProjectId.pending, (st) => {
-        st.loading = true;
-        st.error = null;
+      .addCase(createMeeting.pending, (state) => {
+        state.loading = true;
+        state.error = null;
       })
-      .addCase(fetchMeetingsByProjectId.fulfilled, (st, a: PayloadAction<Meeting[]>) => {
-        st.loading = false;
-        st.meetings = a.payload;
+      .addCase(createMeeting.fulfilled, (state, action: PayloadAction<Meeting>) => {
+        state.loading = false;
+        state.meetings.push(action.payload);
       })
-      .addCase(fetchMeetingsByProjectId.rejected, (st, a) => {
-        st.loading = false;
-        st.error = a.payload as string;
+      .addCase(createMeeting.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
       });
 
-    /* get one */
-    builder.addCase(fetchMeetingById.fulfilled, (st, a: PayloadAction<Meeting>) => {
-      const idx = st.meetings.findIndex((m) => m.meetingId === a.payload.meetingId);
-      idx === -1 ? st.meetings.push(a.payload) : (st.meetings[idx] = a.payload);
-    });
-
-    /* create */
+    // ===================== GET MEETINGS BY PROJECT =====================
     builder
-      .addCase(createMeeting.fulfilled, (st, a: PayloadAction<Meeting>) => {
-        st.meetings.push(a.payload);
+      .addCase(getMeetingsByProject.pending, (state) => {
+        state.loading = true;
+        state.error = null;
       })
-      .addCase(createMeeting.rejected, (st, a) => {
-        st.error = a.payload as string;
+      .addCase(getMeetingsByProject.fulfilled, (state, action: PayloadAction<Meeting[]>) => {
+        state.loading = false;
+        state.meetings = action.payload;
+      })
+      .addCase(getMeetingsByProject.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
       });
 
-    /* update */
-    builder.addCase(updateMeeting.fulfilled, (st, a) => {
-      const idx = st.meetings.findIndex((m) => m.meetingId === a.payload.meetingId);
-      if (idx !== -1) st.meetings[idx] = { ...st.meetings[idx], ...a.payload.updatedData };
-    });
+    // ===================== GET MEETING =====================
+    builder
+      .addCase(getMeeting.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(getMeeting.fulfilled, (state, action: PayloadAction<Meeting>) => {
+        state.loading = false;
+        const idx = state.meetings.findIndex((m) => m.id === action.payload.id);
+        if (idx !== -1) {
+          state.meetings[idx] = action.payload;
+        } else {
+          state.meetings.push(action.payload);
+        }
+      })
+      .addCase(getMeeting.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      });
 
-    /* delete */
-    builder.addCase(deleteMeeting.fulfilled, (st, a: PayloadAction<string>) => {
-      st.meetings = st.meetings.filter((m) => m.meetingId !== a.payload);
-    });
+    // ===================== UPDATE MEETING =====================
+    builder
+      .addCase(updateMeeting.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(updateMeeting.fulfilled, (state, action) => {
+        state.loading = false;
+        const updated = action.payload as Meeting;
+        const idx = state.meetings.findIndex((m) => m.id === updated.id);
+        if (idx !== -1) {
+          state.meetings[idx] = updated;
+        }
+      })
+      .addCase(updateMeeting.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      });
+
+    // ===================== DELETE MEETING =====================
+    builder
+      .addCase(deleteMeeting.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(deleteMeeting.fulfilled, (state, action: PayloadAction<string>) => {
+        state.loading = false;
+        state.meetings = state.meetings.filter((m) => m.id !== action.payload);
+      })
+      .addCase(deleteMeeting.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      });
   },
 });
 
