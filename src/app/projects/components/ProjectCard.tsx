@@ -1,7 +1,6 @@
 import React from "react";
 import Link from "next/link";
-import { Project } from "@/smartspecs/app-lib/redux/slices/ProjectsSlice";
-
+import { Project } from "@/smartspecs/app-lib/interfaces/project";
 const ProjectCard: React.FC<{ project: Project }> = ({ project }) => {
   return (
     <Link key={project.id} href={`/projects/${project.id}`}>

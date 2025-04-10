@@ -1,5 +1,5 @@
-import { Project } from "@/smartspecs/app-lib/redux/slices/ProjectsSlice";
 import LoadingSpinner from "@/smartspecs/app-lib/ components/common/LoadingSpinner";
+import { Project } from "@/smartspecs/app-lib/interfaces/project";
 
 interface ProjectInfoProps {
   project?: Project;

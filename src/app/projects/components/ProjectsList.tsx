@@ -1,6 +1,6 @@
 import React from 'react';
-import { Project } from "@/smartspecs/app-lib/redux/slices/ProjectsSlice";
 import ProjectCard from "@/smartspecs/app/projects/components/ProjectCard";
+import { Project } from '@/smartspecs/app-lib/interfaces/project';
 
 interface ProjectsListProps {
   projects: Project[];
