@@ -18,6 +18,7 @@ import {
 // Importamos la utilidad de Dify
 import { callDifyWorkflow } from "@/smartspecs/app-lib/utils/dify";
 import { Meeting } from "@/smartspecs/app-lib/interfaces/meeting";
+import { Priority, Status } from "../../interfaces/requirement";
 
 interface UseMeetingFormProps {
   // Si existe meeting => Modo edición
@@ -131,7 +132,16 @@ export const useMeetingForm = ({
           }
           if (newRequirementsList.length > 0) {
             for (const req of newRequirementsList) {
-              await dispatch(createRequirement({ ...req, projectId }));
+              if (!req.title || !req.description) continue;
+
+              await dispatch(createRequirement({
+                ...req,
+                projectId,
+                title: req.title ?? "Requerimiento sin título",
+                description: req.description ?? "Requerimiento sin descripción",
+                priority: req.priority ?? Priority.MEDIUM,
+                status: req.status ?? Status.PENDING,
+              }));
             }
           }
 
