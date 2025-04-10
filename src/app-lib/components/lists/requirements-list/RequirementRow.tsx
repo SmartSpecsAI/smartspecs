@@ -1,6 +1,5 @@
 import React from 'react';
-import { Requirement } from '@/smartspecs/app-lib/redux/slices/RequirementsSlice';
-
+import { Requirement } from '@/smartspecs/app-lib/interfaces/requirement';
 interface RequirementRowProps {
   requirement: Requirement;
   index: number;
@@ -106,11 +105,11 @@ const RequirementRow: React.FC<RequirementRowProps> = ({
           <div className="text-sm">
             <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
               requirement.status === 'completed' ? 'bg-green-100 text-green-800' :
-              requirement.status === 'in_progress' ? 'bg-blue-100 text-blue-800' :
+              requirement.status === 'in progress' ? 'bg-blue-100 text-blue-800' :
               'bg-gray-100 text-gray-800'
             }`}>
               {requirement.status === 'completed' ? 'Completado' : 
-               requirement.status === 'in_progress' ? 'En Progreso' : 'Pendiente'}
+               requirement.status === 'in progress' ? 'En Progreso' : 'Pendiente'}
             </span>
           </div>
         )}

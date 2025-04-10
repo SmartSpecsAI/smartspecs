@@ -12,10 +12,9 @@ import ErrorMessage from "@/smartspecs/app-lib/components/messages/ErrorMessage"
 import SuccessMessage from "@/smartspecs/app-lib/components/messages/SuccessMessage";
 import MeetingForm from "@/smartspecs/app-lib/components/forms/MeetingForm";
 import RequirementList from "@/smartspecs/app-lib/components/lists/requirements-list/RequirementList";
-import { Requirement } from "@/smartspecs/app-lib/redux/slices/RequirementsSlice";
 import { useProjectData } from "@/smartspecs/app-lib/hooks/projects/useProjectData";
 import { useProjectDetail } from "@/smartspecs/app-lib/hooks/projects/useProjectDetail";
-
+import { Requirement } from "@/smartspecs/app-lib/interfaces/requirement";
 const ProjectDetail: React.FC = () => {
   // Este hook se encarga de cargar datos: proyecto, reuniones, requerimientos
   const {
