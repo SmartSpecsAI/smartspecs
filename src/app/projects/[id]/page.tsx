@@ -1,24 +1,24 @@
+// src/app/(your-segment)/projects/[id]/page.tsx
 "use client";
 
 import React from "react";
-import { useProjectDetail } from "../../../app-lib/hooks/useProjectDetail";
-import ProjectForm from "../../../app-lib/ components/forms/ProjectForm";
-import MeetingList from "../../../app-lib/ components/lists/MeetingList";
+
+import ProjectForm from "@/smartspecs/app-lib/components/forms/ProjectForm";
+import MeetingList from "@/smartspecs/app-lib/components/lists/MeetingList";
 import ProjectInfo from "./components/ProjectInfo";
-import Modal from "@/smartspecs/app-lib/ components/modals/Modal";
-import LoadingSpinner from "@/smartspecs/app-lib/ components/common/LoadingSpinner";
-import ErrorMessage from "@/smartspecs/app-lib/ components/messages/ErrorMessage";
-import SuccessMessage from "@/smartspecs/app-lib/ components/messages/SuccessMessage";
+import Modal from "@/smartspecs/app-lib/components/modals/Modal";
+import LoadingSpinner from "@/smartspecs/app-lib/components/common/LoadingSpinner";
+import ErrorMessage from "@/smartspecs/app-lib/components/messages/ErrorMessage";
+import SuccessMessage from "@/smartspecs/app-lib/components/messages/SuccessMessage";
+import MeetingForm from "@/smartspecs/app-lib/components/forms/MeetingForm";
+import RequirementList from "@/smartspecs/app-lib/components/lists/requirements-list/RequirementList";
 import { Requirement } from "@/smartspecs/app-lib/redux/slices/RequirementsSlice";
-import MeetingForm from "@/smartspecs/app-lib/ components/forms/MeetingForm";
-import RequirementList from "@/smartspecs/app-lib/ components/lists/requirements-list/RequirementList";
+import { useProjectData } from "@/smartspecs/app-lib/hooks/projects/useProjectData";
+import { useProjectDetail } from "@/smartspecs/app-lib/hooks/projects/useProjectDetail";
 
 const ProjectDetail: React.FC = () => {
+  // Este hook se encarga de cargar datos: proyecto, reuniones, requerimientos
   const {
-    isEditing,
-    handleEdit,
-    deleteSuccessMsg,
-    updateSuccessMsg,
     project,
     projectMeetings,
     requirements,
@@ -26,22 +26,35 @@ const ProjectDetail: React.FC = () => {
     error,
     meetingsError,
     requirementsError,
+  } = useProjectData();
+
+  // Este hook maneja los estados de UI: editar, modales, mensajes de éxito, etc.
+  const {
+    isEditing,
+    deleteSuccessMsg,
+    updateSuccessMsg,
+    handleEdit,
     handleCancelEdit,
     handleSaveSuccess,
-    setShowMeetingModal,
     showMeetingModal,
+    setShowMeetingModal,
     handleDeleteAllMeetings,
     isDeletingMeetings,
-  } = useProjectDetail();
+  } = useProjectDetail(project);
 
   if (loading) {
     return <LoadingSpinner />;
   }
 
   if (error || meetingsError || requirementsError) {
-    return <ErrorMessage message={(error || meetingsError || requirementsError) || 'Ocurrió un error'} />;
+    return (
+      <ErrorMessage
+        message={(error || meetingsError || requirementsError) || "Ocurrió un error"}
+      />
+    );
   }
 
+  // Si no hay proyecto y se eliminó con éxito, mostramos mensaje de éxito
   if (!project) {
     if (deleteSuccessMsg) {
       return (
@@ -59,7 +72,11 @@ const ProjectDetail: React.FC = () => {
       {updateSuccessMsg && <SuccessMessage message={updateSuccessMsg} />}
 
       {isEditing ? (
-        <ProjectForm project={project} onCancel={handleCancelEdit} onSaveSuccess={handleSaveSuccess} />
+        <ProjectForm
+          project={project}
+          onCancel={handleCancelEdit}
+          onSaveSuccess={handleSaveSuccess}
+        />
       ) : (
         <div className="w-full">
           <ProjectInfo project={project} />
@@ -83,9 +100,24 @@ const ProjectDetail: React.FC = () => {
             >
               {isDeletingMeetings ? (
                 <>
-                  <svg className="animate-spin h-5 w-5 text-white inline-block mr-2" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="white" strokeWidth="4" fill="none" />
-                    <path className="opacity-75" fill="white" d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 11-8 8z" />
+                  <svg
+                    className="animate-spin h-5 w-5 text-white inline-block mr-2"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="white"
+                      strokeWidth="4"
+                      fill="none"
+                    />
+                    <path
+                      className="opacity-75"
+                      fill="white"
+                      d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 11-8 8z"
+                    />
                   </svg>
                   Eliminando...
                 </>
