@@ -2,18 +2,18 @@
 
 import { useEffect, useState } from "react";
 import { useSelector, TypedUseSelectorHook, useDispatch } from "react-redux";
-import { RootState, AppDispatch } from "@/smartspecs/lib/presentation/redux/store";
+import { RootState, AppDispatch } from "@/smartspecs/app-lib/redux/store";
 import {
   Project,
   fetchProjectById,
   deleteProject,
-} from "@/smartspecs/lib/presentation/redux/slices/ProjectsSlice";
+} from "@/smartspecs/app-lib/redux/slices/ProjectsSlice";
 import {
   fetchMeetingsByProjectId,
-} from "@/smartspecs/lib/presentation/redux/slices/MeetingsSlice";
+} from "@/smartspecs/app-lib/redux/slices/MeetingsSlice";
 import {
   fetchAllRequirements,
-} from "@/smartspecs/lib/presentation/redux/slices/RequirementsSlice";
+} from "@/smartspecs/app-lib/redux/slices/RequirementsSlice";
 import { usePathname } from "next/navigation";
 
 const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;

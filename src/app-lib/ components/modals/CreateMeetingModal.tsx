@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import { useDispatch } from "react-redux";
-import { AppDispatch } from "@/smartspecs/lib/presentation/redux/store";
-import { createMeeting, fetchMeetingsByProjectId } from "@/smartspecs/lib/presentation/redux/slices/MeetingsSlice";
-import { updateProject } from "@/smartspecs/lib/presentation/redux/slices/ProjectsSlice";
-import { updateRequirement, createRequirement } from "@/smartspecs/lib/presentation/redux/slices/RequirementsSlice";
+import { AppDispatch } from "@/smartspecs/app-lib/redux/store";
+import { createMeeting, fetchMeetingsByProjectId } from "@/smartspecs/app-lib/redux/slices/MeetingsSlice";
+import { updateProject } from "@/smartspecs/app-lib/redux/slices/ProjectsSlice";
+import { updateRequirement, createRequirement } from "@/smartspecs/app-lib/redux/slices/RequirementsSlice";
 
 const useAppDispatch = () => useDispatch<AppDispatch>();
 
@@ -40,13 +40,8 @@ const CreateMeetingModal: React.FC<{
     );
 
     if (result.meta.requestStatus === 'fulfilled') {
-      const { newProjectContext, updatedRequirementsList, newRequirementsList } = result.payload as any;
-      
-      // Actualizar descripción del proyecto
-      await dispatch(updateProject({
-        id: projectId,
-        updatedData: { description: newProjectContext }
-      }));
+      const { updatedRequirementsList, newRequirementsList } = result.payload as any;
+    
 
       // Actualizar requerimientos existentes
       if (updatedRequirementsList && updatedRequirementsList.length > 0) {

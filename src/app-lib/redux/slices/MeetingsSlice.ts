@@ -12,7 +12,7 @@ import {
   deleteDoc,
 } from "firebase/firestore";
 import { firestore } from "@/smartspecs/lib/config/firebase-settings";
-import { callDifyWorkflow } from "@/smartspecs/lib/utils/dify";
+import { callDifyWorkflow } from "@/smartspecs/app-lib/utils/dify";
 
 /* ─────────────────────────────────────────────
  *  Tipos y estado
@@ -31,7 +31,6 @@ export interface Meeting {
   /* Datos devueltos por Dify */
   updatedRequirementsList?: object[];
   newRequirementsList?: object[];
-  newProjectContext?: string;
 }
 
 interface MeetingState {
@@ -91,7 +90,6 @@ export const createMeeting = createAsyncThunk(
       /* 2️⃣ Ejecutar el workflow de Dify */
       let updatedRequirementsList: object[] = [];
       let newRequirementsList: object[] = [];
-      let newProjectContext: string | undefined;
 
       try {
         const wf = await callDifyWorkflow(
@@ -106,9 +104,12 @@ export const createMeeting = createAsyncThunk(
           requirementsList
         );
 
+        console.log("🔄 Dify response:", wf);
+
         updatedRequirementsList = wf?.updatedRequirementsList ?? [];
+        console.log("🔄 Updated requirements list:", updatedRequirementsList);
         newRequirementsList = wf?.newRequirementsList ?? [];
-        newProjectContext = wf?.newProjectContext;
+        console.log("🔄 New requirements list:", newRequirementsList);
       } catch (wfErr) {
         console.error("⚠️  Workflow falló, la reunión se creó igual:", wfErr);
       }
@@ -122,7 +123,6 @@ export const createMeeting = createAsyncThunk(
         meetingTranscription,
         updatedRequirementsList,
         newRequirementsList,
-        newProjectContext,
         requirements: [],
         createdAt: timestamp.toDate().toISOString(),
         updatedAt: timestamp.toDate().toISOString(),

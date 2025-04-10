@@ -1,13 +1,19 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
-import { AppDispatch } from "@/smartspecs/lib/presentation/redux/store";
-import { createProject, Project } from "@/smartspecs/lib/presentation/redux/slices/ProjectsSlice";
+import { AppDispatch } from "@/smartspecs/app-lib/redux/store";
+import { createProject, updateProject, Project } from "@/smartspecs/app-lib/redux/slices/ProjectsSlice";
 
 const useAppDispatch = () => useDispatch<AppDispatch>();
 
-const ProjectForm: React.FC<{ onClose: () => void }> = ({ onClose }) => {
+interface ProjectFormProps {
+  onCancel: () => void;
+  project?: Project;
+  onSaveSuccess?: (message: string) => void;
+}
+
+const ProjectForm: React.FC<ProjectFormProps> = ({ onCancel, project, onSaveSuccess }) => {
   const dispatch = useAppDispatch();
-  const [newProject, setNewProject] = useState<Omit<Project, "id">>({
+  const [formData, setFormData] = useState<Omit<Project, "id">>({
     title: "",
     client: "",
     description: "",
@@ -16,32 +22,49 @@ const ProjectForm: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     updatedAt: "",
   });
 
+  useEffect(() => {
+    if (project) {
+      setFormData({
+        title: project.title,
+        client: project.client,
+        description: project.description,
+        status: project.status,
+        createdAt: project.createdAt,
+        updatedAt: project.updatedAt,
+      });
+    }
+  }, [project]);
+
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
-    setNewProject({ ...newProject, [name]: value });
+    setFormData({ ...formData, [name]: value });
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const timestamp = new Date().toISOString();
-    dispatch(
-      createProject({
-        ...newProject,
+    
+    if (project) {
+      dispatch(updateProject({
+        id: project.id,
+        updatedData: {
+          ...formData,
+          updatedAt: timestamp,
+        }
+      }));
+      onSaveSuccess?.("Proyecto actualizado exitosamente");
+    } else {
+      dispatch(createProject({
+        ...formData,
         createdAt: timestamp,
         updatedAt: timestamp,
-      })
-    );
-    setNewProject({
-      title: "",
-      client: "",
-      description: "",
-      status: "pending",
-      createdAt: "",
-      updatedAt: "",
-    });
-    onClose();
+      }));
+      onSaveSuccess?.("Proyecto creado exitosamente");
+    }
+    
+    onCancel();
   };
 
   return (
@@ -49,7 +72,7 @@ const ProjectForm: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       <input
         type="text"
         name="title"
-        value={newProject.title}
+        value={formData.title}
         onChange={handleInputChange}
         placeholder="Project Title"
         className="border border-primary p-2 w-full mb-2 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
@@ -58,7 +81,7 @@ const ProjectForm: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       <input
         type="text"
         name="client"
-        value={newProject.client}
+        value={formData.client}
         onChange={handleInputChange}
         placeholder="Client Name"
         className="border border-primary p-2 w-full mb-2 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
@@ -66,7 +89,7 @@ const ProjectForm: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       />
       <textarea
         name="description"
-        value={newProject.description}
+        value={formData.description}
         onChange={handleInputChange}
         placeholder="Project Description"
         className="border border-primary p-2 w-full mb-2 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
@@ -76,7 +99,7 @@ const ProjectForm: React.FC<{ onClose: () => void }> = ({ onClose }) => {
         type="submit"
         className="bg-primary text-background hover:bg-primary/80 p-3 w-full rounded-lg shadow-md transition"
       >
-        Create Project
+        {project ? "Update Project" : "Create Project"}
       </button>
     </form>
   );

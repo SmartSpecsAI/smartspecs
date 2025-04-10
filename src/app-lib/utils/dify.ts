@@ -5,7 +5,6 @@
  * Devuelve: {
  *   updatedRequirementsList: Requirement[],
  *   newRequirementsList: Requirement[],
- *   newProjectContext: string
  * }
  */
 export async function callDifyWorkflow(
@@ -21,7 +20,6 @@ export async function callDifyWorkflow(
 ): Promise<{
   updatedRequirementsList: object[];
   newRequirementsList: object[];
-  newProjectContext: string;
 }> {
   try {
     // 🧠 Preparamos el payload
@@ -60,7 +58,6 @@ export async function callDifyWorkflow(
     return {
       updatedRequirementsList: parseJSONSafely(outputs.updated_requirements_list),
       newRequirementsList: parseJSONSafely(outputs.new_requirements_list),
-      newProjectContext: outputs.new_project_context ?? "",
     };
   } catch (err) {
     console.error("❌ callDifyWorkflow failed:", err);

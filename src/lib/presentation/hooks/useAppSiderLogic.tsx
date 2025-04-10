@@ -21,12 +21,12 @@ export const useAppSiderLogic = () => {
   }, []);
 
   const menuItems: MenuProps["items"] = [
-    {
-      key: "smartspecs",
-      icon: <FileDoneOutlined/>,
-      label: "SmartSpecs",
-      onClick: () => router.push("/smartspecs"),
-    },
+    // {
+    //   key: "smartspecs",
+    //   icon: <FileDoneOutlined/>,
+    //   label: "SmartSpecs",
+    //   onClick: () => router.push("/smartspecs"),
+    // },
     {
       key: "projects",
       icon: <FileDoneOutlined/>,

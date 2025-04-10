@@ -1,7 +1,7 @@
 "use client";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { useSelector, useDispatch } from "react-redux";
-import type { RootState } from "../redux/store";
+import type { RootState } from "../../../app-lib/redux/store";
 import { Project } from "@/smartspecs/lib/domain";
 
 interface ProjectsState {

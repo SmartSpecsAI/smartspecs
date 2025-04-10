@@ -1,8 +1,8 @@
 import { useEffect } from "react";
 import { useDispatch, useSelector, TypedUseSelectorHook } from "react-redux";
-import { AppDispatch } from "@/smartspecs/lib/presentation/redux/store";
-import { RootState } from "@/smartspecs/lib/presentation/redux/store";
-import { fetchProjects } from "@/smartspecs/lib/presentation/redux/slices/ProjectsSlice";
+import { AppDispatch } from "@/smartspecs/app-lib/redux/store";
+import { RootState } from "@/smartspecs/app-lib/redux/store";
+import { fetchProjects } from "@/smartspecs/app-lib/redux/slices/ProjectsSlice";
 
 // Hooks tipados
 const useAppDispatch = () => useDispatch<AppDispatch>();

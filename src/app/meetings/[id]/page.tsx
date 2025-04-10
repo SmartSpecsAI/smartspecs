@@ -1,12 +1,11 @@
 "use client";
 
-import ConfirmModal from './components/ConfirmModal';
-import MeetingForm from './components/MeetingForm';
+import MeetingForm from '../../../app-lib/ components/forms/MeetingForm';
 import MeetingInfo from './components/MeetingInfo';
-import LoadingMessage from './components/LoadingMessage';
-import ErrorMessage from './components/ErrorMessage';
-import { useMeetingDetail } from "./hooks/useMeetingDetail";
-
+import { useMeetingDetail } from "../../../app-lib/hooks/useMeetingDetail";
+import LoadingSpinner from '@/smartspecs/app-lib/ components/common/LoadingSpinner';
+import ErrorMessage from '@/smartspecs/app-lib/ components/messages/ErrorMessage';
+import ConfirmModal from '@/smartspecs/app-lib/ components/modals/ConfirmModal';
 const MeetingDetail: React.FC = () => {
   const {
     isEditing,
@@ -23,13 +22,13 @@ const MeetingDetail: React.FC = () => {
   } = useMeetingDetail();
 
   if (loading) {
-    return <LoadingMessage />;
+    return <LoadingSpinner title="Cargando reunión..." />;
   }
   if (error) {
-    return <ErrorMessage error={error} />;
+    return <ErrorMessage message={error} />;
   }
   if (!meeting) {
-    return <p className="text-center mt-5">Reunión no encontrada</p>;
+    return <ErrorMessage message="Reunión no encontrada" />;
   }
 
   return (
@@ -55,6 +54,8 @@ const MeetingDetail: React.FC = () => {
         isOpen={showDeleteModal}
         onClose={() => setShowDeleteModal(false)}
         onConfirm={handleConfirmDelete}
+        title="Eliminar Reunión"
+        message="¿Estás seguro de que deseas eliminar esta reunión?"
       />
     </div>
   );

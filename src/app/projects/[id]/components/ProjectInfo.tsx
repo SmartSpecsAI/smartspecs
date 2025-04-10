@@ -1,9 +1,9 @@
 "use client";
 import React, { useState } from "react";
 import { useDispatch } from "react-redux";
-import { AppDispatch } from "@/smartspecs/lib/presentation/redux/store";
-import { updateProject } from "@/smartspecs/lib/presentation/redux/slices/ProjectsSlice";
-import { Project } from "@/smartspecs/lib/presentation/redux/slices/ProjectsSlice";
+import { AppDispatch } from "@/smartspecs/app-lib/redux/store";
+import { updateProject } from "@/smartspecs/app-lib/redux/slices/ProjectsSlice";
+import { Project } from "@/smartspecs/app-lib/redux/slices/ProjectsSlice";
 
 interface ProjectInfoProps {
   project?: Project;
