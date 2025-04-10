@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { usePathname, useRouter } from "next/navigation";
 import {
-  fetchMeetingById,
+  getMeeting,
   updateMeeting,
   deleteMeeting,
 } from "@/smartspecs/app-lib/redux/slices/MeetingsSlice";
@@ -28,20 +28,20 @@ export const useMeetingDetail = () => {
     (state: RootState) => state.meetings
   );
 
-  const meeting = meetings.find((m) => m.meetingId === meetingId);
+  const meeting = meetings.find((m) => m.id === meetingId);
 
   useEffect(() => {
     if (meetingId && !meeting) {
-      dispatch(fetchMeetingById(meetingId));
+      dispatch(getMeeting(meetingId));
     }
   }, [meetingId, meeting, dispatch]);
 
   useEffect(() => {
     if (meeting && isEditing) {
       setFormData({
-        title: meeting.meetingTitle,
-        description: meeting.meetingDescription,
-        transcription: meeting.meetingTranscription || "",
+        title: meeting.title,
+        description: meeting.description,
+        transcription: meeting.transcription || "",
       });
     }
   }, [meeting, isEditing]);
@@ -56,19 +56,19 @@ export const useMeetingDetail = () => {
   const handleSaveEdit = async () => {
     if (!meeting) return;
     const updatedData = {
-      meetingTitle: formData.title,
-      meetingDescription: formData.description,
-      meetingTranscription: formData.transcription,
+      title: formData.title,
+      description: formData.description,
+      transcription: formData.transcription,
     };
     await dispatch(
-      updateMeeting({ meetingId: meeting.meetingId, updatedData })
+      updateMeeting({ id: meeting.id, updatedData })
     );
     setIsEditing(false);
   };
 
   const handleConfirmDelete = async () => {
     if (!meeting) return;
-    await dispatch(deleteMeeting(meeting.meetingId));
+    await dispatch(deleteMeeting(meeting.id));
     setShowDeleteModal(false);
     router.push("/projects");
   };

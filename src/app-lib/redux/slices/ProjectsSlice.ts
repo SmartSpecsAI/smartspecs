@@ -2,13 +2,17 @@ import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import {
   collection,
   getDocs,
-  Timestamp,
   addDoc,
   updateDoc,
   deleteDoc,
   doc,
   getDoc,
 } from "firebase/firestore";
+import {
+  getTimestampObject,
+  getUpdatedTimestamp,
+  toISODate,
+} from "@/smartspecs/app-lib/utils/firestoreTimeStamps";
 import { firestore } from "@/smartspecs/lib/config/firebase-settings";
 
 export interface Project {
@@ -35,14 +39,25 @@ const initialState: ProjectState = {
 // Crear Proyecto
 export const createProject = createAsyncThunk(
   "projects/createProject",
-  async (newProject: Omit<Project, "id">, { rejectWithValue }) => {
+  async (
+    newProject: Omit<Project, "id" | "createdAt" | "updatedAt">,
+    { rejectWithValue }
+  ) => {
     try {
-      const docRef = await addDoc(collection(firestore, "projects"), newProject);
+      const timestamps = getTimestampObject();
+      const docRef = await addDoc(collection(firestore, "projects"), {
+        ...newProject,
+        ...timestamps,
+      });
 
-      return { id: docRef.id, ...newProject };
+      return {
+        id: docRef.id,
+        ...newProject,
+        createdAt: toISODate(timestamps.createdAt),
+        updatedAt: toISODate(timestamps.updatedAt),
+      };
     } catch (error) {
       console.error("Error al crear el proyecto:", error);
-
       return rejectWithValue("Error al crear el proyecto");
     }
   }
@@ -56,18 +71,10 @@ export const updateProject = createAsyncThunk(
     { rejectWithValue }
   ) => {
     try {
+      const timestamp = getUpdatedTimestamp();
+      const updateData = { ...updatedData, ...timestamp };
+
       const projectRef = doc(firestore, "projects", id);
-
-      const snapshot = await getDoc(projectRef);
-      if (!snapshot.exists()) {
-        return rejectWithValue("El proyecto no existe");
-      }
-
-      const updateData = {
-        ...updatedData,
-        updatedAt: Timestamp.now()
-      };
-
       await updateDoc(projectRef, updateData);
 
       const updatedSnapshot = await getDoc(projectRef);
@@ -75,11 +82,12 @@ export const updateProject = createAsyncThunk(
 
       return {
         id: updatedSnapshot.id,
-        ...data,
-        updatedAt: data?.updatedAt instanceof Timestamp ?
-          data.updatedAt.toDate().toISOString() :
-          data?.updatedAt
-      };
+        title: data?.title ?? "",
+        client: data?.client ?? "",
+        description: data?.description ?? "",
+        createdAt: toISODate(data?.createdAt),
+        updatedAt: toISODate(data?.updatedAt),
+      } as Project;
     } catch (error) {
       console.error("Error al actualizar el proyecto:", error);
       return rejectWithValue("Error al actualizar el proyecto");
@@ -92,14 +100,10 @@ export const deleteProject = createAsyncThunk(
   "projects/deleteProject",
   async (id: string, { rejectWithValue }) => {
     try {
-      const projectRef = doc(firestore, "projects", id);
-
-      await deleteDoc(projectRef);
-
+      await deleteDoc(doc(firestore, "projects", id));
       return id;
     } catch (error) {
       console.error("Error al eliminar el proyecto:", error);
-
       return rejectWithValue("Error al eliminar el proyecto");
     }
   }
@@ -110,33 +114,22 @@ export const getProject = createAsyncThunk(
   "projects/getProject",
   async (projectId: string, { rejectWithValue }) => {
     try {
-      const projectRef = doc(firestore, "projects", projectId);
-
-      const snapshot = await getDoc(projectRef);
+      const snapshot = await getDoc(doc(firestore, "projects", projectId));
       if (!snapshot.exists()) {
         return rejectWithValue("El proyecto no existe");
       }
 
       const data = snapshot.data();
-
       return {
         id: snapshot.id,
         title: data.title,
         client: data.client,
         description: data.description,
-        createdAt:
-          data.createdAt instanceof Timestamp
-            ? data.createdAt.toDate().toISOString()
-            : data.createdAt,
-        updatedAt:
-          data.updatedAt instanceof Timestamp
-            ? data.updatedAt.toDate().toISOString()
-            : data.updatedAt,
+        createdAt: toISODate(data.createdAt),
+        updatedAt: toISODate(data.updatedAt),
       } as Project;
-
     } catch (error) {
       console.error("Error obteniendo proyecto por ID:", error);
-
       return rejectWithValue("Error al obtener proyecto por ID");
     }
   }
@@ -148,41 +141,24 @@ export const getProjects = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const querySnapshot = await getDocs(collection(firestore, "projects"));
-
-      if (!querySnapshot.empty) {
-        const projects = querySnapshot.docs.map((doc) => {
-
-          const data = doc.data();
-
-          return {
-            id: doc.id,
-            title: data.title,
-            client: data.client,
-            description: data.description,
-            createdAt:
-              data.createdAt instanceof Timestamp
-                ? data.createdAt.toDate().toISOString()
-                : data.createdAt,
-            updatedAt:
-              data.updatedAt instanceof Timestamp
-                ? data.updatedAt.toDate().toISOString()
-                : data.updatedAt,
-          } as Project;
-
-        });
-
-        return projects;
-
-      } else {
-        return [];
-      }
+      return querySnapshot.docs.map((docSnap) => {
+        const data = docSnap.data();
+        return {
+          id: docSnap.id,
+          title: data.title,
+          client: data.client,
+          description: data.description,
+          createdAt: toISODate(data.createdAt),
+          updatedAt: toISODate(data.updatedAt),
+        } as Project;
+      });
     } catch (error) {
       console.error("Error al obtener proyectos:", error);
-
       return rejectWithValue("Error al obtener proyectos");
     }
   }
 );
+
 
 const projectSlice = createSlice({
   name: "projects",

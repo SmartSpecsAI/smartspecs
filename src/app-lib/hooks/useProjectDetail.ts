@@ -1,5 +1,3 @@
-// src/app/projects/[id]/useProjectDetail.ts
-
 import { useEffect, useState } from "react";
 import { useSelector, TypedUseSelectorHook, useDispatch } from "react-redux";
 import { RootState, AppDispatch } from "@/smartspecs/app-lib/redux/store";
@@ -9,10 +7,10 @@ import {
   deleteProject,
 } from "@/smartspecs/app-lib/redux/slices/ProjectsSlice";
 import {
-  fetchMeetingsByProjectId,
+  getMeetingsByProject,
 } from "@/smartspecs/app-lib/redux/slices/MeetingsSlice";
 import {
-  fetchAllRequirements,
+  fetchRequirementsByProject,
 } from "@/smartspecs/app-lib/redux/slices/RequirementsSlice";
 import { usePathname } from "next/navigation";
 
@@ -42,15 +40,15 @@ export const useProjectDetail = () => {
   useEffect(() => {
     if (id) {
       dispatch(getProject(id));
-      dispatch(fetchMeetingsByProjectId(id));
-      dispatch(fetchAllRequirements());
+      dispatch(getMeetingsByProject(id));
+      dispatch(fetchRequirementsByProject(id));
     }
   }, [id, dispatch]);
 
   // Add new effect to refresh requirements when meetings change
   useEffect(() => {
     if (id) {
-      dispatch(fetchAllRequirements());
+      dispatch(fetchRequirementsByProject(id));
     }
   }, [meetings, id, dispatch]);
 
@@ -99,7 +97,7 @@ export const useProjectDetail = () => {
       }
 
       // Refresh meetings list
-      await dispatch(fetchMeetingsByProjectId(id));
+      await dispatch(getMeetingsByProject(id));
       alert("✅ Todas las reuniones han sido eliminadas correctamente");
     } catch (error) {
       console.error("❌ Error eliminando reuniones:", error);
