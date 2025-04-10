@@ -1,9 +1,8 @@
 import React from 'react';
-import { Requirement } from '@/smartspecs/app-lib/redux/slices/RequirementsSlice';
 import { useRequirementList } from '../../../hooks/useRequirementList';
 import ConfirmModal from '../../modals/ConfirmModal';
 import RequirementRow from './RequirementRow';
-
+import { Requirement } from '@/smartspecs/app-lib/interfaces/requirement';
 interface RequirementListProps {
   requirements: Requirement[];
 }

@@ -1,13 +1,13 @@
 import { useState } from 'react';
-import { deleteRequirement, Requirement, updateRequirement } from '@/smartspecs/app-lib/redux/slices/RequirementsSlice';
+import { deleteRequirement, updateRequirement } from '@/smartspecs/app-lib/redux/slices/RequirementsSlice';
 import { useAppDispatch } from './useAppDispatch';
-
+import { Requirement } from '@/smartspecs/app-lib/interfaces/requirement';
 export const useRequirementList = () => {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [tempTitle, setTempTitle] = useState("");
   const [tempDescription, setTempDescription] = useState("");
   const [tempPriority, setTempPriority] = useState<"low" | "medium" | "high">("medium");
-  const [tempStatus, setTempStatus] = useState<"pending" | "in_progress" | "completed">("pending");
+  const [tempStatus, setTempStatus] = useState<"pending" | "in progress" | "completed">("pending");
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
@@ -32,7 +32,7 @@ export const useRequirementList = () => {
       setTempTitle(req.title);
       setTempDescription(req.description);
       setTempPriority(req.priority);
-      setTempStatus(req.status);
+      setTempStatus(req.status as "pending" | "in progress" | "completed");
     }
   };
 
