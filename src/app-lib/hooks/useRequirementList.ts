@@ -1,13 +1,14 @@
 import { useState } from 'react';
 import { deleteRequirement, updateRequirement } from '@/smartspecs/app-lib/redux/slices/RequirementsSlice';
 import { useAppDispatch } from './useAppDispatch';
-import { Requirement } from '@/smartspecs/app-lib/interfaces/requirement';
+import { Requirement, Status, Priority } from '@/smartspecs/app-lib/interfaces/requirement';
+
 export const useRequirementList = () => {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [tempTitle, setTempTitle] = useState("");
   const [tempDescription, setTempDescription] = useState("");
-  const [tempPriority, setTempPriority] = useState<"low" | "medium" | "high">("medium");
-  const [tempStatus, setTempStatus] = useState<"pending" | "in progress" | "completed">("pending");
+  const [tempPriority, setTempPriority] = useState<Priority>(Priority.MEDIUM);
+  const [tempStatus, setTempStatus] = useState<Status>(Status.IN_PROGRESS);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
@@ -21,7 +22,7 @@ export const useRequirementList = () => {
           updatedData: {
             title: tempTitle,
             description: tempDescription,
-            priority: tempPriority,
+            priority: tempPriority as Priority,
             status: tempStatus,
           },
         })
@@ -32,7 +33,7 @@ export const useRequirementList = () => {
       setTempTitle(req.title);
       setTempDescription(req.description);
       setTempPriority(req.priority);
-      setTempStatus(req.status as "pending" | "in progress" | "completed");
+      setTempStatus(req.status);
     }
   };
 

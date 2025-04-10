@@ -17,17 +17,8 @@ import {
   getUpdatedTimestamp,
   toISODate,
 } from "@/smartspecs/app-lib/utils/firestoreTimeStamps";
-
-export interface Requirement {
-  id: string;
-  title: string;
-  description: string;
-  priority: "low" | "medium" | "high";
-  status: "pending" | "in progress" | "completed";
-  createdAt: string;
-  updatedAt: string;
-  projectId: string;
-}
+import { Requirement } from "@/smartspecs/app-lib/interfaces/requirement";
+import { Status } from "@/smartspecs/lib/domain/entities/Status";
 
 interface RequirementState {
   requirements: Requirement[];
@@ -44,33 +35,28 @@ const initialState: RequirementState = {
 // Crear un nuevo requerimiento
 export const createRequirement = createAsyncThunk(
   "requirements/createRequirement",
-  async (
-    newRequirement: Omit<Requirement, "id" | "createdAt" | "updatedAt">,
-    { rejectWithValue }
-  ) => {
+  async (requirement: Omit<Requirement, "id">, { rejectWithValue }) => {
     try {
-      const timestamps = getTimestampObject();
-      const requirementData = {
-        ...newRequirement,
-        ...timestamps,
-      };
-
-      const docRef = await addDoc(collection(firestore, "requirements"), requirementData);
+      const docRef = await addDoc(collection(firestore, "requirements"), {
+        ...requirement,
+        createdAt: getTimestampObject(),
+        updatedAt: getTimestampObject(),
+      });
 
       return {
         id: docRef.id,
-        ...newRequirement,
-        createdAt: toISODate(timestamps.createdAt),
-        updatedAt: toISODate(timestamps.updatedAt),
-      };
+        ...requirement,
+        createdAt: toISODate(getTimestampObject()),
+        updatedAt: toISODate(getTimestampObject()),
+      } as Requirement;
     } catch (error) {
       console.error("Error creating requirement:", error);
-      return rejectWithValue("Error al crear el requerimiento");
+      return rejectWithValue("Error al crear requerimiento");
     }
   }
 );
 
-// Actualizar un requerimiento
+// Actualizar requerimiento
 export const updateRequirement = createAsyncThunk(
   "requirements/updateRequirement",
   async (
@@ -78,19 +64,31 @@ export const updateRequirement = createAsyncThunk(
     { rejectWithValue }
   ) => {
     try {
-      const timestamp = getUpdatedTimestamp();
-      const updateData = { ...updatedData, ...timestamp };
-
-      await updateDoc(doc(firestore, "requirements", id), updateData);
-
-      return {
-        id,
+      const docRef = doc(firestore, "requirements", id);
+      await updateDoc(docRef, {
         ...updatedData,
-        updatedAt: toISODate(timestamp.updatedAt),
-      };
+        updatedAt: getUpdatedTimestamp(),
+      });
+
+      const snap = await getDoc(docRef);
+      if (!snap.exists()) {
+        return rejectWithValue("El requerimiento no existe");
+      }
+
+      const data = snap.data();
+      return {
+        id: snap.id,
+        projectId: data.projectId || data.project_id,
+        title: data.title || "Untitled",
+        description: data.description || "",
+        priority: data.priority || "medium",
+        status: data.status || Status.IN_PROGRESS,
+        createdAt: toISODate(data.createdAt),
+        updatedAt: toISODate(data.updatedAt),
+      } as Requirement;
     } catch (error) {
-      console.error("Error updating requirement:", error);
-      return rejectWithValue("Error al actualizar el requerimiento");
+      console.error("Error obteniendo requerimiento por ID:", error);
+      return rejectWithValue("Error al obtener requerimiento por ID");
     }
   }
 );
@@ -145,7 +143,7 @@ export const getRequirementsByProject = createAsyncThunk(
     try {
       const q = query(
         collection(firestore, "requirements"),
-        where("project_id", "==", projectId)
+        where("projectId", "==", projectId)
       );
 
       const snap = await getDocs(q);
@@ -158,7 +156,7 @@ export const getRequirementsByProject = createAsyncThunk(
           title: data.title || "Untitled",
           description: data.description || "",
           priority: data.priority || "medium",
-          status: data.status || "pending",
+          status: data.status || Status.IN_PROGRESS,
           createdAt: toISODate(data.createdAt),
           updatedAt: toISODate(data.updatedAt),
         } as Requirement;
@@ -180,13 +178,13 @@ const requirementSlice = createSlice({
   extraReducers: (builder) => {
     builder
       // Crear requerimiento
-      .addCase(createRequirement.fulfilled, (state, action: PayloadAction<Requirement>) => {
-        state.requirements.push(action.payload);
-        state.loading = false;
-      })
       .addCase(createRequirement.pending, (state) => {
         state.loading = true;
         state.error = null;
+      })
+      .addCase(createRequirement.fulfilled, (state, action: PayloadAction<Requirement>) => {
+        state.requirements.push(action.payload);
+        state.loading = false;
       })
       .addCase(createRequirement.rejected, (state, action) => {
         state.error = action.payload as string;
@@ -194,16 +192,16 @@ const requirementSlice = createSlice({
       })
 
       // Actualizar requerimiento
-      .addCase(updateRequirement.fulfilled, (state, action) => {
-        const idx = state.requirements.findIndex((r) => r.id === action.payload.id);
-        if (idx !== -1) {
-          state.requirements[idx] = { ...state.requirements[idx], ...action.payload };
-        }
-        state.loading = false;
-      })
       .addCase(updateRequirement.pending, (state) => {
         state.loading = true;
         state.error = null;
+      })
+      .addCase(updateRequirement.fulfilled, (state, action: PayloadAction<Requirement>) => {
+        const index = state.requirements.findIndex((req) => req.id === action.payload.id);
+        if (index !== -1) {
+          state.requirements[index] = action.payload;
+        }
+        state.loading = false;
       })
       .addCase(updateRequirement.rejected, (state, action) => {
         state.error = action.payload as string;

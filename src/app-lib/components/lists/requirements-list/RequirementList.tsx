@@ -2,7 +2,8 @@ import React from 'react';
 import { useRequirementList } from '../../../hooks/useRequirementList';
 import ConfirmModal from '../../modals/ConfirmModal';
 import RequirementRow from './RequirementRow';
-import { Requirement } from '@/smartspecs/app-lib/interfaces/requirement';
+import { Requirement, Priority } from '@/smartspecs/app-lib/interfaces/requirement';
+
 interface RequirementListProps {
   requirements: Requirement[];
 }
@@ -71,7 +72,7 @@ const RequirementList: React.FC<RequirementListProps> = ({ requirements }) => {
               tempStatus={tempStatus}
               onTitleChange={setTempTitle}
               onDescriptionChange={setTempDescription}
-              onPriorityChange={setTempPriority}
+              onPriorityChange={setTempPriority as (value: Priority) => void}
               onStatusChange={setTempStatus}
               onEditClick={() => handleEditClick(requirement)}
               onDeleteClick={() => handleDeleteClick(requirement.id)}
