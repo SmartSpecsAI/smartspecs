@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "@/smartspecs/app-lib/redux/store";
 import { createMeeting, fetchMeetingsByProjectId } from "@/smartspecs/app-lib/redux/slices/MeetingsSlice";
-import { updateProject } from "@/smartspecs/app-lib/redux/slices/ProjectsSlice";
 import { updateRequirement, createRequirement } from "@/smartspecs/app-lib/redux/slices/RequirementsSlice";
 
 const useAppDispatch = () => useDispatch<AppDispatch>();

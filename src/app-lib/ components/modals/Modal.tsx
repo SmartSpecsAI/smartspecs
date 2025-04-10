@@ -5,6 +5,7 @@ const Modal: React.FC<{
   onClose: () => void;
   children: React.ReactNode;
 }> = ({ isOpen, onClose, children }) => {
+  
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
