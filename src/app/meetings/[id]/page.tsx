@@ -6,6 +6,7 @@ import LoadingSpinner from '@/smartspecs/app-lib/ components/common/LoadingSpinn
 import ErrorMessage from '@/smartspecs/app-lib/ components/messages/ErrorMessage';
 import ConfirmModal from '@/smartspecs/app-lib/ components/modals/ConfirmModal';
 import MeetingForm from '@/smartspecs/app-lib/ components/forms/MeetingForm';
+
 const MeetingDetail: React.FC = () => {
   const {
     isEditing,

@@ -1,10 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { useDispatch } from "react-redux";
-import { AppDispatch } from "@/smartspecs/app-lib/redux/store";
-import { createMeeting, fetchMeetingsByProjectId } from "@/smartspecs/app-lib/redux/slices/MeetingsSlice";
-import { updateRequirement, createRequirement } from "@/smartspecs/app-lib/redux/slices/RequirementsSlice";
-
-const useAppDispatch = () => useDispatch<AppDispatch>();
+import React from "react";
+import { useMeetingForm } from "@/smartspecs/app-lib/hooks/useMeetingForm";
 
 interface MeetingFormProps {
   onCancel: () => void;
@@ -39,122 +34,76 @@ const MeetingForm: React.FC<MeetingFormProps> = ({
   setIsEditing,
   isEditing = false,
 }) => {
-  const dispatch = useAppDispatch();
-  const [meetingTitle, setMeetingTitle] = useState(formData?.title || "");
-  const [meetingDescription, setMeetingDescription] = useState(formData?.description || "");
-  const [meetingTranscription, setMeetingTranscription] = useState(formData?.transcription || "");
-  const [isLoading, setIsLoading] = useState(false);
-
-  useEffect(() => {
-    if (formData) {
-      setMeetingTitle(formData.title);
-      setMeetingDescription(formData.description);
-      setMeetingTranscription(formData.transcription);
-    }
-  }, [formData]);
-
-  const handleCreateMeeting = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-
-    if (isEditing && handleSaveEdit) {
-      await handleSaveEdit();
-      setIsEditing?.(false);
-      setIsLoading(false);
-      return;
-    }
-
-    if (!projectId) return;
-
-    const result = await dispatch(
-      createMeeting({
-        projectId: projectId,
-        projectTitle: projectTitle || "",
-        projectDescription: projectDescription || "",
-        projectClient: projectClient || "",
-        meetingTitle: meetingTitle,
-        meetingDescription: meetingDescription,
-        meetingTranscription: meetingTranscription,
-        requirementsList: requirementsList || [],
-      })
-    );
-
-    if (result.meta.requestStatus === 'fulfilled') {
-      const { updatedRequirementsList, newRequirementsList } = result.payload as any;
-
-      if (updatedRequirementsList && updatedRequirementsList.length > 0) {
-        for (const requirement of updatedRequirementsList) {
-          await dispatch(updateRequirement({
-            id: requirement.id,
-            updatedData: requirement
-          }));
-        }
-      }
-
-      if (newRequirementsList && newRequirementsList.length > 0) {
-        for (const requirement of newRequirementsList) {
-          await dispatch(createRequirement({
-            ...requirement,
-            projectId: projectId
-          }));
-        }
-      }
-    }
-
-    await dispatch(fetchMeetingsByProjectId(projectId));
-    setIsLoading(false);
-    setMeetingTitle("");
-    setMeetingDescription("");
-    setMeetingTranscription("");
-    onSaveSuccess?.();
-    onCancel();
-  };
+  const {
+    meetingTitle,
+    setMeetingTitle,
+    meetingDescription,
+    setMeetingDescription,
+    meetingTranscription,
+    setMeetingTranscription,
+    isLoading,
+    handleCreateMeeting,
+  } = useMeetingForm({
+    formData,
+    projectId,
+    projectTitle,
+    projectDescription,
+    projectClient,
+    requirementsList,
+    isEditing,
+    onSaveSuccess,
+    onCancel,
+    handleSaveEdit,
+    setIsEditing,
+  });
 
   return (
-    <form onSubmit={handleCreateMeeting} className="space-y-4">
-      <div>
-        <label className="block font-semibold mb-1">Título:</label>
+    <form onSubmit={handleCreateMeeting} className="space-y-6 w-full mx-auto p-6 bg-white rounded-lg shadow-lg">
+      <div className="space-y-2">
+        <label className="block text-sm font-medium text-gray-700">Título:</label>
         <input
           type="text"
-          className="border w-full p-2 rounded text-black"
+          className="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-primary focus:border-primary transition-colors duration-200"
           value={isEditing ? formData?.title : meetingTitle}
           onChange={isEditing ? handleChange : (e) => setMeetingTitle(e.target.value)}
           placeholder="Nombre de la reunión"
           required
         />
       </div>
-      <div>
-        <label className="block font-semibold mb-1">Descripción:</label>
+      <div className="space-y-2">
+        <label className="block text-sm font-medium text-gray-700">Descripción:</label>
         <textarea
-          className="border w-full p-2 rounded text-black"
+          className="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-primary focus:border-primary transition-colors duration-200"
           value={isEditing ? formData?.description : meetingDescription}
           onChange={isEditing ? handleChange : (e) => setMeetingDescription(e.target.value)}
           placeholder="Describe brevemente la reunión"
+          rows={3}
         />
       </div>
-      <div>
-        <label className="block font-semibold mb-1">Transcripción:</label>
+      <div className="space-y-2">
+        <label className="block text-sm font-medium text-gray-700">Transcripción:</label>
         <textarea
-          className="border w-full p-2 rounded text-black min-h-[200px]"
+          className="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-primary focus:border-primary transition-colors duration-200"
           value={isEditing ? formData?.transcription : meetingTranscription}
           onChange={isEditing ? handleChange : (e) => setMeetingTranscription(e.target.value)}
           placeholder="Ingresa la transcripción de la reunión"
+          rows={6}
         />
       </div>
-      <div className="flex gap-2">
-        <button
-          type="submit"
-          className="bg-primary text-background px-4 py-2 rounded"
-          disabled={isLoading}
-        >
-          {isLoading ? (isEditing ? "Guardando..." : "Creando...") : (isEditing ? "Guardar" : "Crear")}
-        </button>
+      <div className="flex gap-4 justify-end pt-4">
         <button
           type="button"
           onClick={onCancel}
-          className="bg-gray-500 text-background px-4 py-2 rounded"
+          className="px-6 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-colors duration-200"
         >
           Cancelar
+        </button>
+        <button
+          type="submit"
+          className="px-6 py-2 text-sm font-medium text-white bg-primary rounded-md hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+          disabled={isLoading}
+        >
+          {isLoading ? (isEditing ? "Guardando..." : "Creando...") : (isEditing ? "Guardar" : "Crear")}
         </button>
       </div>
     </form>
