@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "@/smartspecs/app-lib/redux/store";
-import { createProject, updateProject, Project } from "@/smartspecs/app-lib/redux/slices/ProjectsSlice";
-
+import { createProject, updateProject } from "@/smartspecs/app-lib/redux/slices/ProjectsSlice";
+import { Project } from "@/smartspecs/app-lib/interfaces/project";
 const useAppDispatch = () => useDispatch<AppDispatch>();
 
 interface ProjectFormProps {
@@ -17,7 +17,6 @@ const ProjectForm: React.FC<ProjectFormProps> = ({ onCancel, project, onSaveSucc
     title: "",
     client: "",
     description: "",
-    status: "pending",
     createdAt: "",
     updatedAt: "",
   });
@@ -28,7 +27,6 @@ const ProjectForm: React.FC<ProjectFormProps> = ({ onCancel, project, onSaveSucc
         title: project.title,
         client: project.client,
         description: project.description,
-        status: project.status,
         createdAt: project.createdAt,
         updatedAt: project.updatedAt,
       });
@@ -56,11 +54,7 @@ const ProjectForm: React.FC<ProjectFormProps> = ({ onCancel, project, onSaveSucc
       }));
       onSaveSuccess?.("Proyecto actualizado exitosamente");
     } else {
-      dispatch(createProject({
-        ...formData,
-        createdAt: timestamp,
-        updatedAt: timestamp,
-      }));
+      dispatch(createProject(formData));
       onSaveSuccess?.("Proyecto creado exitosamente");
     }
     

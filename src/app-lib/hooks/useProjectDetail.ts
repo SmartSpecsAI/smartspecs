@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { useSelector, TypedUseSelectorHook, useDispatch } from "react-redux";
 import { RootState, AppDispatch } from "@/smartspecs/app-lib/redux/store";
 import {
-  Project,
   getProject,
   deleteProject,
 } from "@/smartspecs/app-lib/redux/slices/ProjectsSlice";
@@ -13,6 +12,7 @@ import {
   fetchRequirementsByProject,
 } from "@/smartspecs/app-lib/redux/slices/RequirementsSlice";
 import { usePathname } from "next/navigation";
+import { Project } from "../interfaces/project";
 
 const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
 const useAppDispatch = () => useDispatch<AppDispatch>();
