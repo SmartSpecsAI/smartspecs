@@ -9,13 +9,10 @@ import {
   getDoc,
   query,
   where,
+  Timestamp,
 } from "firebase/firestore";
-import {
-  getTimestampObject,
-  getUpdatedTimestamp,
-  toISODate,
-} from "@/smartspecs/app-lib/utils/firestoreTimeStamps";
 import { firestore } from "@/smartspecs/lib/config/firebase-settings";
+import { toISODate } from "@/smartspecs/app-lib/utils/firestoreTimeStamps";
 import { Meeting } from "../../interfaces/meeting";
 
 interface MeetingState {
@@ -38,17 +35,18 @@ export const createMeeting = createAsyncThunk(
     { rejectWithValue }
   ) => {
     try {
-      const timestamps = getTimestampObject();
+      const now = Timestamp.now();
       const docRef = await addDoc(collection(firestore, "meetings"), {
         ...newMeeting,
-        ...timestamps,
+        createdAt: now,
+        updatedAt: now,
       });
 
       return {
         id: docRef.id,
         ...newMeeting,
-        createdAt: toISODate(timestamps.createdAt),
-        updatedAt: toISODate(timestamps.updatedAt),
+        createdAt: toISODate(now),
+        updatedAt: toISODate(now),
       } as Meeting;
     } catch (error) {
       console.error("❌ Error al crear la reunión:", error);
@@ -65,10 +63,11 @@ export const updateMeeting = createAsyncThunk(
     { rejectWithValue }
   ) => {
     try {
-      const timestamps = getUpdatedTimestamp();
-      const updateData = { ...updatedData, ...timestamps };
-
-      await updateDoc(doc(firestore, "meetings", id), updateData);
+      const updatedAt = Timestamp.now();
+      await updateDoc(doc(firestore, "meetings", id), {
+        ...updatedData,
+        updatedAt,
+      });
 
       const snap = await getDoc(doc(firestore, "meetings", id));
       const data = snap.data();
@@ -169,7 +168,6 @@ const meetingsSlice = createSlice({
   initialState,
   reducers: {},
   extraReducers: (builder) => {
-    // ===================== CREATE MEETING =====================
     builder
       .addCase(createMeeting.pending, (state) => {
         state.loading = true;
@@ -182,10 +180,8 @@ const meetingsSlice = createSlice({
       .addCase(createMeeting.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
-      });
+      })
 
-    // ===================== GET MEETINGS BY PROJECT =====================
-    builder
       .addCase(getMeetingsByProject.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -197,10 +193,8 @@ const meetingsSlice = createSlice({
       .addCase(getMeetingsByProject.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
-      });
+      })
 
-    // ===================== GET MEETING =====================
-    builder
       .addCase(getMeeting.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -217,10 +211,8 @@ const meetingsSlice = createSlice({
       .addCase(getMeeting.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
-      });
+      })
 
-    // ===================== UPDATE MEETING =====================
-    builder
       .addCase(updateMeeting.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -236,10 +228,8 @@ const meetingsSlice = createSlice({
       .addCase(updateMeeting.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
-      });
+      })
 
-    // ===================== DELETE MEETING =====================
-    builder
       .addCase(deleteMeeting.pending, (state) => {
         state.loading = true;
         state.error = null;

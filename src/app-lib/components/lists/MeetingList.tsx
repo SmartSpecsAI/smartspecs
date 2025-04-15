@@ -7,7 +7,12 @@ interface Props {
 }
 
 const MeetingList: React.FC<Props> = ({ meetings }) => {
-  if (!meetings.length) {
+  // Ordenar las reuniones por fecha de creación (más reciente primero)
+  const sortedMeetings = [...meetings].sort((a, b) => 
+    new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+  );
+
+  if (!sortedMeetings.length) {
     return (
       <div className="text-center p-8 bg-gray-50 rounded-lg border border-gray-200">
         <p className="text-gray-500">No hay reuniones registradas para este proyecto.</p>
@@ -32,7 +37,7 @@ const MeetingList: React.FC<Props> = ({ meetings }) => {
           </tr>
         </thead>
         <tbody className="bg-white divide-y divide-gray-200">
-          {meetings.map((m) => (
+          {sortedMeetings.map((m) => (
             <tr key={m.id} className="hover:bg-gray-50 transition-colors duration-150">
               <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                 {m.title}

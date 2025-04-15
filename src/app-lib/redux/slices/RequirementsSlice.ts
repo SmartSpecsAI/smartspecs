@@ -1,4 +1,3 @@
-// app-lib/redux/slices/requirementsSlice.ts
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import {
   collection,
@@ -10,13 +9,10 @@ import {
   getDoc,
   query,
   where,
+  Timestamp,
 } from "firebase/firestore";
 import { firestore } from "@/smartspecs/lib/config/firebase-settings";
-import {
-  getTimestampObject,
-  getUpdatedTimestamp,
-  toISODate,
-} from "@/smartspecs/app-lib/utils/firestoreTimeStamps";
+import { toISODate } from "@/smartspecs/app-lib/utils/firestoreTimeStamps";
 import { Requirement } from "@/smartspecs/app-lib/interfaces/requirement";
 import { Status } from "@/smartspecs/lib/domain/entities/Status";
 
@@ -37,17 +33,19 @@ export const createRequirement = createAsyncThunk(
   "requirements/createRequirement",
   async (requirement: Omit<Requirement, "id">, { rejectWithValue }) => {
     try {
+      const timestamp = Timestamp.now();
+
       const docRef = await addDoc(collection(firestore, "requirements"), {
         ...requirement,
-        createdAt: getTimestampObject(),
-        updatedAt: getTimestampObject(),
+        createdAt: timestamp,
+        updatedAt: timestamp,
       });
 
       return {
         id: docRef.id,
         ...requirement,
-        createdAt: toISODate(getTimestampObject()),
-        updatedAt: toISODate(getTimestampObject()),
+        createdAt: toISODate(timestamp),
+        updatedAt: toISODate(timestamp),
       } as Requirement;
     } catch (error) {
       console.error("Error creating requirement:", error);
@@ -65,9 +63,11 @@ export const updateRequirement = createAsyncThunk(
   ) => {
     try {
       const docRef = doc(firestore, "requirements", id);
+      const timestamp = Timestamp.now();
+
       await updateDoc(docRef, {
         ...updatedData,
-        updatedAt: getUpdatedTimestamp(),
+        updatedAt: timestamp,
       });
 
       const snap = await getDoc(docRef);
