@@ -7,12 +7,9 @@ import {
   deleteDoc,
   doc,
   getDoc,
+  Timestamp,
 } from "firebase/firestore";
-import {
-  getTimestampObject,
-  getUpdatedTimestamp,
-  toISODate,
-} from "@/smartspecs/app-lib/utils/firestoreTimeStamps";
+import { toISODate } from "@/smartspecs/app-lib/utils/firestoreTimeStamps";
 import { firestore } from "@/smartspecs/lib/config/firebase-settings";
 
 export interface Project {
@@ -44,17 +41,18 @@ export const createProject = createAsyncThunk(
     { rejectWithValue }
   ) => {
     try {
-      const timestamps = getTimestampObject();
+      const now = Timestamp.now();
       const docRef = await addDoc(collection(firestore, "projects"), {
         ...newProject,
-        ...timestamps,
+        createdAt: now,
+        updatedAt: now,
       });
 
       return {
         id: docRef.id,
         ...newProject,
-        createdAt: toISODate(timestamps.createdAt),
-        updatedAt: toISODate(timestamps.updatedAt),
+        createdAt: toISODate(now),
+        updatedAt: toISODate(now),
       };
     } catch (error) {
       console.error("Error al crear el proyecto:", error);
@@ -71,11 +69,13 @@ export const updateProject = createAsyncThunk(
     { rejectWithValue }
   ) => {
     try {
-      const timestamp = getUpdatedTimestamp();
-      const updateData = { ...updatedData, ...timestamp };
+      const updatedAt = Timestamp.now();
 
       const projectRef = doc(firestore, "projects", id);
-      await updateDoc(projectRef, updateData);
+      await updateDoc(projectRef, {
+        ...updatedData,
+        updatedAt,
+      });
 
       const updatedSnapshot = await getDoc(projectRef);
       const data = updatedSnapshot.data();
