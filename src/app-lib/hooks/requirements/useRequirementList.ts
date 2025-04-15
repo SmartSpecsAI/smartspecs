@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { deleteRequirement, updateRequirement } from '@/smartspecs/app-lib/redux/slices/RequirementsSlice';
-import { useAppDispatch } from './useAppDispatch';
+import { useAppDispatch } from '@/smartspecs/app-lib/hooks/useAppDispatch';
 import { Requirement, Status, Priority } from '@/smartspecs/app-lib/interfaces/requirement';
 
 export const useRequirementList = () => {

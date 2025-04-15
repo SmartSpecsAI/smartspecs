@@ -20,6 +20,7 @@
     "cohere-ai": "^7.16.0",
     "dotenv": "^16.4.7",
     "firebase": "^11.1.0",
+    "framer-motion": "^12.7.3",
     "graphql-request": "^7.1.2",
     "html-react-parser": "^5.2.2",
     "langchain": "^0.3.19",
