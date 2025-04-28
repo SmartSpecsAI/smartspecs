@@ -1,5 +1,3 @@
-// src/app-lib/utils/difyProcessor.ts
-
 import { AppDispatch } from "@/smartspecs/app-lib/redux/store";
 import { callDifyWorkflow } from "@/smartspecs/app-lib/utils/difyClient";
 import {
@@ -14,6 +12,7 @@ import {
 } from "@/smartspecs/app-lib/interfaces/requirement";
 import {
   doc,
+  getDoc,
   setDoc,
   collection,
   Timestamp,
@@ -32,6 +31,7 @@ interface HistoryItem {
   changedBy: string;
   origin: string;
   changedAt: string;
+  reason?: string;
   fields: HistoryFields;
 }
 
@@ -86,17 +86,24 @@ export async function processDifyWorkflow({
     const updatedRequirementsList = wfResp?.updatedRequirementsList ?? [];
     const newRequirementsList = wfResp?.newRequirementsList ?? [];
 
-    // 1. Actualizar requerimientos existentes y guardar historial
+    // 1. Actualizar requerimientos existentes
     for (const item of updatedRequirementsList) {
       const updated = item.updated;
       const history = item.history;
 
-      if (!updated.id) {
-        console.warn("⚠️ Requerimiento actualizado sin ID:", updated);
+      if (!updated?.id) {
+        console.warn("⚠️ Requerimiento actualizado sin ID válido:", updated);
         continue;
       }
 
-      // A. Actualizar el requerimiento
+      const docRef = doc(firestore, "requirements", updated.id);
+      const snap = await getDoc(docRef);
+      if (!snap.exists()) {
+        console.warn(`🚫 ID recibido de Dify no existe en Firestore: ${updated.id}`);
+        continue;
+      }
+
+      // A. Actualizar en Firestore usando dispatch
       await dispatch(
         updateRequirement({
           id: updated.id,
@@ -105,15 +112,15 @@ export async function processDifyWorkflow({
             description: updated.description,
             priority: updated.priority,
             status: updated.status,
+            responsible: updated.responsible ?? "",
+            reason: updated.reason ?? "",
+            origin: updated.origin ?? "Dify",
           },
         })
       );
 
       // B. Guardar historial
-      const historyRef = doc(
-        collection(firestore, "requirements", updated.id, "history")
-      );
-
+      const historyRef = doc(collection(firestore, "requirements", updated.id, "history"));
       await setDoc(historyRef, {
         ...history,
         changedAt: Timestamp.now(),
@@ -127,19 +134,24 @@ export async function processDifyWorkflow({
         continue;
       }
 
+      const { id: _ignore, ...cleanedReq } = req;
+
       await dispatch(
         createRequirement({
           projectId,
-          title: req.title,
-          description: req.description,
-          priority: req.priority ?? Priority.MEDIUM,
-          status: req.status ?? Status.PENDING,
+          title: cleanedReq.title,
+          description: cleanedReq.description,
+          priority: cleanedReq.priority ?? Priority.MEDIUM,
+          status: cleanedReq.status ?? Status.PENDING,
+          responsible: cleanedReq.responsible ?? "",
+          reason: cleanedReq.reason ?? "",
+          origin: cleanedReq.origin ?? "Dify",
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
         })
       );
     }
-  } catch (error) {
-    console.error("❌ Error en processDifyWorkflow:", error);
+  } catch (err) {
+    console.error("❌ Error en processDifyWorkflow:", err);
   }
 }

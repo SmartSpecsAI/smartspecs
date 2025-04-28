@@ -12,11 +12,14 @@ export enum Priority {
 
 export interface Requirement {
     id: string;
+    projectId: string;
     title: string;
     description: string;
     priority: Priority;
     status: Status;
+    responsible?: string;   // ✅ nuevo
+    reason?: string;        // ✅ nuevo
+    origin?: string;        // ✅ nuevo
     createdAt: string;
     updatedAt: string;
-    projectId: string;
 }

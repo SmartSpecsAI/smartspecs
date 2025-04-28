@@ -71,7 +71,12 @@ export async function callDifyWorkflow(
 function parseJSONSafely(input: string | any): any[] {
   if (typeof input !== "string") return Array.isArray(input) ? input : [];
   try {
-    const parsed = JSON.parse(input);
+    const cleanInput = input
+      .trim()
+      .replace(/^```json/, "")  // 🔥 Elimina si empieza con ```json
+      .replace(/```$/, "")      // 🔥 Elimina si termina con ```
+      .trim();
+    const parsed = JSON.parse(cleanInput);
     return Array.isArray(parsed) ? parsed : [];
   } catch (err) {
     console.warn("⚠️ Error parsing JSON string:", input);
