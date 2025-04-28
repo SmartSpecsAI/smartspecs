@@ -37,6 +37,9 @@ export const createRequirement = createAsyncThunk(
 
       const docRef = await addDoc(collection(firestore, "requirements"), {
         ...requirement,
+        responsible: requirement.responsible ?? "",
+        reason: requirement.reason ?? "",
+        origin: requirement.origin ?? "Dify",
         createdAt: timestamp,
         updatedAt: timestamp,
       });
@@ -44,6 +47,9 @@ export const createRequirement = createAsyncThunk(
       return {
         id: docRef.id,
         ...requirement,
+        responsible: requirement.responsible ?? "",
+        reason: requirement.reason ?? "",
+        origin: requirement.origin ?? "Dify",
         createdAt: toISODate(timestamp),
         updatedAt: toISODate(timestamp),
       } as Requirement;
@@ -83,6 +89,9 @@ export const updateRequirement = createAsyncThunk(
         description: data.description || "",
         priority: data.priority || "medium",
         status: data.status || Status.IN_PROGRESS,
+        responsible: data.responsible || "",
+        reason: data.reason || "",
+        origin: data.origin || "Dify",
         createdAt: toISODate(data.createdAt),
         updatedAt: toISODate(data.updatedAt),
       } as Requirement;
@@ -126,6 +135,9 @@ export const getRequirement = createAsyncThunk(
         description: data.description || "",
         priority: data.priority || "medium",
         status: data.status || "pending",
+        responsible: data.responsible || "",
+        reason: data.reason || "",
+        origin: data.origin || "Dify",
         createdAt: toISODate(data.createdAt),
         updatedAt: toISODate(data.updatedAt),
       } as Requirement;
@@ -157,6 +169,9 @@ export const getRequirementsByProject = createAsyncThunk(
           description: data.description || "",
           priority: data.priority || "medium",
           status: data.status || Status.IN_PROGRESS,
+          responsible: data.responsible || "",
+          reason: data.reason || "",
+          origin: data.origin || "Dify",
           createdAt: toISODate(data.createdAt),
           updatedAt: toISODate(data.updatedAt),
         } as Requirement;
