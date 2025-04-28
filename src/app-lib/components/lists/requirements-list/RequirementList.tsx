@@ -51,12 +51,15 @@ const RequirementList: React.FC<RequirementListProps> = ({ requirements }) => {
       <table className="min-w-full divide-y divide-gray-100">
         <thead className="bg-gray-50">
           <tr>
-            <th className="w-12 px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">#</th>
-            <th className="w-1/4 px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Título</th>
-            <th className="w-2/5 px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Descripción</th>
-            <th className="w-24 px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Prioridad</th>
-            <th className="w-24 px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Estado</th>
-            <th className="w-20 px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Acciones</th>
+            <th className="w-12 px-2 py-3 text-center text-xs font-semibold text-gray-600 uppercase">#</th>
+            <th className="px-2 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Título</th>
+            <th className="px-2 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Descripción</th>
+            <th className="px-2 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Prioridad</th>
+            <th className="px-2 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Estado</th>
+            <th className="px-2 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Responsable</th>
+            <th className="px-2 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Origen</th>
+            <th className="px-2 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Razón</th>
+            <th className="px-2 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Acciones</th>
           </tr>
         </thead>
         <tbody className="bg-white divide-y divide-gray-100">
@@ -78,8 +81,9 @@ const RequirementList: React.FC<RequirementListProps> = ({ requirements }) => {
                 onDeleteClick={() => handleDeleteClick(requirement.id)}
               />
 
+              {/* Botón Ver Historial */}
               <tr className="bg-gray-50/50">
-                <td colSpan={6} className="px-4 py-2 text-right">
+                <td colSpan={9} className="px-4 py-2 text-right">
                   <button
                     className="inline-flex items-center text-sm text-blue-600 hover:text-blue-700 font-medium transition-all duration-200 ease-in-out hover:scale-105 active:scale-95"
                     onClick={() => toggleExpand(requirement.id)}
@@ -105,7 +109,7 @@ const RequirementList: React.FC<RequirementListProps> = ({ requirements }) => {
 
               {expandedId === requirement.id && (
                 <tr className="bg-white">
-                  <td colSpan={6} className="px-4 pb-4">
+                  <td colSpan={9} className="px-4 pb-4">
                     <div className="mt-2 bg-gray-50/50 rounded-lg p-4 transition-all duration-300 ease-in-out">
                       <RequirementHistory histories={histories[requirement.id] || []} />
                     </div>
@@ -117,6 +121,7 @@ const RequirementList: React.FC<RequirementListProps> = ({ requirements }) => {
         </tbody>
       </table>
 
+      {/* Modal Confirmación de Eliminar */}
       <ConfirmModal
         isOpen={showDeleteModal}
         onClose={cancelDelete}
