@@ -1,11 +1,13 @@
+import { Requirement } from "@/smartspecs/app-lib/interfaces/requirement";
+
 /**
  * Lanza el workflow de Dify con toda la info del proyecto y la reunión.
- * Se comunica con /api/workflow (API interna del backend Next.js).
  * 
- * Devuelve: {
- *   updatedRequirementsList: Requirement[],
- *   newRequirementsList: Requirement[],
- * }
+ * Devuelve:
+ *   {
+ *     updatedRequirementsList: Requirement[],
+ *     newRequirementsList: Requirement[],
+ *   }
  */
 export async function callDifyWorkflow(
   projectId: string,
@@ -16,13 +18,12 @@ export async function callDifyWorkflow(
   meetingTitle: string,
   meetingDescription: string,
   meetingTranscription: string,
-  requirementsList: object[]
+  requirementsList: Requirement[]
 ): Promise<{
-  updatedRequirementsList: object[];
-  newRequirementsList: object[];
+  updatedRequirementsList: Requirement[];
+  newRequirementsList: Requirement[];
 }> {
   try {
-    // 🧠 Preparamos el payload
     const payload: any = {
       user: projectClient || "frontend-app",
       inputs: {
@@ -34,11 +35,12 @@ export async function callDifyWorkflow(
         meeting_title: meetingTitle,
         meeting_description: meetingDescription,
         meeting_transcription: meetingTranscription,
-        requirements_list: JSON.stringify(requirementsList),
+        requirements_list: requirementsList.length > 0
+          ? JSON.stringify(requirementsList)
+          : "[]",  // <- Esto garantiza siempre enviar un array válido
       },
     };
 
-    // 🚀 Llamamos al endpoint local
     const res = await fetch("/api/workflow", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -65,18 +67,17 @@ export async function callDifyWorkflow(
   }
 }
 
-/**
- * Parsea un string JSON de forma segura y devuelve un array.
- */
 function parseJSONSafely(input: string | any): any[] {
   if (typeof input !== "string") return Array.isArray(input) ? input : [];
+
   try {
-    const cleanInput = input
-      .trim()
-      .replace(/^```json/, "")  // 🔥 Elimina si empieza con ```json
-      .replace(/```$/, "")      // 🔥 Elimina si termina con ```
+    // Limpiar el string: quitar posibles ```json, ``` y saltos innecesarios
+    const cleanedInput = input
+      .replace(/```json/g, "")
+      .replace(/```/g, "")
       .trim();
-    const parsed = JSON.parse(cleanInput);
+
+    const parsed = JSON.parse(cleanedInput);
     return Array.isArray(parsed) ? parsed : [];
   } catch (err) {
     console.warn("⚠️ Error parsing JSON string:", input);
