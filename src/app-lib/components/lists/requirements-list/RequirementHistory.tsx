@@ -26,28 +26,41 @@ const RequirementHistory: React.FC<RequirementHistoryProps> = ({ histories }) =>
                                 <span className="font-semibold">{entry.changedBy ?? "Desconocido"}</span>
                             </p>
                             <p className="text-xs text-gray-500">
-                                {new Date(entry.changedAt?.seconds * 1000).toLocaleString()}
+                                {entry.changedAt?.seconds ? new Date(entry.changedAt.seconds * 1000).toLocaleString() : ""}
                             </p>
                         </div>
+
                         <ul className="space-y-2">
-                            {Object.entries(entry.fields || {}).map(
-                                ([field, { oldValue, newValue }]: any) => (
-                                    <li 
-                                        key={field} 
+                            {(entry.fields || []).map((fieldChange: any, idx: number) => {
+                                const { field, previousValue, newValue } = fieldChange;
+
+                                // Definir estilos por tipo de campo
+                                let colorClasses = "text-gray-700"; // Default
+                                if (field === "status") colorClasses = "text-blue-600 font-semibold";
+                                if (field === "priority") colorClasses = "text-red-500 font-semibold";
+                                if (field === "responsible") colorClasses = "text-green-600 font-semibold";
+
+                                return (
+                                    <li
+                                        key={idx}
                                         className="flex items-start transition-all duration-200 ease-in-out hover:bg-gray-50 rounded-md p-1"
                                     >
                                         <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-gray-100 text-gray-600 text-xs mr-2 mt-0.5">
                                             →
                                         </span>
                                         <div>
-                                            <span className="text-sm font-medium text-gray-700">{field}:</span>{" "}
-                                            <span className="text-sm line-through text-red-400">{oldValue}</span>{" "}
-                                            <span className="text-sm text-green-600">{newValue}</span>
+                                            <span className={`${colorClasses} text-sm capitalize`}>
+                                                {field}
+                                            </span>:&nbsp;
+                                            <span className="text-sm line-through text-red-400">{previousValue}</span>{" "}
+                                            →
+                                            <span className="text-sm text-green-600 ml-1">{newValue}</span>
                                         </div>
                                     </li>
-                                )
-                            )}
+                                );
+                            })}
                         </ul>
+
                         {entry.reason && (
                             <div className="mt-3 p-2 bg-blue-50 rounded-md transition-all duration-200 ease-in-out hover:bg-blue-100">
                                 <p className="text-sm text-blue-700 flex items-center">

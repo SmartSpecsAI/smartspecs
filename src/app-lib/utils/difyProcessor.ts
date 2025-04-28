@@ -1,11 +1,12 @@
-import { callDifyWorkflow } from "./difyClient";
-import { updateRequirement, createRequirement } from "@/smartspecs/app-lib/redux/slices/RequirementsSlice";
 import { AppDispatch } from "@/smartspecs/app-lib/redux/store";
-import { Requirement } from "@/smartspecs/app-lib/interfaces/requirement";
+import { callDifyWorkflow } from "@/smartspecs/app-lib/utils/difyClient";
+import { createRequirement, updateRequirement } from "@/smartspecs/app-lib/redux/slices/RequirementsSlice";
+import { firestore } from "@/smartspecs/lib/config/firebase-settings";
+import { Priority, Requirement, Status } from "@/smartspecs/app-lib/interfaces/requirement";
+import { doc, getDoc, setDoc, collection, Timestamp } from "firebase/firestore";
 
 interface ProcessDifyParams {
   dispatch: AppDispatch;
-  getState: any;
   projectId: string;
   meetingId: string;
   projectTitle: string;
@@ -15,6 +16,18 @@ interface ProcessDifyParams {
   meetingDescription: string;
   meetingTranscription: string;
   requirementsList: Requirement[];
+}
+
+function mapStatus(value: string): Status {
+  switch (value) {
+    case "in_progress":
+      return Status.IN_PROGRESS;
+    case "done":
+      return Status.DONE;
+    case "pending":
+    default:
+      return Status.PENDING;
+  }
 }
 
 export async function processDifyWorkflow({
@@ -45,12 +58,27 @@ export async function processDifyWorkflow({
     const updatedRequirementsList = wfResp?.updatedRequirementsList ?? [];
     const newRequirementsList = wfResp?.newRequirementsList ?? [];
 
-    // 1. Actualizar requerimientos existentes
     for (const updated of updatedRequirementsList) {
-      if (!updated.id) {
-        console.warn("⚠️ Requerimiento actualizado sin ID:", updated);
+      const docRef = doc(firestore, "requirements", updated.id);
+      const snap = await getDoc(docRef);
+
+      if (!snap.exists()) {
+        console.warn(`🚫 ID no encontrado en Firestore: ${updated.id}`);
         continue;
       }
+
+      const previousData = snap.data();
+      const previousState = {
+        id: snap.id,
+        projectId: previousData?.projectId || "",
+        title: previousData?.title || "",
+        description: previousData?.description || "",
+        priority: previousData?.priority || Priority.MEDIUM,
+        status: previousData?.status || Status.PENDING,
+        responsible: previousData?.responsible || "",
+        createdAt: previousData?.createdAt?.toDate().toISOString() || "",
+        updatedAt: previousData?.updatedAt?.toDate().toISOString() || "",
+      };
 
       await dispatch(
         updateRequirement({
@@ -58,18 +86,37 @@ export async function processDifyWorkflow({
           updatedData: {
             title: updated.title,
             description: updated.description,
-            priority: updated.priority,
-            status: updated.status,
-            responsible: (updated as any).responsible || "",
-            origin: (updated as any).origin || "Dify",
-            reason: (updated as any).reason || "",
+            priority: updated.priority as Priority,
+            status: mapStatus(updated.status),
+            responsible: updated.responsible || "",
+            origin: updated.origin || "Dify",
+            reason: updated.reason || "",
             updatedAt: new Date().toISOString(),
           },
         })
       );
+
+      const historyRef = doc(collection(firestore, "requirements", updated.id, "history"));
+      await setDoc(historyRef, {
+        changedAt: Timestamp.now(),
+        meetingId,
+        origin: updated.origin || "Dify",
+        reason: updated.reason || "",
+        previousState,
+        newState: {
+          id: updated.id,
+          projectId: updated.projectId,
+          title: updated.title,
+          description: updated.description,
+          priority: updated.priority,
+          status: updated.status,
+          responsible: updated.responsible || "",
+          createdAt: updated.createdAt,
+          updatedAt: updated.updatedAt,
+        },
+      });
     }
 
-    // 2. Crear nuevos requerimientos
     for (const req of newRequirementsList) {
       if (!req.title || !req.description) {
         console.warn("⚠️ Requerimiento nuevo incompleto:", req);
@@ -81,9 +128,11 @@ export async function processDifyWorkflow({
           projectId,
           title: req.title,
           description: req.description,
-          priority: req.priority ?? "medium",
-          status: req.status ?? "pending",
-          responsible: (req as any).responsible || "",
+          priority: req.priority ?? Priority.MEDIUM,
+          status: mapStatus(req.status),
+          responsible: req.responsible || "",
+          origin: req.origin || "Dify",
+          reason: req.reason || "",
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
         })
