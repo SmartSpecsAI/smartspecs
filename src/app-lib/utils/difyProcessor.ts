@@ -98,6 +98,8 @@ export async function processDifyWorkflow({
 
       const historyRef = doc(collection(firestore, "requirements", updated.id, "history"));
       await setDoc(historyRef, {
+        id: historyRef.id, // (opcional pero útil si querés guardar también el ID del historial)
+        requirementId: updated.id, // ⬅️ Esta es la línea clave
         changedAt: Timestamp.now(),
         meetingId,
         origin: updated.origin || "Dify",
