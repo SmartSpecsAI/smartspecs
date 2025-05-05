@@ -21,22 +21,22 @@ export const useMeetingDetail = () => {
     (state: RootState) => state.meetings
   );
 
-  // Buscamos la reunión en el store
+  // Search the meeting in the store
   const meeting = meetings.find((m) => m.id === meetingId);
 
-  // Si no está en el store, la cargamos
+  // If the meeting is not in the store, we load it
   useEffect(() => {
     if (meetingId && !meeting) {
       dispatch(getMeeting(meetingId));
     }
   }, [meetingId, meeting, dispatch]);
 
-  // Manejo de eliminar la reunión
+  // Handle delete the meeting
   const handleConfirmDelete = async () => {
     if (!meeting) return;
     await dispatch(deleteMeeting(meeting.id));
     setShowDeleteModal(false);
-    router.push("/projects"); // Redirige luego de eliminar
+    router.push("/projects"); // Redirect after deleting
   };
 
   return {
