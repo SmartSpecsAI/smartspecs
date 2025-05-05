@@ -17,9 +17,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <AppLayout>
-          <MultiProvider>{children}</MultiProvider>{" "}
-        </AppLayout>
+        <MultiProvider>
+          <AppLayout>{children}</AppLayout>
+        </MultiProvider>
       </body>
     </html>
   );

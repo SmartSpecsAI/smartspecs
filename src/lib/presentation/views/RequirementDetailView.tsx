@@ -1,96 +1,30 @@
 "use client";
-import { useState, useEffect, useRef } from "react";
-import {
-  Card,
-  Button,
-  Typography,
-  Space,
-  Skeleton,
-  Tag,
-  Row,
-  Col,
-  List,
-  Input,
-} from "antd";
+import { Card, Button, Typography, Space, Skeleton, Tag, Row, Col, List, Input } from "antd";
 import parse from "html-react-parser";
 import { CheckOutlined, EditOutlined, SaveOutlined } from "@ant-design/icons";
-import { useParams } from "next/navigation";
-import { useRequirementsData } from "@/smartspecs/lib/presentation";
-import {
-  colorByStatus,
-  Requirement,
-  RequirementItem,
-} from "@/smartspecs/lib/domain";
-
+import { useRequirementDetail } from "../../hooks/useRequirementDetail";
+import { StatusTag } from '../components/common/StatusTag';
+import { DetailCard } from "../components/common/DetailCard";
+import { StandardButton } from "../components/common/StandardButton";
+import { IconButton } from "../components/common/IconButton";
+import ExportPrdButton from "../components/components/PrdPdf/PrdButton";
 const { Title, Paragraph } = Typography;
 
 export function RequirementDetailView() {
-  const params = useParams();
-  const [isEditMode, setIsEditMode] = useState(false);
   const {
-    getRequirementById,
-    updateRequirement,
-    approveRequirement,
-    rejectRequirement,
+    isEditMode,
+    requirement,
+    editedItems,
+    editedDescription,
+    setEditedDescription,
     isLoading,
     error,
-  } = useRequirementsData();
-  const [requirement, setRequirement] = useState<Requirement | null>(null);
-  const [editedItems, setEditedItems] = useState<RequirementItem[]>([]);
-  const [editedDescription, setEditedDescription] = useState<string>("");
-
-  useEffect(() => {
-    const fetchRequirement = async () => {
-      if (params.slug) {
-        const data = await getRequirementById(params.slug as string);
-        setRequirement(data);
-        setEditedDescription(data?.description || "");
-        setEditedItems(data?.items || []);
-      }
-    };
-    fetchRequirement();
-  }, [params.slug]);
-
-  const handleEditToggle = async () => {
-    if (isEditMode) {
-      const updatedRequirement: Requirement = {
-        ...requirement!,
-        description: editedDescription,
-        items: editedItems,
-      };
-      setRequirement(updatedRequirement);
-      await updateRequirement(updatedRequirement);
-    }
-    setIsEditMode(!isEditMode);
-  };
-
-  const handleItemChange = (index: number, field: string, value: string) => {
-    const newItems = [...editedItems];
-    newItems[index] = { ...newItems[index], [field]: value };
-    setEditedItems(newItems);
-  };
-
-  const handleActionItemChange = (
-    itemIndex: number,
-    actionIndex: number,
-    value: string
-  ) => {
-    const newItems = [...editedItems];
-    newItems[itemIndex].action_items[actionIndex] = value;
-    setEditedItems(newItems);
-  };
-
-  const handleApprove = async () => {
-    const updatedRequirement = await approveRequirement(requirement!.id);
-    if (!updatedRequirement) return;
-    setRequirement(updatedRequirement);
-  };
-
-  const handleReject = async () => {
-    const updatedRequirement = await rejectRequirement(requirement!.id);
-    if (!updatedRequirement) return;
-    setRequirement(updatedRequirement);
-  };
+    handleEditToggle,
+    handleItemChange,
+    handleActionItemChange,
+    handleApprove,
+    handleReject,
+  } = useRequirementDetail();
 
   if (isLoading) {
     return (
@@ -128,62 +62,52 @@ export function RequirementDetailView() {
   return (
     <div className="p-1">
       <Card
-        className="card shadow-sm hover:shadow-md transition-shadow duration-300"
+        className="card shadow-sm hover:shadow-md transition-shadow duration-300 bg-white dark:bg-background"
         title={
           <Row justify="space-between" align="middle">
             <Col>
-              <Title level={3} style={{ margin: 0 }}>
+              <Title level={3} style={{ margin: 0, color: '#1890ff' }}>
                 {requirement.title}
               </Title>
             </Col>
             <Col>
               <Space className="mr-4">
-                <Button
+                <IconButton
                   type={isEditMode ? "primary" : "default"}
                   icon={isEditMode ? <SaveOutlined /> : <EditOutlined />}
                   onClick={handleEditToggle}
-                  className="hover:scale-105 transition-transform duration-200"
-                >
-                  <p className="inline ms-2">
-                    {isEditMode ? "Save Changes" : "Edit"}
-                  </p>
-                </Button>
+                  label={isEditMode ? "Save Changes" : "Edit"}
+                />
                 {requirement.status === "approved" ? (
-                  <Button
-                    type="primary"
+                  <StandardButton
+                    buttonVariant="primary"
                     onClick={handleReject}
-                    className="hover:scale-105 transition-transform duration-200"
                     danger
                   >
                     Reject
-                  </Button>
+                  </StandardButton>
                 ) : requirement.status === "rejected" ? (
-                  <Button
-                    type="primary"
+                  <StandardButton
+                    buttonVariant="primary" 
                     onClick={handleApprove}
-                    className="hover:scale-105 transition-transform duration-200"
-                    danger={false}
                   >
                     Approve
-                  </Button>
+                  </StandardButton>
                 ) : (
                   <>
-                    <Button
-                      type="primary"
+                    <StandardButton
+                      buttonVariant="primary"
                       onClick={handleApprove}
-                      className="hover:scale-105 transition-transform duration-200"
-                      danger={false}
                     >
                       Approve
-                    </Button>
-                    <Button
-                      type="primary"
+                    </StandardButton>
+                    <StandardButton
+                      buttonVariant="primary"
                       onClick={handleReject}
-                      className="hover:scale-105 transition-transform duration-200"
                       danger
                     >
                       Reject
-                    </Button>
+                    </StandardButton>
                   </>
                 )}
               </Space>
@@ -193,10 +117,7 @@ export function RequirementDetailView() {
       >
         <Row gutter={[24, 24]}>
           <Col className="!flex flex-col gap-2" xs={24} lg={16}>
-            <Card className="card bg-gray-50 border !p-0">
-              <Title level={5} className="text-gray-700">
-                Description
-              </Title>
+            <DetailCard title="Description">
               {isEditMode ? (
                 <Input.TextArea
                   value={editedDescription}
@@ -208,44 +129,37 @@ export function RequirementDetailView() {
                   {requirement.description}
                 </Paragraph>
               )}
-            </Card>
+            </DetailCard>
 
             {requirement.transcription && (
-              <Card className="card bg-gray-50 border">
-                <Title level={5} className="text-gray-700">
-                  Transcription
-                </Title>
+              <DetailCard title="Transcription">
                 <Paragraph className="bg-white p-4 rounded border text-base leading-relaxed max-h-[250px] overflow-y-auto">
                   {parse(requirement.transcription ?? "")}
                 </Paragraph>
-              </Card>
+              </DetailCard>
             )}
           </Col>
           <Col xs={24} lg={8}>
-            <Card className="card bg-gray-50 border">
+            <DetailCard title="Client Representative">
               <Space direction="vertical" className="w-full" size="large">
                 <div>
-                  <Title level={5} className="text-gray-700">
-                    Client Representative
-                  </Title>
                   <Paragraph className="bg-white p-2 rounded border m-0">
                     {requirement.clientRepName}
                   </Paragraph>
                 </div>
                 <div>
-                  <Title level={5} className="text-gray-700">
+                  <Title level={5} className="text-text">
                     Status
                   </Title>
-                  <Tag
-                    color={colorByStatus(requirement.status)}
+                  <StatusTag
+                    type="status"
+                    value={requirement.status}
                     className="text-lg px-4 py-1"
-                  >
-                    {requirement.status.replace("_", " ").toUpperCase()}
-                  </Tag>
+                  />
                 </div>
 
                 <div>
-                  <Title level={5} className="text-gray-700">
+                  <Title level={5} className="text-text">
                     Audio Recording
                   </Title>
                   <audio
@@ -255,13 +169,10 @@ export function RequirementDetailView() {
                   />
                 </div>
               </Space>
-            </Card>
+            </DetailCard>
           </Col>
         </Row>
-        <Card className="card bg-gray-50 border mt-2">
-          <Title level={5} className="text-gray-700">
-            Requirement Items
-          </Title>
+        <DetailCard title="Requirement Items" className="mt-2">
           <List
             dataSource={editedItems}
             renderItem={(item, index) => (
@@ -269,7 +180,7 @@ export function RequirementDetailView() {
                 <Card className="w-full bg-gray-50 border p-2">
                   <Space direction="vertical" size="small" className="w-full">
                     <div>
-                      <Title level={5} className="text-gray-700 m-0">
+                      <Title level={5} className="text-text m-0">
                         {item.name}
                       </Title>
                       <Paragraph className="m-0 text-sm text-gray-500">
@@ -277,7 +188,7 @@ export function RequirementDetailView() {
                       </Paragraph>
                     </div>
                     <div>
-                      <Title level={5} className="text-gray-700 m-0">
+                      <Title level={5} className="text-text m-0">
                         Description
                       </Title>
                       {isEditMode ? (
@@ -293,36 +204,17 @@ export function RequirementDetailView() {
                       )}
                     </div>
                     <div>
-                      <Title level={5} className="text-gray-700 m-0">
+                      <Title level={5} className="text-text m-0">
                         Type, Estimation Time & Priority
                       </Title>
                       <Space className="mt-2">
-                        <Tag color="blue" className="m-0">
-                          {item.type
-                            .replace("_", " ")
-                            .replace(/\b\w/g, (l) => l.toUpperCase())}
-                        </Tag>
-                        <Tag color="green" className="m-0">
-                          {item.estimated_time}
-                        </Tag>
-                        <Tag
-                          color={
-                            item.priority === "high"
-                              ? "red"
-                              : item.priority === "medium"
-                              ? "orange"
-                              : "yellow"
-                          }
-                          className="m-0"
-                        >
-                          {item.priority.replace(/\b\w/g, (l) =>
-                            l.toUpperCase()
-                          )}
-                        </Tag>
+                        <StatusTag type="itemType" value={item.type} />
+                        <StatusTag type="estimatedTime" value={item.estimated_time} />
+                        <StatusTag type="priority" value={item.priority} />
                       </Space>
                     </div>
                     <div>
-                      <Title level={5} className="text-gray-700 m-0">
+                      <Title level={5} className="text-text m-0">
                         Action Items
                       </Title>
                       {isEditMode ? (
@@ -367,8 +259,9 @@ export function RequirementDetailView() {
               </List.Item>
             )}
           />
-        </Card>
+        </DetailCard>
       </Card>
+      <ExportPrdButton />
     </div>
   );
 }

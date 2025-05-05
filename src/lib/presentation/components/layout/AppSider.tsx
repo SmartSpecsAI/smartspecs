@@ -1,66 +1,67 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import { Layout, Menu } from "antd";
-import type { MenuProps } from "antd";
 import {
-  FileDoneOutlined,
-  HeartFilled,
   MenuFoldOutlined,
   MenuUnfoldOutlined,
 } from "@ant-design/icons";
-import { useRouter, usePathname } from "next/navigation";
+import SmartSpecsIsotype from "@/smartspecs/assets/images/brand/smartspecs-isotype.svg";
+import SmartSpecsIsotypeDark from "@/smartspecs/assets/images/brand/smartspecs-isotype-dark.svg";
+import Image from "next/image";
+import useTheme from "../../hooks/useTheme";
 
 const { Sider } = Layout;
 
-export const AppSider: React.FC = () => {
-  const [collapsed, setCollapsed] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
-  const router = useRouter();
-  const pathname = usePathname();
+interface AppSiderProps {
+  collapsed: boolean;
+  setCollapsed: React.Dispatch<React.SetStateAction<boolean>>;
+  selectedKeys: string[];
+  menuItems: any[];
+}
+
+export const AppSider: React.FC<AppSiderProps> = ({ collapsed, setCollapsed, selectedKeys, menuItems }) => {
+  const { theme } = useTheme();
 
   useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth <= 992); // lg breakpoint is 992px
-    };
+    console.log(theme);
+  }, [theme]);
 
-    checkMobile();
-    window.addEventListener("resize", checkMobile);
-
-    return () => window.removeEventListener("resize", checkMobile);
-  }, []);
-
-  const menuItems: MenuProps["items"] = [
-    {
-      key: "smartspecs",
-      icon: <FileDoneOutlined />,
-      label: "SmartSpecs",
-      onClick: () => router.push("/smartspecs"),
-    },
-  ];
+  const toggle = () => {
+    setCollapsed(!collapsed);
+  };
 
   return (
     <Sider
-      width={260}
+      trigger={null}
       collapsible
-      collapsedWidth={isMobile && collapsed ? 0 : 80}
       collapsed={collapsed}
-      onCollapse={(value) => setCollapsed(value)}
-      className="bg-white overflow-hidden"
-      theme="light"
-      breakpoint="lg"
-      style={{
-        boxShadow: "rgba(208, 208, 208, 0.7) 0px 0px 7px 0px",
-      }}
-      trigger={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
+      className={`bg-background p-4 transition-all duration-300 ${collapsed ? 'w-24' : 'w-[300px] shadow-lg border-r border-primary'}`}
+      style={{ marginTop: '64px', position: 'fixed', height: 'calc(100vh - 64px)' }}
     >
-      <div className="wcp-silder-menu-container">
-        <Menu
-          mode="inline"
-          className="border-end-0"
-          selectedKeys={[pathname.split("/")[1]]}
-          items={menuItems}
-        />
+      <div className="flex items-center justify-between p-4 border-b border-primary mb-2 ">
+        <div className="flex items-center">
+          {!collapsed &&
+            <div className="flex items-center">
+              <Image 
+                src={theme === "dark" ? SmartSpecsIsotypeDark : SmartSpecsIsotype}
+                alt="Logo" 
+                className="w-6 h-6 mr-1" 
+              />
+              <span className="font-semibold text-sm text-primary">SmartSpecs</span>
+            </div>
+          }
+        </div>
+        <div onClick={toggle} className="cursor-pointer">
+          {collapsed ? <MenuUnfoldOutlined className="text-primary" /> : <MenuFoldOutlined className="text-primary" />}
+        </div>
       </div>
+
+      <Menu
+  mode="inline"
+  selectedKeys={selectedKeys}
+  items={menuItems}
+  theme={theme === "dark" ? "dark" : "light"}
+/>
     </Sider>
   );
 };

@@ -1,42 +1,33 @@
+"use client";
+
 import React from "react";
 import { Layout } from "antd";
-import ReactLogo from "@/smartspecs/assets/images/57blocks-logo.svg";
+import SmartSpecsLogo from "@/smartspecs/assets/images/brand/smartspecs-imagotype.svg";
 import Image from "next/image";
-
+import ThemeToggleButton from "../common/ThemeToggleButton";
 const { Header } = Layout;
 
 export const AppHeader: React.FC = () => {
+
   return (
-    <Header className="px-0 bg-white">
-      <div className="system-header w-100">
-        <nav className="navbar navbar-expand-lg bg-white">
-          <div className="container-fluid flex-nowrap px-4">
-            <a
-              className="navbar-brand d-inline-flex align-items-center flex-grow-0 flex-shrink-0 overflow-hidden text-nowrap"
-              href="/"
-            >
-              <span className="d-inline-block" style={{ height: "26px" }}>
-                <Image
-                  src={ReactLogo}
-                  height={25}
-                  width={97}
-                  alt="57Blocks Logo"
-                />
-              </span>
-            </a>
-            <button
-              type="button"
-              id="react-aria9048498645-:r0:"
-              aria-expanded="false"
-              className="flex-grow-0 flex-shrink-0 p-0 ms-4 border-0 rounded-circle dropdown-toggle btn btn-link"
-              style={{
-                width: "24px",
-                height: "24px",
-                backgroundColor: "rgb(187, 207, 231)",
-                backgroundSize: "100%",
-                border: "1px solid rgb(187, 207, 231)",
-              }}
-            ></button>
+    <Header className="bg-background shadow-lg rounded-lg border-b-2 border-primary fixed top-0 left-0 right-0 z-10">
+      <div className="system-header w-full">
+        <nav className="navbar flex items-center justify-between p-4">
+          <a
+            className="navbar-brand flex items-center h-full"
+            href="/"
+          >
+            <span className="inline-flex items-center h-7">
+              <Image
+                src={SmartSpecsLogo}
+                height={25}
+                width={97}
+                alt="SmartSpecs Logo"
+              />
+            </span>
+          </a>
+          <div className="flex items-center space-x-4">
+            <ThemeToggleButton />
           </div>
         </nav>
       </div>
