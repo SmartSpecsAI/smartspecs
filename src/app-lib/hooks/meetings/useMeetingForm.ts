@@ -90,7 +90,7 @@ export const useMeetingForm = ({
           // ⚡ Llamar al workflow de Dify
           await processDifyWorkflow({
             dispatch,
-            getState: store.getState, // 👈 Pasamos getState correctamente
+            //getState: store.getState, // 👈 pass getState
             projectId,
             meetingId: createdMeeting.id,
             projectTitle: projectTitle || "",
