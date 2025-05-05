@@ -12,7 +12,7 @@ export function SmartspecsView() {
   const {
     projects,
     selectedProject,
-    setSelectedProject,
+    updateSelectedProject,
     projectsLoading,
     projectsError,
     requirements,
@@ -36,7 +36,7 @@ export function SmartspecsView() {
   const handleMenuClick = (item: DropdownItem) => {
     const project = projects.find((p) => p.id === item.value);
     if (project) {
-      setSelectedProject(project);
+      updateSelectedProject(project);
     }
   };
 

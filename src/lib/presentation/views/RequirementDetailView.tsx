@@ -8,6 +8,7 @@ import { DetailCard } from "../components/common/DetailCard";
 import { StandardButton } from "../components/common/StandardButton";
 import { IconButton } from "../components/common/IconButton";
 import ExportPrdButton from "../components/components/PrdPdf/PrdButton";
+import { Status } from "@/smartspecs/lib/domain";
 const { Title, Paragraph } = Typography;
 
 export function RequirementDetailView() {
@@ -78,7 +79,7 @@ export function RequirementDetailView() {
                   onClick={handleEditToggle}
                   label={isEditMode ? "Save Changes" : "Edit"}
                 />
-                {requirement.status === "approved" ? (
+                {requirement.status === Status.DONE ? (
                   <StandardButton
                     buttonVariant="primary"
                     onClick={handleReject}
@@ -86,7 +87,7 @@ export function RequirementDetailView() {
                   >
                     Reject
                   </StandardButton>
-                ) : requirement.status === "rejected" ? (
+                ) : requirement.status === Status.PENDING ? (
                   <StandardButton
                     buttonVariant="primary" 
                     onClick={handleApprove}

@@ -15,17 +15,20 @@ import { firestore } from "@/smartspecs/lib/config/firebase-settings";
 import { toISODate } from "@/smartspecs/app-lib/utils/firestoreTimeStamps";
 import { Requirement } from "@/smartspecs/app-lib/interfaces/requirement";
 import { Status } from "@/smartspecs/lib/domain/entities/Status";
+import { RequirementAdapter } from "@/smartspecs/lib/adapters/RequirementAdapter";
 
 interface RequirementState {
   requirements: Requirement[];
   loading: boolean;
   error: string | null;
+  selectedRequirement: Requirement | null;
 }
 
 const initialState: RequirementState = {
   requirements: [],
   loading: false,
   error: null,
+  selectedRequirement: null,
 };
 
 // Crear un nuevo requerimiento
@@ -44,7 +47,7 @@ export const createRequirement = createAsyncThunk(
         updatedAt: timestamp,
       });
 
-      return {
+      const newRequirement = {
         id: docRef.id,
         ...requirement,
         responsible: requirement.responsible ?? "",
@@ -53,6 +56,8 @@ export const createRequirement = createAsyncThunk(
         createdAt: toISODate(timestamp),
         updatedAt: toISODate(timestamp),
       } as Requirement;
+
+      return RequirementAdapter.toApp(RequirementAdapter.toDomain(newRequirement));
     } catch (error) {
       console.error("Error creating requirement:", error);
       return rejectWithValue("Error al crear requerimiento");
@@ -82,7 +87,7 @@ export const updateRequirement = createAsyncThunk(
       }
 
       const data = snap.data();
-      return {
+      const requirement = {
         id: snap.id,
         projectId: data.projectId || data.project_id,
         title: data.title || "Untitled",
@@ -95,6 +100,8 @@ export const updateRequirement = createAsyncThunk(
         createdAt: toISODate(data.createdAt),
         updatedAt: toISODate(data.updatedAt),
       } as Requirement;
+
+      return RequirementAdapter.toApp(RequirementAdapter.toDomain(requirement));
     } catch (error) {
       console.error("Error obteniendo requerimiento por ID:", error);
       return rejectWithValue("Error al obtener requerimiento por ID");
@@ -128,7 +135,7 @@ export const getRequirement = createAsyncThunk(
       }
 
       const data = snap.data();
-      return {
+      const requirement = {
         id: snap.id,
         projectId: data.projectId || data.project_id,
         title: data.title || "Untitled",
@@ -141,6 +148,8 @@ export const getRequirement = createAsyncThunk(
         createdAt: toISODate(data.createdAt),
         updatedAt: toISODate(data.updatedAt),
       } as Requirement;
+
+      return RequirementAdapter.toApp(RequirementAdapter.toDomain(requirement));
     } catch (error) {
       console.error("Error obteniendo requerimiento por ID:", error);
       return rejectWithValue("Error al obtener requerimiento por ID");
@@ -162,7 +171,7 @@ export const getRequirementsByProject = createAsyncThunk(
 
       const requirements = snap.docs.map((doc) => {
         const data = doc.data();
-        return {
+        const requirement = {
           id: doc.id,
           projectId: data.projectId || data.project_id,
           title: data.title || "Untitled",
@@ -175,6 +184,8 @@ export const getRequirementsByProject = createAsyncThunk(
           createdAt: toISODate(data.createdAt),
           updatedAt: toISODate(data.updatedAt),
         } as Requirement;
+
+        return RequirementAdapter.toApp(RequirementAdapter.toDomain(requirement));
       });
 
       return requirements;
@@ -198,76 +209,83 @@ const requirementSlice = createSlice({
         state.error = null;
       })
       .addCase(createRequirement.fulfilled, (state, action: PayloadAction<Requirement>) => {
-        state.requirements.push(action.payload);
         state.loading = false;
+        state.error = null;
+        state.requirements.push(action.payload);
       })
       .addCase(createRequirement.rejected, (state, action) => {
-        state.error = action.payload as string;
         state.loading = false;
+        state.error = action.payload as string;
       })
-
       // Actualizar requerimiento
       .addCase(updateRequirement.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
       .addCase(updateRequirement.fulfilled, (state, action: PayloadAction<Requirement>) => {
-        const index = state.requirements.findIndex((req) => req.id === action.payload.id);
+        state.loading = false;
+        state.error = null;
+        const index = state.requirements.findIndex(
+          (req) => req.id === action.payload.id
+        );
         if (index !== -1) {
           state.requirements[index] = action.payload;
         }
-        state.loading = false;
       })
       .addCase(updateRequirement.rejected, (state, action) => {
+        state.loading = false;
         state.error = action.payload as string;
-        state.loading = false;
       })
-
       // Eliminar requerimiento
-      .addCase(deleteRequirement.fulfilled, (state, action: PayloadAction<string>) => {
-        state.requirements = state.requirements.filter((r) => r.id !== action.payload);
-        state.loading = false;
-      })
       .addCase(deleteRequirement.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
+      .addCase(deleteRequirement.fulfilled, (state, action: PayloadAction<string>) => {
+        state.loading = false;
+        state.error = null;
+        state.requirements = state.requirements.filter(
+          (req) => req.id !== action.payload
+        );
+      })
       .addCase(deleteRequirement.rejected, (state, action) => {
+        state.loading = false;
         state.error = action.payload as string;
-        state.loading = false;
       })
-
-      // Obtener uno
-      .addCase(getRequirement.fulfilled, (state, action: PayloadAction<Requirement>) => {
-        const idx = state.requirements.findIndex((r) => r.id === action.payload.id);
-        if (idx !== -1) {
-          state.requirements[idx] = action.payload;
-        } else {
-          state.requirements.push(action.payload);
-        }
-        state.loading = false;
-      })
+      // Obtener requerimiento por ID
       .addCase(getRequirement.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
+      .addCase(getRequirement.fulfilled, (state, action: PayloadAction<Requirement>) => {
+        state.loading = false;
+        state.error = null;
+        const index = state.requirements.findIndex(
+          (req) => req.id === action.payload.id
+        );
+        if (index !== -1) {
+          state.requirements[index] = action.payload;
+        } else {
+          state.requirements.push(action.payload);
+        }
+      })
       .addCase(getRequirement.rejected, (state, action) => {
+        state.loading = false;
         state.error = action.payload as string;
-        state.loading = false;
       })
-
-      // Obtener por proyecto
-      .addCase(getRequirementsByProject.fulfilled, (state, action: PayloadAction<Requirement[]>) => {
-        state.requirements = action.payload;
-        state.loading = false;
-      })
+      // Obtener requerimientos por proyecto
       .addCase(getRequirementsByProject.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(getRequirementsByProject.rejected, (state, action) => {
-        state.error = action.payload as string;
+      .addCase(getRequirementsByProject.fulfilled, (state, action: PayloadAction<Requirement[]>) => {
         state.loading = false;
+        state.error = null;
+        state.requirements = action.payload;
+      })
+      .addCase(getRequirementsByProject.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
       });
   },
 });

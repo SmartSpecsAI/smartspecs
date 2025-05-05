@@ -2,11 +2,13 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { useSelector, useDispatch } from "react-redux";
 import type { RootState } from "../../../app-lib/redux/store";
-import { Project } from "@/smartspecs/lib/domain";
+import { Project as DomainProject } from "@/smartspecs/lib/domain";
+import { Project as ReduxProject } from "@/smartspecs/app-lib/redux/slices/ProjectsSlice";
+import { ProjectAdapter } from "@/smartspecs/lib/adapters/ProjectAdapter";
 
 interface ProjectsState {
-  projects: Project[];
-  selectedProject: Project | null;
+  projects: ReduxProject[];
+  selectedProject: ReduxProject | null;
 }
 
 const initialState: ProjectsState = {
@@ -18,10 +20,10 @@ const projectsSlice = createSlice({
   name: "projects",
   initialState,
   reducers: {
-    setProjects: (state, action: PayloadAction<Project[]>) => {
+    setProjects: (state, action: PayloadAction<ReduxProject[]>) => {
       state.projects = action.payload;
     },
-    setSelectedProject: (state, action: PayloadAction<Project | null>) => {
+    setSelectedProject: (state, action: PayloadAction<ReduxProject | null>) => {
       state.selectedProject = action.payload;
     },
   },
@@ -38,16 +40,20 @@ export const useProjects = () => {
   const projects = useSelector(selectProjects);
   const selectedProject = useSelector(selectSelectedProject);
 
-  const updateProjects = (projects: Project[]) => {
-    dispatch(setProjects(projects));
-    console.log("PROJECTS:", projects);
+  const updateProjects = (projects: DomainProject[]) => {
+    dispatch(setProjects(projects.map(ProjectAdapter.toRedux)));
   };
 
-  const updateSelectedProject = (project: Project | null) => {
-    dispatch(setSelectedProject(project));
+  const updateSelectedProject = (project: DomainProject | null) => {
+    dispatch(setSelectedProject(project ? ProjectAdapter.toRedux(project) : null));
   };
 
-  return { projects, selectedProject, updateProjects, updateSelectedProject };
+  return {
+    projects: projects.map(ProjectAdapter.toDomain),
+    selectedProject: selectedProject ? ProjectAdapter.toDomain(selectedProject) : null,
+    updateProjects,
+    updateSelectedProject,
+  };
 };
 
 export default projectsSlice.reducer;
