@@ -23,12 +23,14 @@ export interface Project {
 
 interface ProjectState {
   projects: Project[];
+  selectedProject: Project | null;
   loading: boolean;
   error: string | null;
 }
 
 const initialState: ProjectState = {
   projects: [],
+  selectedProject: null,
   loading: false,
   error: null,
 };

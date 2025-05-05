@@ -1,31 +1,31 @@
 export enum Status {
-  IN_PROGRESS = "in_progress",
-  APPROVED = "approved",
-  REJECTED = "rejected",
+  IN_PROGRESS = "in progress",
+  DONE = "done",
+  PENDING = "pending",
 }
 
-export function stringToStatus(status: string): Status | undefined {
+export function stringToStatus(status: string): Status {
   switch (status) {
-    case "in_progress":
+    case "in progress":
       return Status.IN_PROGRESS;
-    case "approved":
-      return Status.APPROVED;
-    case "rejected":
-      return Status.REJECTED;
+    case "done":
+      return Status.DONE;
+    case "pending":
+      return Status.PENDING;
     default:
-      return undefined;
+      return Status.IN_PROGRESS;
   }
 }
 
 export function colorByStatus(status: Status): string {
   switch (status) {
     case Status.IN_PROGRESS:
-      return "warning";
-    case Status.APPROVED:
-      return "success";
-    case Status.REJECTED:
-      return "error";
+      return "blue";
+    case Status.DONE:
+      return "green";
+    case Status.PENDING:
+      return "orange";
     default:
-      return "default";
+      return "blue";
   }
 }

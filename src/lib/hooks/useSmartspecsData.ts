@@ -4,6 +4,7 @@ import {
   useProjectsData,
   useRequirementsData,
 } from "@/smartspecs/lib/presentation";
+import { Project } from "@/smartspecs/lib/domain";
 
 export function useSmartspecsData() {
   const {
@@ -27,7 +28,7 @@ export function useSmartspecsData() {
 
   useEffect(() => {
     if (projects[0]) {
-      updateSelectedProject(projects[0]);
+      updateSelectedProject(projects[0] as unknown as Project);
     }
   }, [projects]);
 

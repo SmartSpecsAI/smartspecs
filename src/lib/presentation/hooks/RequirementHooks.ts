@@ -2,8 +2,10 @@
 import { useEffect, useState } from "react";
 import { useProjects } from "../slides/ProjectsSlide";
 import { getInjection } from "@/smartspecs/di/container";
-import { Requirement } from "@/smartspecs/lib/domain";
+import { Requirement as DomainRequirement } from "@/smartspecs/lib/domain";
 import { useRequirements } from "../slides";
+import { RequirementAdapter } from "@/smartspecs/lib/adapters/RequirementAdapter";
+import { Requirement as AppRequirement } from "@/smartspecs/app-lib/interfaces/requirement";
 
 export function useRequirementsData() {
   const getAllRequirementsByProjectUseCase = getInjection(
@@ -20,10 +22,10 @@ export function useRequirementsData() {
   const rejectRequirementUseCase = getInjection("IRejectRequirementUseCase");
   const { selectedProject } = useProjects();
 
-  const { requirements, updateRequirements } = useRequirements();
+  const { requirements: appRequirements, updateRequirements } = useRequirements();
   const [error, setError] = useState<string | null>(null);
   const [selectedRequirement, setSelectedRequirement] =
-    useState<Requirement | null>(null);
+    useState<DomainRequirement | null>(null);
 
   // Initialize loading map
   const [loadingMap, setLoadingMap] = useState({
@@ -43,7 +45,7 @@ export function useRequirementsData() {
       const requirementsData = await getAllRequirementsByProjectUseCase.execute(
         selectedProject.id
       );
-      updateRequirements(requirementsData);
+      updateRequirements(requirementsData.map(RequirementAdapter.toApp));
     } catch (err) {
       setError(
         err instanceof Error ? err.message : "Failed to fetch requirements"
@@ -60,7 +62,7 @@ export function useRequirementsData() {
     setLoadingMap((prev) => ({ ...prev, getRequirementById: true }));
     setError(null);
     try {
-      let requirement = requirements.find((req: Requirement) => req.id === id);
+      let requirement = appRequirements.find((req) => req.id === id);
       if (!requirement) {
         if (!selectedProject) throw new Error("Requirement not found");
         const result = await getRequirementByIdUseCase.execute(
@@ -68,13 +70,14 @@ export function useRequirementsData() {
           id
         );
         if (result) {
-          requirement = result;
+          requirement = RequirementAdapter.toApp(result);
         } else {
           throw new Error("Requirement not found");
         }
       }
-      setSelectedRequirement(requirement);
-      return requirement;
+      const domainRequirement = RequirementAdapter.toDomain(requirement);
+      setSelectedRequirement(domainRequirement);
+      return domainRequirement;
     } catch (err) {
       setError(
         err instanceof Error ? err.message : "Failed to fetch requirement"
@@ -85,7 +88,7 @@ export function useRequirementsData() {
     }
   };
 
-  const createRequirement = async (requirement: Omit<Requirement, "id">) => {
+  const createRequirement = async (requirement: Omit<DomainRequirement, "id">) => {
     if (!selectedProject) return;
     setLoadingMap((prev) => ({ ...prev, createRequirement: true }));
     setError(null);
@@ -93,7 +96,7 @@ export function useRequirementsData() {
       const newRequirement = await createRequirementUseCase.execute(
         requirement
       );
-      const updatedRequirements = [...requirements, newRequirement];
+      const updatedRequirements = [...appRequirements, RequirementAdapter.toApp(newRequirement)];
       updateRequirements(updatedRequirements);
     } catch (err) {
       setError(
@@ -104,7 +107,7 @@ export function useRequirementsData() {
     }
   };
 
-  const updateRequirement = async (updatedData: Requirement) => {
+  const updateRequirement = async (updatedData: DomainRequirement) => {
     setLoadingMap((prev) => ({ ...prev, updateRequirement: true }));
     setError(null);
     try {
@@ -115,8 +118,8 @@ export function useRequirementsData() {
         projectId,
         updatedData
       );
-      const updatedRequirements = requirements.map((req: Requirement) =>
-        req.id === id ? updatedRequirement : req
+      const updatedRequirements = appRequirements.map((req) =>
+        req.id === id ? RequirementAdapter.toApp(updatedRequirement) : req
       );
       updateRequirements(updatedRequirements);
       setSelectedRequirement(updatedRequirement);
@@ -138,14 +141,12 @@ export function useRequirementsData() {
         selectedProject.id,
         requirementId
       );
-      const updatedRequirements = requirements.map((req: Requirement) =>
-        req.id === requirementId ? approvedRequirement : req
+      const updatedRequirements = appRequirements.map((req) =>
+        req.id === requirementId ? RequirementAdapter.toApp(approvedRequirement) : req
       );
       updateRequirements(updatedRequirements);
       setSelectedRequirement(approvedRequirement);
-      return updatedRequirements.filter(
-        (req: Requirement) => req.id === requirementId
-      )[0];
+      return updatedRequirements.find((req) => req.id === requirementId);
     } catch (err) {
       setError(
         err instanceof Error ? err.message : "Failed to approve requirement"
@@ -164,14 +165,12 @@ export function useRequirementsData() {
         selectedProject.id,
         requirementId
       );
-      const updatedRequirements = requirements.map((req: Requirement) =>
-        req.id === requirementId ? rejectedRequirement : req
+      const updatedRequirements = appRequirements.map((req) =>
+        req.id === requirementId ? RequirementAdapter.toApp(rejectedRequirement) : req
       );
       updateRequirements(updatedRequirements);
       setSelectedRequirement(rejectedRequirement);
-      return updatedRequirements.filter(
-        (req: Requirement) => req.id === requirementId
-      )[0];
+      return updatedRequirements.find((req) => req.id === requirementId);
     } catch (err) {
       setError(
         err instanceof Error ? err.message : "Failed to reject requirement"
@@ -183,7 +182,7 @@ export function useRequirementsData() {
 
   const getRequirementAnalysis = async (
     conversation: string
-  ): Promise<Requirement> =>
+  ): Promise<DomainRequirement> =>
     await generateRequirementItemsFromConversation.execute(conversation);
 
   const isLoadingObject = (id: keyof typeof loadingMap): boolean => {
@@ -191,7 +190,7 @@ export function useRequirementsData() {
   };
 
   return {
-    requirements,
+    requirements: appRequirements.map(RequirementAdapter.toDomain),
     selectedRequirement,
     isLoading: loadingMap.fetchRequirements, // Return fetchRequirements loader as default
     isLoadingObject,

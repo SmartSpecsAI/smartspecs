@@ -21,7 +21,7 @@ export const RejectRequirementUseCase = (
           throw new Error("Requirement not found");
         }
 
-        const updatedData = { ...requirement, status: Status.REJECTED };
+        const updatedData = { ...requirement, status: Status.PENDING };
         const updatedRequirement = await updateRequirement.execute(
           projectId,
           updatedData

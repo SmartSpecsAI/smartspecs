@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import { useRequirementsData } from "@/smartspecs/lib/presentation";
 import { Requirement, RequirementItem } from "@/smartspecs/lib/domain";
+import { RequirementAdapter } from "@/smartspecs/lib/adapters/RequirementAdapter";
 
 export function useRequirementDetail() {
   const params = useParams();
@@ -21,7 +22,7 @@ export function useRequirementDetail() {
   useEffect(() => {
     const fetchRequirement = async () => {
       if (params.slug) {
-        const data = await getRequirementById(params.slug as string);
+        const data = await getRequirementById(params.slug as string) as unknown as Requirement;
         setRequirement(data);
         setEditedDescription(data?.description || "");
         setEditedItems(data?.items || []);
@@ -60,15 +61,15 @@ export function useRequirementDetail() {
   };
 
   const handleApprove = async () => {
-    const updatedRequirement = await approveRequirement(requirement!.id);
-    if (!updatedRequirement) return;
-    setRequirement(updatedRequirement);
+    const appRequirement = await approveRequirement(requirement!.id);
+    if (!appRequirement) return;
+    setRequirement(RequirementAdapter.toDomain(appRequirement));
   };
 
   const handleReject = async () => {
-    const updatedRequirement = await rejectRequirement(requirement!.id);
-    if (!updatedRequirement) return;
-    setRequirement(updatedRequirement);
+    const appRequirement = await rejectRequirement(requirement!.id);
+    if (!appRequirement) return;
+    setRequirement(RequirementAdapter.toDomain(appRequirement));
   };
 
   return {

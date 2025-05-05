@@ -2,7 +2,7 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { useSelector, useDispatch } from "react-redux";
 import type { RootState } from "../../../app-lib/redux/store";
-import { Requirement } from "@/smartspecs/lib/domain";
+import { Requirement } from "@/smartspecs/app-lib/interfaces/requirement";
 
 interface RequirementsState {
   requirements: Requirement[];

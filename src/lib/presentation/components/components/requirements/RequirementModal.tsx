@@ -9,6 +9,7 @@ import {
 import { DetailsStep, UploadStep } from "./steps";
 import { useRequirementModal } from "@/smartspecs/lib/presentation/hooks/useRequirementModal";
 import { StandardButton } from "@/smartspecs/lib/presentation/components/common/StandardButton";
+import { ProjectAdapter } from "@/smartspecs/lib/adapters/ProjectAdapter";
 
 interface RequirementModalProps {
   triggerButtonText?: string;
