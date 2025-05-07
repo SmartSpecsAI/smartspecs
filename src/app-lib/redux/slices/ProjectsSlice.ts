@@ -207,6 +207,7 @@ const projectSlice = createSlice({
         state.error = null;
       })
       .addCase(createProject.fulfilled, (state, action: PayloadAction<Project>) => {
+        state.loading = false;
         state.projects.push(action.payload);
       })
       .addCase(createProject.rejected, (state, action) => {
