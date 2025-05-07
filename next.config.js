@@ -4,7 +4,7 @@ const nextConfig = {
       return [
         {
           source: "/api/workflow",
-          destination: "http://localhost/v1/workflows/run",
+          destination: `${process.env.DIFY_API_URL}/v1/workflows/run`,
         },
       ];
     },
