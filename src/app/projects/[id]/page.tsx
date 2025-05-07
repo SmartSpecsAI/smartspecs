@@ -1,7 +1,7 @@
 // src/app/(your-segment)/projects/[id]/page.tsx
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 
 import ProjectForm from "@/smartspecs/app-lib/components/forms/ProjectForm";
 import MeetingList from "@/smartspecs/app-lib/components/lists/MeetingList";
@@ -15,6 +15,7 @@ import RequirementList from "@/smartspecs/app-lib/components/lists/requirements-
 import { useProjectData } from "@/smartspecs/app-lib/hooks/projects/useProjectData";
 import { useProjectDetail } from "@/smartspecs/app-lib/hooks/projects/useProjectDetail";
 import { Requirement } from "@/smartspecs/app-lib/interfaces/requirement";
+
 const ProjectDetail: React.FC = () => {
   // Este hook se encarga de cargar datos: proyecto, reuniones, requerimientos
   const {
@@ -40,6 +41,24 @@ const ProjectDetail: React.FC = () => {
     handleDeleteAllMeetings,
     isDeletingMeetings,
   } = useProjectDetail(project);
+
+  const [showCopySuccess, setShowCopySuccess] = useState(false);
+
+  const handleCopyRequirements = () => {
+    const requirementsText = requirements.map(req => {
+      return `Título: ${req.title}\nDescripción: ${req.description}\nEstado: ${req.status}\nResponsable: ${req.responsible || 'No asignado'}\n\n`;
+    }).join('---\n');
+
+    navigator.clipboard.writeText(requirementsText)
+      .then(() => {
+        setShowCopySuccess(true);
+        setTimeout(() => setShowCopySuccess(false), 2000); // Ocultar después de 2 segundos
+      })
+      .catch(err => {
+        console.error('Error al copiar al portapapeles:', err);
+        alert('Error al copiar los requerimientos');
+      });
+  };
 
   if (loading) {
     return <LoadingSpinner />;
@@ -148,6 +167,22 @@ const ProjectDetail: React.FC = () => {
       <div className="bg-background p-6 rounded-xl shadow-md w-full mt-8">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-2xl font-bold">Requerimientos</h2>
+          <div className="flex items-center gap-2">
+            {showCopySuccess && (
+              <span className="text-green-500 flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                </svg>
+                Copiado
+              </span>
+            )}
+            <button
+              className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors"
+              onClick={handleCopyRequirements}
+            >
+              Copiar Requerimientos
+            </button>
+          </div>
         </div>
         <RequirementList requirements={requirements} />
       </div>
