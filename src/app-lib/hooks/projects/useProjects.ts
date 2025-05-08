@@ -13,10 +13,13 @@ export const useProjects = () => {
   const dispatch = useAppDispatch();
 
   const { projects, loading, error } = useAppSelector((state) => state.projects);
+  const { currentUser } = useAppSelector((state) => state.users);
 
   useEffect(() => {
-    dispatch(getProjects());
-  }, [dispatch]);
+    if (currentUser) {
+      dispatch(getProjects(currentUser.id));
+    }
+  }, [dispatch, currentUser]);
 
   return {
     projects,

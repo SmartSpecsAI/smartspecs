@@ -41,7 +41,7 @@ const RequirementList: React.FC<RequirementListProps> = ({ requirements }) => {
   if (requirements.length === 0) {
     return (
       <div className="flex items-center justify-center h-40 bg-white rounded-xl border border-gray-100 shadow-sm transition-all duration-300 ease-in-out">
-        <p className="text-gray-500 text-lg font-medium">No hay requerimientos registrados para este proyecto</p>
+        <p className="text-gray-500 text-lg font-medium">No requirements registered for this project</p>
       </div>
     );
   }
@@ -52,14 +52,14 @@ const RequirementList: React.FC<RequirementListProps> = ({ requirements }) => {
         <thead className="bg-gray-50">
           <tr>
             <th className="w-12 px-2 py-3 text-center text-xs font-semibold text-gray-600 uppercase">#</th>
-            <th className="px-2 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Título</th>
-            <th className="px-2 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Descripción</th>
-            <th className="px-2 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Prioridad</th>
-            <th className="px-2 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Estado</th>
-            <th className="px-2 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Responsable</th>
-            <th className="px-2 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Origen</th>
-            <th className="px-2 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Razón</th>
-            <th className="px-2 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Acciones</th>
+            <th className="px-2 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Title</th>
+            <th className="px-2 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Description</th>
+            <th className="px-2 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Priority</th>
+            <th className="px-2 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Status</th>
+            <th className="px-2 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Responsible</th>
+            <th className="px-2 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Origin</th>
+            <th className="px-2 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Reason</th>
+            <th className="px-2 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Actions</th>
           </tr>
         </thead>
         <tbody className="bg-white divide-y divide-gray-100">
@@ -90,14 +90,14 @@ const RequirementList: React.FC<RequirementListProps> = ({ requirements }) => {
                   >
                     {expandedId === requirement.id ? (
                       <>
-                        <span>Ocultar historial</span>
+                        <span>Hide history</span>
                         <svg className="w-4 h-4 ml-1 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
                         </svg>
                       </>
                     ) : (
                       <>
-                        <span>Ver historial</span>
+                        <span>Show history</span>
                         <svg className="w-4 h-4 ml-1 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                         </svg>
@@ -126,10 +126,10 @@ const RequirementList: React.FC<RequirementListProps> = ({ requirements }) => {
         isOpen={showDeleteModal}
         onClose={cancelDelete}
         onConfirm={confirmDelete}
-        title="Confirmar eliminación"
-        message="¿Estás seguro de que deseas eliminar este requerimiento? Esta acción no se puede deshacer."
-        confirmText="Eliminar"
-        cancelText="Cancelar"
+        title="Confirm delete"
+        message="Are you sure you want to delete this requirement? This action cannot be undone."
+        confirmText="Delete"
+        cancelText="Cancel"
         confirmButtonStyle="danger"
       />
     </div>

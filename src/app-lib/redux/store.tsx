@@ -5,6 +5,7 @@ import projectsReducer from "./slices/ProjectsSlice";
 import requirementsReducer from "./slices/RequirementsSlice";
 import meetingsReducer from "./slices/MeetingsSlice";
 import filesReducer from "../../lib/presentation/slides/FilesSlide";
+import usersReducer from "./slices/UsersSlice";
 
 export const store = configureStore({
   reducer: {
@@ -12,6 +13,7 @@ export const store = configureStore({
     requirements: requirementsReducer,
     meetings: meetingsReducer,
     files: filesReducer,
+    users: usersReducer,
   },
 });
 

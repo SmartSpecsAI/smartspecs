@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 import { ReactNode } from "react";
-import { AppLayout, MultiProvider } from "@/smartspecs/lib/presentation";
+import { MultiProvider } from "@/smartspecs/lib/presentation";
+import ConditionalLayoutWrapper from "./ConditionalLayoutWrapper";
 
 export const metadata: Metadata = {
   title: "SmartSpecs - 57Blocks Collaboration Platform",
@@ -18,7 +19,7 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <MultiProvider>
-          <AppLayout>{children}</AppLayout>
+          <ConditionalLayoutWrapper>{children}</ConditionalLayoutWrapper>
         </MultiProvider>
       </body>
     </html>

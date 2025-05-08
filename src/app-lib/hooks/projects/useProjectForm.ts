@@ -1,8 +1,8 @@
 // src/app-lib/hooks/projects/useProjectForm.ts
 
 import { useState, useEffect } from "react";
-import { useDispatch } from "react-redux";
-import { AppDispatch } from "@/smartspecs/app-lib/redux/store";
+import { useDispatch, useSelector, TypedUseSelectorHook } from "react-redux";
+import { AppDispatch, RootState } from "@/smartspecs/app-lib/redux/store";
 import { createProject, updateProject } from "@/smartspecs/app-lib/redux/slices/ProjectsSlice";
 import { Project } from "@/smartspecs/app-lib/interfaces/project";
 
@@ -13,6 +13,7 @@ interface UseProjectFormProps {
 }
 
 const useAppDispatch = () => useDispatch<AppDispatch>();
+const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
 
 export const useProjectForm = ({
     project,
@@ -20,6 +21,7 @@ export const useProjectForm = ({
     onCancel,
 }: UseProjectFormProps) => {
     const dispatch = useAppDispatch();
+    const { currentUser } = useAppSelector((state) => state.users);
 
     const [formData, setFormData] = useState<Omit<Project, "id">>({
         title: "",
@@ -57,6 +59,11 @@ export const useProjectForm = ({
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         const timestamp = new Date().toISOString();
+        
+        if (!currentUser) {
+            console.error("No hay usuario autenticado");
+            return;
+        }
 
         if (project) {
             await dispatch(
@@ -71,7 +78,10 @@ export const useProjectForm = ({
             onSaveSuccess?.("Proyecto actualizado exitosamente");
         } else {
             await dispatch(
-                createProject(formData)
+                createProject({
+                    newProject: formData,
+                    userId: currentUser.id
+                })
             );
             onSaveSuccess?.("Proyecto creado exitosamente");
         }

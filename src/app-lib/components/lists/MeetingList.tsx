@@ -15,7 +15,7 @@ const MeetingList: React.FC<Props> = ({ meetings }) => {
   if (!sortedMeetings.length) {
     return (
       <div className="text-center p-8 bg-gray-50 rounded-lg border border-gray-200">
-        <p className="text-gray-500">No hay reuniones registradas para este proyecto.</p>
+        <p className="text-gray-500">No meetings registered for this project.</p>
       </div>
     );
   }
@@ -26,13 +26,13 @@ const MeetingList: React.FC<Props> = ({ meetings }) => {
         <thead className="bg-gray-50">
           <tr>
             <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">
-              Título
+              Title
             </th>
             <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">
-              Descripción
+              Description
             </th>
             <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">
-              Acciones
+              Actions
             </th>
           </tr>
         </thead>
@@ -50,7 +50,7 @@ const MeetingList: React.FC<Props> = ({ meetings }) => {
                   href={`/meetings/${m.id}`}
                   className="inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md text-primary bg-primary/10 hover:bg-primary/20 transition-colors duration-150"
                 >
-                  Ver detalle
+                  View details
                 </Link>
               </td>
             </tr>
