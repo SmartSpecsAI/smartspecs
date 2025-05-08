@@ -9,10 +9,12 @@ interface RequirementRowProps {
   tempDescription: string;
   tempPriority: Priority;
   tempStatus: Status;
+  tempResponsible: string;
   onTitleChange: (value: string) => void;
   onDescriptionChange: (value: string) => void;
   onPriorityChange: (value: Priority) => void;
   onStatusChange: (value: Status) => void;
+  onResponsibleChange: (value: string) => void;
   onEditClick: () => void;
   onDeleteClick: () => void;
 }
@@ -25,10 +27,12 @@ const RequirementRow: React.FC<RequirementRowProps> = ({
   tempDescription,
   tempPriority,
   tempStatus,
+  tempResponsible,
   onTitleChange,
   onDescriptionChange,
   onPriorityChange,
   onStatusChange,
+  onResponsibleChange,
   onEditClick,
   onDeleteClick,
 }) => {
@@ -122,7 +126,17 @@ const RequirementRow: React.FC<RequirementRowProps> = ({
 
       {/* Responsable */}
       <td className="px-2 py-2 text-gray-700">
-        {requirement.responsible || <span className="italic text-gray-400">Sin asignar</span>}
+        {isEditing ? (
+          <input
+            type="text"
+            className="w-full px-2 py-1 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+            value={tempResponsible}
+            onChange={(e) => onResponsibleChange(e.target.value)}
+            placeholder="Asignar responsable"
+          />
+        ) : (
+          requirement.responsible || <span className="italic text-gray-400">Sin asignar</span>
+        )}
       </td>
 
       {/* Origen */}

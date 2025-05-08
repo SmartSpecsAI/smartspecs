@@ -17,11 +17,13 @@ const RequirementList: React.FC<RequirementListProps> = ({ requirements }) => {
     tempDescription,
     tempPriority,
     tempStatus,
+    tempResponsible,
     showDeleteModal,
     setTempTitle,
     setTempDescription,
     setTempPriority,
     setTempStatus,
+    setTempResponsible,
     handleEditClick,
     handleDeleteClick,
     confirmDelete,
@@ -73,10 +75,12 @@ const RequirementList: React.FC<RequirementListProps> = ({ requirements }) => {
                 tempDescription={tempDescription}
                 tempPriority={tempPriority}
                 tempStatus={tempStatus}
+                tempResponsible={tempResponsible}
                 onTitleChange={setTempTitle}
                 onDescriptionChange={setTempDescription}
                 onPriorityChange={setTempPriority as (value: Priority) => void}
                 onStatusChange={setTempStatus}
+                onResponsibleChange={setTempResponsible}
                 onEditClick={() => handleEditClick(requirement)}
                 onDeleteClick={() => handleDeleteClick(requirement.id)}
               />
