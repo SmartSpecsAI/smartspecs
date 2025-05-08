@@ -5,6 +5,7 @@ export type Project = {
   name?: string;
   description?: string;
   clientName?: string;
+  userId?: string;
   representatives?: Representative[];
   startDate?: Date;
   endDate?: Date;
