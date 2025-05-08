@@ -20,21 +20,21 @@ const ProjectInfo: React.FC<ProjectInfoProps> = ({ project }) => {
 
         <div className="space-y-4">
           <div className="bg-gray-50 p-4 rounded-lg">
-            <h3 className="text-sm font-semibold text-gray-500 mb-1">Cliente</h3>
+            <h3 className="text-sm font-semibold text-gray-500 mb-1">Client</h3>
             <p className="text-lg text-gray-800">{project.client}</p>
           </div>
 
           <div className="bg-gray-50 p-4 rounded-lg">
-            <h3 className="text-sm font-semibold text-gray-500 mb-1">Descripción</h3>
+            <h3 className="text-sm font-semibold text-gray-500 mb-1">Description</h3>
             <p className="text-gray-800">{project.description}</p>
           </div>
 
           <div className="flex items-center space-x-4 text-sm text-gray-500 mt-6">
             <div>
-              <span className="font-medium">Creado:</span> {new Date(project.createdAt).toLocaleDateString()}
+              <span className="font-medium">Created:</span> {new Date(project.createdAt).toLocaleDateString()}
             </div>
             <div>
-              <span className="font-medium">Actualizado:</span> {new Date(project.updatedAt).toLocaleDateString()}
+              <span className="font-medium">Updated:</span> {new Date(project.updatedAt).toLocaleDateString()}
             </div>
           </div>
         </div>

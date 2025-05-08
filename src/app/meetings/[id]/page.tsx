@@ -21,7 +21,7 @@ const MeetingDetail: React.FC = () => {
   } = useMeetingDetail();
 
   if (loading) {
-    return <LoadingSpinner title="Cargando reunión..." />;
+    return <LoadingSpinner title="Loading meeting..." />;
   }
 
   if (error) {
@@ -29,12 +29,12 @@ const MeetingDetail: React.FC = () => {
   }
 
   if (!meeting) {
-    return <ErrorMessage message="Reunión no encontrada" />;
+    return <ErrorMessage message="Meeting not found" />;
   }
 
   return (
     <div className="min-h-screen bg-background text-text p-4 flex flex-col items-center">
-      <h1 className="text-3xl font-bold mb-6">Detalle de Reunión</h1>
+      <h1 className="text-3xl font-bold mb-6">Meeting Details</h1>
 
       {isEditing ? (
         <MeetingForm
@@ -54,8 +54,8 @@ const MeetingDetail: React.FC = () => {
         isOpen={showDeleteModal}
         onClose={() => setShowDeleteModal(false)}
         onConfirm={handleConfirmDelete}
-        title="Eliminar Reunión"
-        message="¿Estás seguro de que deseas eliminar esta reunión?"
+        title="Delete Meeting"
+        message="Are you sure you want to delete this meeting?"
       />
     </div>
   );

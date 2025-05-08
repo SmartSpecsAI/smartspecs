@@ -8,6 +8,8 @@ import {
   doc,
   getDoc,
   Timestamp,
+  query,
+  where,
 } from "firebase/firestore";
 import { toISODate } from "@/smartspecs/app-lib/utils/firestoreTimeStamps";
 import { firestore } from "@/smartspecs/lib/config/firebase-settings";
@@ -19,6 +21,7 @@ export interface Project {
   description: string;
   createdAt: string;
   updatedAt: string;
+  userId: string;
 }
 
 interface ProjectState {
@@ -39,13 +42,17 @@ const initialState: ProjectState = {
 export const createProject = createAsyncThunk(
   "projects/createProject",
   async (
-    newProject: Omit<Project, "id" | "createdAt" | "updatedAt">,
+    { newProject, userId }: { 
+      newProject: Omit<Project, "id" | "createdAt" | "updatedAt" | "userId">, 
+      userId: string 
+    },
     { rejectWithValue }
   ) => {
     try {
       const now = Timestamp.now();
       const docRef = await addDoc(collection(firestore, "projects"), {
         ...newProject,
+        userId,
         createdAt: now,
         updatedAt: now,
       });
@@ -53,6 +60,7 @@ export const createProject = createAsyncThunk(
       return {
         id: docRef.id,
         ...newProject,
+        userId,
         createdAt: toISODate(now),
         updatedAt: toISODate(now),
       };
@@ -87,6 +95,7 @@ export const updateProject = createAsyncThunk(
         title: data?.title ?? "",
         client: data?.client ?? "",
         description: data?.description ?? "",
+        userId: data?.userId ?? "",
         createdAt: toISODate(data?.createdAt),
         updatedAt: toISODate(data?.updatedAt),
       } as Project;
@@ -127,6 +136,7 @@ export const getProject = createAsyncThunk(
         title: data.title,
         client: data.client,
         description: data.description,
+        userId: data.userId,
         createdAt: toISODate(data.createdAt),
         updatedAt: toISODate(data.updatedAt),
       } as Project;
@@ -140,9 +150,14 @@ export const getProject = createAsyncThunk(
 // Obtener Todos los Proyectos
 export const getProjects = createAsyncThunk(
   "projects/getProjects",
-  async (_, { rejectWithValue }) => {
+  async (userId: string, { rejectWithValue }) => {
     try {
-      const querySnapshot = await getDocs(collection(firestore, "projects"));
+      const projectsQuery = query(
+        collection(firestore, "projects"),
+        where("userId", "==", userId)
+      );
+      const querySnapshot = await getDocs(projectsQuery);
+      
       return querySnapshot.docs.map((docSnap) => {
         const data = docSnap.data();
         return {
@@ -150,6 +165,7 @@ export const getProjects = createAsyncThunk(
           title: data.title,
           client: data.client,
           description: data.description,
+          userId: data.userId,
           createdAt: toISODate(data.createdAt),
           updatedAt: toISODate(data.updatedAt),
         } as Project;

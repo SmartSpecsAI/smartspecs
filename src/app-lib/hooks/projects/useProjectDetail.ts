@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Project } from "@/smartspecs/app-lib/interfaces/project";
+import { toast } from "react-toastify";
 
 /**
  * Maneja estados de interfaz en la vista de "detalle de proyecto":
@@ -52,14 +53,15 @@ export const useProjectDetail = (project?: Project) => {
       );
 
       if (!response.ok) {
-        throw new Error("Error al eliminar las reuniones");
+        throw new Error("Error deleting meetings");
       }
 
-      alert("✅ Todas las reuniones han sido eliminadas correctamente");
+      toast.success("All meetings have been deleted successfully");
+
       // Podés disparar un refresh de reuniones, etc.
     } catch (error) {
-      console.error("❌ Error eliminando reuniones:", error);
-      alert("❌ Error al eliminar las reuniones");
+      console.error("❌ Error deleting meetings:", error);
+      toast.error("Error deleting meetings");
     } finally {
       setIsDeletingMeetings(false);
     }

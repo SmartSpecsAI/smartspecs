@@ -46,7 +46,7 @@ const ProjectDetail: React.FC = () => {
 
   const handleCopyRequirements = () => {
     const requirementsText = requirements.map(req => {
-      return `Título: ${req.title}\nDescripción: ${req.description}\nEstado: ${req.status}\nResponsable: ${req.responsible || 'No asignado'}\n\n`;
+      return `Title: ${req.title}\nDescription: ${req.description}\nStatus: ${req.status}\nResponsible: ${req.responsible || 'Not assigned'}\n\n`;
     }).join('---\n');
 
     navigator.clipboard.writeText(requirementsText)
@@ -103,13 +103,13 @@ const ProjectDetail: React.FC = () => {
               className="bg-primary text-white px-4 py-2 rounded"
               onClick={handleEdit}
             >
-              Editar
+              Edit
             </button>
             <button
               className="bg-green-500 text-white px-4 py-2 rounded"
               onClick={() => setShowMeetingModal(true)}
             >
-              Agregar Reunión
+              Add Meeting
             </button>
             <button
               className="bg-red-500 text-white px-4 py-2 rounded"
@@ -137,10 +137,10 @@ const ProjectDetail: React.FC = () => {
                       d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 11-8 8z"
                     />
                   </svg>
-                  Eliminando...
+                  Deleting...
                 </>
               ) : (
-                "Eliminar Reuniones"
+                "Delete Meetings"
               )}
             </button>
           </div>
@@ -160,13 +160,13 @@ const ProjectDetail: React.FC = () => {
       </Modal>
 
       <div className="bg-background p-6 rounded-xl shadow-md w-full mt-8">
-        <h2 className="text-2xl font-bold mb-4">Reuniones</h2>
+        <h2 className="text-2xl font-bold mb-4">Meetings</h2>
         <MeetingList meetings={projectMeetings} />
       </div>
 
       <div className="bg-background p-6 rounded-xl shadow-md w-full mt-8">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-2xl font-bold">Requerimientos</h2>
+          <h2 className="text-2xl font-bold">Requirements</h2>
           <div className="flex items-center gap-2">
             {showCopySuccess && (
               <span className="text-green-500 flex items-center">
@@ -180,7 +180,7 @@ const ProjectDetail: React.FC = () => {
               className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors"
               onClick={handleCopyRequirements}
             >
-              Copiar Requerimientos
+              Copy Requirements
             </button>
           </div>
         </div>
