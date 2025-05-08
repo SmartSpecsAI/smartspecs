@@ -4,7 +4,7 @@ import { useState, FormEvent, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useDispatch, useSelector } from 'react-redux';
-import { registerUser, resetRegistration } from '../../app-lib/redux/slices/UsersSlice';
+import { registerUser, resetRegistration, logoutUserFromFirebase } from '../../app-lib/redux/slices/UsersSlice';
 import { RootState, AppDispatch } from '../../app-lib/redux/store';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -36,8 +36,10 @@ export default function RegisterPage() {
         draggable: true,
       });
       
-      // Redirect after toast is shown
-      const timer = setTimeout(() => {
+      // Cerrar sesión y redirigir después de que se muestre el toast
+      const timer = setTimeout(async () => {
+        // Cerrar sesión antes de redirigir al login
+        await logoutUserFromFirebase();
         router.push('/login');
       }, 3000);
       
