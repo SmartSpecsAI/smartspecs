@@ -46,3 +46,8 @@ src/app/smartspecs57b-firebase-adminsdk-ua8vu-d4cae3e4dc.json
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Firebase
+/.firebase/
+/.firebase
+/.firebase/smartspecs57b/
