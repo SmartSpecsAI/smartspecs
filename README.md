@@ -73,3 +73,37 @@ Guidelines for contributing to the project. For example:
 3. Make your changes and commit them (`git commit -m 'Add some feature'`).
 4. Push to the branch (`git push origin feature/YourFeature`).
 5. Open a pull request.
+
+
+## Running Dify Locally
+
+1. Clone Dify project: https://github.com/langgenius/dify
+2. Run the following commands:
+   ```bash
+   cd dify
+   cd docker
+   cp .env.example .env
+   docker compose up -d
+   ```
+
+3. In the Dify app, follow these steps:
+   - Create a new project or import a DSL file
+   - After your project is ready to use, publish it
+   - Create an API KEY in: API Access → API Key → Create new secret key
+   - Use this key in your environment variable `DIFY_API_KEY`
+   - Also set `DIFY_API_URL` which can be found in API Access
+   - Remember to configure your OpenAI API key in the model settings
+
+## Deployment
+
+To deploy the application, run the following commands:
+```bash
+npm install firebase
+npm install -g firebase-tools
+firebase login
+firebase init
+firebase deploy
+```
+
+After deployment, go to Firebase Console → Hosting section. There you will find the deployment URL and additional deployment details.
+
