@@ -43,6 +43,7 @@ const ProjectDetail: React.FC = () => {
   } = useProjectDetail(project);
 
   const [showCopySuccess, setShowCopySuccess] = useState(false);
+  const [isMeetingProcessing, setIsMeetingProcessing] = useState(false);
 
   const handleCopyRequirements = () => {
     const requirementsText = requirements.map(req => {
@@ -60,14 +61,27 @@ const ProjectDetail: React.FC = () => {
       });
   };
 
+  const handleMeetingProcessingStart = () => {
+    setShowMeetingModal(false);
+    setIsMeetingProcessing(true);
+  };
+
+  const handleMeetingSaveSuccess = () => {
+    setIsMeetingProcessing(false);
+  };
+
   if (loading) {
     return <LoadingSpinner />;
+  }
+
+  if (isMeetingProcessing) {
+    return <LoadingSpinner title="Processing meeting..." subtitle="This may take a moment" />;
   }
 
   if (error || meetingsError || requirementsError) {
     return (
       <ErrorMessage
-        message={(error || meetingsError || requirementsError) || "Ocurrió un error"}
+        message={(error || meetingsError || requirementsError) || "An error occurred"}
       />
     );
   }
@@ -81,7 +95,7 @@ const ProjectDetail: React.FC = () => {
         </div>
       );
     }
-    return <ErrorMessage message="Proyecto no encontrado" />;
+    return <ErrorMessage message="Project not found" />;
   }
 
   return (
@@ -150,7 +164,8 @@ const ProjectDetail: React.FC = () => {
       <Modal isOpen={showMeetingModal} onClose={() => setShowMeetingModal(false)}>
         <MeetingForm
           onCancel={() => setShowMeetingModal(false)}
-          onSaveSuccess={() => setShowMeetingModal(false)}
+          onSaveSuccess={handleMeetingSaveSuccess}
+          onProcessingStart={handleMeetingProcessingStart}
           projectId={project.id}
           projectTitle={project.title}
           projectDescription={project.description}
