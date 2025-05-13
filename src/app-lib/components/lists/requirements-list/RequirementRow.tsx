@@ -132,21 +132,21 @@ const RequirementRow: React.FC<RequirementRowProps> = ({
             className="w-full px-2 py-1 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
             value={tempResponsible}
             onChange={(e) => onResponsibleChange(e.target.value)}
-            placeholder="Asignar responsable"
+            placeholder="Assign responsible"
           />
         ) : (
-          requirement.responsible || <span className="italic text-gray-400">Sin asignar</span>
+          requirement.responsible || <span className="italic text-gray-400">No assigned</span>
         )}
       </td>
 
       {/* Origen */}
       <td className="px-2 py-2 text-gray-700">
-        {requirement.origin || <span className="italic text-gray-400">No registrado</span>}
+        {requirement.origin || <span className="italic text-gray-400">Not registered</span>}
       </td>
 
       {/* Razón */}
       <td className="px-2 py-2 text-gray-700">
-        {requirement.reason || <span className="italic text-gray-400">Sin motivo</span>}
+        {requirement.reason || <span className="italic text-gray-400">No reason</span>}
       </td>
 
       {/* Acciones */}

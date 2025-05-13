@@ -15,6 +15,7 @@ import RequirementList from "@/smartspecs/app-lib/components/lists/requirements-
 import { useProjectData } from "@/smartspecs/app-lib/hooks/projects/useProjectData";
 import { useProjectDetail } from "@/smartspecs/app-lib/hooks/projects/useProjectDetail";
 import { Requirement } from "@/smartspecs/app-lib/interfaces/requirement";
+import { useRouter } from 'next/navigation';
 
 const ProjectDetail: React.FC = () => {
   // Este hook se encarga de cargar datos: proyecto, reuniones, requerimientos
@@ -27,7 +28,7 @@ const ProjectDetail: React.FC = () => {
     meetingsError,
     requirementsError,
   } = useProjectData();
-
+  const router = useRouter();
   // Este hook maneja los estados de UI: editar, modales, mensajes de éxito, etc.
   const {
     isEditing,
@@ -43,6 +44,7 @@ const ProjectDetail: React.FC = () => {
   } = useProjectDetail(project);
 
   const [showCopySuccess, setShowCopySuccess] = useState(false);
+  const [isMeetingProcessing, setIsMeetingProcessing] = useState(false);
 
   const handleCopyRequirements = () => {
     const requirementsText = requirements.map(req => {
@@ -60,14 +62,27 @@ const ProjectDetail: React.FC = () => {
       });
   };
 
+  const handleMeetingProcessingStart = () => {
+    setShowMeetingModal(false);
+    setIsMeetingProcessing(true);
+  };
+
+  const handleMeetingSaveSuccess = () => {
+    setIsMeetingProcessing(false);
+  };
+
   if (loading) {
     return <LoadingSpinner />;
+  }
+
+  if (isMeetingProcessing) {
+    return <LoadingSpinner title="Processing meeting..." subtitle="This may take a moment" />;
   }
 
   if (error || meetingsError || requirementsError) {
     return (
       <ErrorMessage
-        message={(error || meetingsError || requirementsError) || "Ocurrió un error"}
+        message={(error || meetingsError || requirementsError) || "An error occurred"}
       />
     );
   }
@@ -81,7 +96,7 @@ const ProjectDetail: React.FC = () => {
         </div>
       );
     }
-    return <ErrorMessage message="Proyecto no encontrado" />;
+    return <ErrorMessage message="Project not found" />;
   }
 
   return (
@@ -97,6 +112,15 @@ const ProjectDetail: React.FC = () => {
         />
       ) : (
         <div className="w-full">
+            <button
+              onClick={() => router.back()}
+              className="bg-background hover:bg-gray-100 text-text p-2 rounded-lg border border-border"
+              aria-label="Go back"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clipRule="evenodd" />
+              </svg>
+            </button>
           <ProjectInfo project={project} />
           <div className="flex justify-end gap-4 mt-4">
             <button
@@ -150,7 +174,8 @@ const ProjectDetail: React.FC = () => {
       <Modal isOpen={showMeetingModal} onClose={() => setShowMeetingModal(false)}>
         <MeetingForm
           onCancel={() => setShowMeetingModal(false)}
-          onSaveSuccess={() => setShowMeetingModal(false)}
+          onSaveSuccess={handleMeetingSaveSuccess}
+          onProcessingStart={handleMeetingProcessingStart}
           projectId={project.id}
           projectTitle={project.title}
           projectDescription={project.description}

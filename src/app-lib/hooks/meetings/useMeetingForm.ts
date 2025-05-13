@@ -21,6 +21,7 @@ interface UseMeetingFormProps {
   requirementsList?: object[];
   onSaveSuccess?: () => void;
   onCancel: () => void;
+  onProcessingStart?: () => void; // Nueva función para notificar cuando comienza el procesamiento
 }
 
 export const useMeetingForm = ({
@@ -32,6 +33,7 @@ export const useMeetingForm = ({
   requirementsList,
   onSaveSuccess,
   onCancel,
+  onProcessingStart,
 }: UseMeetingFormProps) => {
   const dispatch = useDispatch<AppDispatch>();
   const store = useStore<RootState>(); // 👈 Creamos store
@@ -40,6 +42,7 @@ export const useMeetingForm = ({
   const [description, setDescription] = useState("");
   const [transcription, setTranscription] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   useEffect(() => {
     if (meeting) {
@@ -86,6 +89,12 @@ export const useMeetingForm = ({
 
         if (createResult.meta.requestStatus === "fulfilled") {
           const createdMeeting = createResult.payload as Meeting;
+          
+          // Notificar que empieza el procesamiento y cerrar modal
+          setIsProcessing(true);
+          if (onProcessingStart) {
+            onProcessingStart();
+          }
 
           // ⚡ Llamar al workflow de Dify
           await processDifyWorkflow({
@@ -120,6 +129,7 @@ export const useMeetingForm = ({
       console.error("Error en handleSubmit:", err);
     } finally {
       setIsLoading(false);
+      setIsProcessing(false);
     }
   };
 
@@ -131,6 +141,7 @@ export const useMeetingForm = ({
     transcription,
     setTranscription,
     isLoading,
+    isProcessing,
     handleSubmit,
   };
 };

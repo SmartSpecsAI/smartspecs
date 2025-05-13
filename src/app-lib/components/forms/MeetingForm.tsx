@@ -5,6 +5,7 @@ import { useMeetingForm } from "@/smartspecs/app-lib/hooks/meetings/useMeetingFo
 interface MeetingFormProps {
   onCancel: () => void;
   onSaveSuccess?: () => void;
+  onProcessingStart?: () => void;
 
   // Si es edición, pasamos la meeting
   meeting?: Meeting;
@@ -21,6 +22,7 @@ const MeetingForm: React.FC<MeetingFormProps> = ({
   meeting,
   onCancel,
   onSaveSuccess,
+  onProcessingStart,
   projectId,
   projectTitle,
   projectDescription,
@@ -45,6 +47,7 @@ const MeetingForm: React.FC<MeetingFormProps> = ({
     requirementsList,
     onSaveSuccess,
     onCancel,
+    onProcessingStart,
   });
 
   // Para indicar si es edición en la UI
