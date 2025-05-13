@@ -44,11 +44,12 @@ const RequirementRow: React.FC<RequirementRowProps> = ({
       {/* Título */}
       <td className="px-2 py-2">
         {isEditing ? (
-          <input
-            type="text"
+          <textarea
             className="w-full px-2 py-1 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
             value={tempTitle}
             onChange={(e) => onTitleChange(e.target.value)}
+            rows={3}
+            style={{ minHeight: "60px" }}
           />
         ) : (
           <div className="font-medium text-gray-900">{requirement.title}</div>
@@ -62,6 +63,8 @@ const RequirementRow: React.FC<RequirementRowProps> = ({
             className="w-full px-2 py-1 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
             value={tempDescription}
             onChange={(e) => onDescriptionChange(e.target.value)}
+            rows={5}
+            style={{ minHeight: "100px" }}
           />
         ) : (
           <div className="text-gray-500">{requirement.description}</div>

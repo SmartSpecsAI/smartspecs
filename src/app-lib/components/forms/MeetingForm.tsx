@@ -59,39 +59,39 @@ const MeetingForm: React.FC<MeetingFormProps> = ({
       className="space-y-6 w-full mx-auto p-6 bg-white rounded-lg shadow-lg"
     >
       <div className="space-y-2">
-        <label className="block text-sm font-medium text-gray-700">Título:</label>
+        <label className="block text-sm font-medium text-gray-700">Title:</label>
         <input
           type="text"
           className="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-primary focus:border-primary transition-colors duration-200"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          placeholder="Nombre de la reunión"
+          placeholder="Meeting title"
           required
         />
       </div>
 
       <div className="space-y-2">
         <label className="block text-sm font-medium text-gray-700">
-          Descripción:
+          Description: 
         </label>
         <textarea
           className="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-primary focus:border-primary transition-colors duration-200"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          placeholder="Describe brevemente la reunión"
+          placeholder="Describe briefly the meeting"
           rows={3}
         />
       </div>
 
       <div className="space-y-2">
         <label className="block text-sm font-medium text-gray-700">
-          Transcripción:
+          Transcription:
         </label>
         <textarea
           className="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-primary focus:border-primary transition-colors duration-200"
           value={transcription}
           onChange={(e) => setTranscription(e.target.value)}
-          placeholder="Ingresa la transcripción de la reunión"
+          placeholder="Enter the meeting transcription"
           rows={6}
         />
       </div>
@@ -102,7 +102,7 @@ const MeetingForm: React.FC<MeetingFormProps> = ({
           onClick={onCancel}
           className="px-6 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-colors duration-200"
         >
-          Cancelar
+          Cancel
         </button>
         <button
           type="submit"
@@ -111,11 +111,11 @@ const MeetingForm: React.FC<MeetingFormProps> = ({
         >
           {isLoading
             ? isEditMode
-              ? "Guardando..."
-              : "Creando..."
+              ? "Saving..."
+              : "Creating..."
             : isEditMode
-            ? "Guardar"
-            : "Crear"}
+            ? "Save"
+            : "Create"}
         </button>
       </div>
     </form>

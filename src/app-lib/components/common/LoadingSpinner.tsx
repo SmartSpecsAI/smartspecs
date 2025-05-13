@@ -8,7 +8,7 @@ interface LoadingSpinnerProps {
 
 const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({ 
   className = "min-h-[50vh]", 
-  title = "Cargando...",
+  title = "Loading...",
   subtitle 
 }) => {
   return (

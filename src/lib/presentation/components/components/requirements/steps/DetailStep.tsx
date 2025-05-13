@@ -13,7 +13,7 @@ export const DetailsStep: React.FC<DetailsStepProps> = ({ form, project }) => (
       label="Title"
       rules={[{ required: true, message: "Please input the title!" }]}
     >
-      <Input />
+      <Input.TextArea rows={3} style={{ minHeight: "70px" }} />
     </Form.Item>
 
     <Form.Item
@@ -21,7 +21,7 @@ export const DetailsStep: React.FC<DetailsStepProps> = ({ form, project }) => (
       label="Description"
       rules={[{ required: true, message: "Please input the description!" }]}
     >
-      <Input.TextArea rows={4} />
+      <Input.TextArea rows={5} style={{ minHeight: "100px" }} />
     </Form.Item>
 
     <Form.Item
