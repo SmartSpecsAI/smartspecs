@@ -8,7 +8,7 @@ interface ProjectInfoProps {
 const ProjectInfo: React.FC<ProjectInfoProps> = ({ project }) => {
   
   if (!project) {
-    return <LoadingSpinner title="Cargando información del proyecto..." />;
+    return <LoadingSpinner title="Loading project information..." />;
   }
 
   return (

@@ -23,5 +23,5 @@ export default function Home() {
   }, [currentUser, isLoading, router]);
 
   // Usar el componente LoadingSpinner
-  return <LoadingSpinner title="Cargando SmartSpecs..." />;
+  return <LoadingSpinner title="Loading SmartSpecs..." />;
 }
