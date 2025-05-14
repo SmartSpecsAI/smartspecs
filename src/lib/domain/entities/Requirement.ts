@@ -22,4 +22,5 @@ export type Requirement = {
   transcription?: string;
   items?: RequirementItem[];
   priority: Priority;
+  reason?: string;
 };

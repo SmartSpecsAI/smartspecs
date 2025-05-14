@@ -6,7 +6,7 @@ interface RequirementHistoryProps {
 
 const RequirementHistory: React.FC<RequirementHistoryProps> = ({ histories }) => {
     if (histories.length === 0) {
-        return <p className="text-gray-500 italic text-sm">Sin historial de cambios.</p>;
+        return <p className="text-gray-500 italic text-sm">No history.</p>;
     }
 
     return (
@@ -22,8 +22,8 @@ const RequirementHistory: React.FC<RequirementHistoryProps> = ({ histories }) =>
                     >
                         <div className="flex items-center justify-between mb-3">
                             <p className="text-sm font-medium text-gray-700">
-                                <span className="text-gray-500">Modificado por</span>{" "}
-                                <span className="font-semibold">{entry.changedBy ?? "Desconocido"}</span>
+                                <span className="text-gray-500">Modified by</span>{" "}
+                                <span className="font-semibold">{entry.changedBy ?? "Unknown"}</span>
                             </p>
                             <p className="text-xs text-gray-500">
                                 {entry.changedAt?.seconds ? new Date(entry.changedAt.seconds * 1000).toLocaleString() : ""}

@@ -11,6 +11,7 @@ import LoadingSpinner from "@/smartspecs/app-lib/components/common/LoadingSpinne
 import ErrorMessage from "@/smartspecs/app-lib/components/messages/ErrorMessage";
 import SuccessMessage from "@/smartspecs/app-lib/components/messages/SuccessMessage";
 import MeetingForm from "@/smartspecs/app-lib/components/forms/MeetingForm";
+import RequirementForm from "@/smartspecs/app-lib/components/forms/RequirementForm";
 import RequirementList from "@/smartspecs/app-lib/components/lists/requirements-list/RequirementList";
 import { useProjectData } from "@/smartspecs/app-lib/hooks/projects/useProjectData";
 import { useProjectDetail } from "@/smartspecs/app-lib/hooks/projects/useProjectDetail";
@@ -45,6 +46,7 @@ const ProjectDetail: React.FC = () => {
 
   const [showCopySuccess, setShowCopySuccess] = useState(false);
   const [isMeetingProcessing, setIsMeetingProcessing] = useState(false);
+  const [showRequirementModal, setShowRequirementModal] = useState(false);
 
   const handleCopyRequirements = () => {
     const requirementsText = requirements.map(req => {
@@ -69,6 +71,10 @@ const ProjectDetail: React.FC = () => {
 
   const handleMeetingSaveSuccess = () => {
     setIsMeetingProcessing(false);
+  };
+
+  const handleRequirementSaveSuccess = () => {
+    setShowRequirementModal(false);
   };
 
   if (loading) {
@@ -184,6 +190,14 @@ const ProjectDetail: React.FC = () => {
         />
       </Modal>
 
+      <Modal isOpen={showRequirementModal} onClose={() => setShowRequirementModal(false)}>
+        <RequirementForm
+          onCancel={() => setShowRequirementModal(false)}
+          onSaveSuccess={handleRequirementSaveSuccess}
+          projectId={project.id}
+        />
+      </Modal>
+
       <div className="bg-background p-6 rounded-xl shadow-md w-full mt-8">
         <h2 className="text-2xl font-bold mb-4">Meetings</h2>
         <MeetingList meetings={projectMeetings} />
@@ -206,6 +220,12 @@ const ProjectDetail: React.FC = () => {
               onClick={handleCopyRequirements}
             >
               Copy Requirements
+            </button>
+            <button
+              className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition-colors"
+              onClick={() => setShowRequirementModal(true)}
+            >
+              Add Requirement
             </button>
           </div>
         </div>

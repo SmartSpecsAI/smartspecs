@@ -38,6 +38,7 @@ export const createRequirement = createAsyncThunk(
     try {
       const timestamp = Timestamp.now();
 
+      console.log("requirement", requirement);
       const docRef = await addDoc(collection(firestore, "requirements"), {
         ...requirement,
         responsible: requirement.responsible ?? "",
@@ -69,7 +70,11 @@ export const createRequirement = createAsyncThunk(
 export const updateRequirement = createAsyncThunk(
   "requirements/updateRequirement",
   async (
-    { id, updatedData }: { id: string; updatedData: Partial<Requirement> },
+    { id, updatedData, historyReason }: { 
+      id: string; 
+      updatedData: Partial<Requirement>; 
+      historyReason?: string 
+    },
     { rejectWithValue }
   ) => {
     try {
@@ -81,9 +86,36 @@ export const updateRequirement = createAsyncThunk(
         updatedAt: timestamp,
       });
 
+      // Obtener los datos actualizados del requerimiento
       const snap = await getDoc(docRef);
       if (!snap.exists()) {
         return rejectWithValue("El requerimiento no existe");
+      }
+
+      // Guardar historial si hay un historyReason
+      if (historyReason) {
+        const previousData = snap.data();
+        await addDoc(collection(firestore, "requirements", id, "history"), {
+          changedAt: timestamp,
+          changedBy: "User", // Podrías obtener el usuario actual aquí
+          origin: updatedData.origin || "Manual",
+          reason: historyReason, // Usar el reason específico para el historial
+          meetingId: "",
+          requirementId: id,
+          previousState: {
+            title: previousData.title,
+            description: previousData.description,
+            priority: previousData.priority,
+            status: previousData.status,
+            projectId: previousData.projectId,
+            createdAt: previousData.createdAt,
+            updatedAt: previousData.updatedAt,
+          },
+          newState: {
+            ...previousData,
+            ...updatedData,
+          }
+        });
       }
 
       const data = snap.data();
@@ -95,7 +127,7 @@ export const updateRequirement = createAsyncThunk(
         priority: data.priority || "medium",
         status: data.status || Status.IN_PROGRESS,
         responsible: data.responsible || "",
-        reason: data.reason || "",
+        reason: data.reason || "", // Mantener el reason original
         origin: data.origin || "Dify",
         createdAt: toISODate(data.createdAt),
         updatedAt: toISODate(data.updatedAt),
@@ -109,7 +141,7 @@ export const updateRequirement = createAsyncThunk(
   }
 );
 
-// Eliminar un requerimiento
+// Eliminar requerimiento
 export const deleteRequirement = createAsyncThunk(
   "requirements/deleteRequirement",
   async (id: string, { rejectWithValue }) => {
@@ -118,7 +150,7 @@ export const deleteRequirement = createAsyncThunk(
       return id;
     } catch (error) {
       console.error("Error deleting requirement:", error);
-      return rejectWithValue("Error al eliminar el requerimiento");
+      return rejectWithValue("Error al eliminar requerimiento");
     }
   }
 );
@@ -260,14 +292,7 @@ const requirementSlice = createSlice({
       .addCase(getRequirement.fulfilled, (state, action: PayloadAction<Requirement>) => {
         state.loading = false;
         state.error = null;
-        const index = state.requirements.findIndex(
-          (req) => req.id === action.payload.id
-        );
-        if (index !== -1) {
-          state.requirements[index] = action.payload;
-        } else {
-          state.requirements.push(action.payload);
-        }
+        state.selectedRequirement = action.payload;
       })
       .addCase(getRequirement.rejected, (state, action) => {
         state.loading = false;

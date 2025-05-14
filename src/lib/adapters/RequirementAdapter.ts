@@ -16,6 +16,7 @@ export class RequirementAdapter {
       source: (appRequirement.origin || "text") as "text" | "audio" | "integration",
       status: appRequirement.status as DomainStatus,
       priority: appRequirement.priority,
+      reason: appRequirement.reason,
       items: [],
       audioUrl: undefined,
       text: undefined,
@@ -34,6 +35,7 @@ export class RequirementAdapter {
       updatedAt: domainRequirement.updatedAt.toDate().toISOString(),
       responsible: domainRequirement.clientRepName,
       origin: domainRequirement.source,
+      reason: domainRequirement.reason || "",
       status: domainRequirement.status as AppStatus,
       priority: domainRequirement.priority,
     };

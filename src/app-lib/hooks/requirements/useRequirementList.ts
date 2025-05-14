@@ -22,82 +22,23 @@ export const useRequirementList = () => {
 
   const handleEditClick = async (req: Requirement) => {
     if (editingId === req.id) {
-      // Primero obtenemos el estado anterior del requerimiento para el historial
-      const docRef = doc(firestore, "requirements", req.id);
-      const snap = await getDoc(docRef);
-      
-      if (snap.exists()) {
-        const previousData = snap.data();
-        const previousState = {
-          id: snap.id,
-          projectId: previousData?.projectId || "",
-          title: previousData?.title || "",
-          description: previousData?.description || "",
-          priority: previousData?.priority || Priority.MEDIUM,
-          status: previousData?.status || Status.PENDING,
-          responsible: previousData?.responsible || "",
-          createdAt: previousData?.createdAt?.toDate().toISOString() || "",
-          updatedAt: previousData?.updatedAt?.toDate().toISOString() || "",
-        };
-        
-        // Actualizar el requerimiento
-        dispatch(
-          updateRequirement({
-            id: req.id,
-            updatedData: {
-              title: tempTitle,
-              description: tempDescription,
-              priority: tempPriority as Priority,
-              status: tempStatus,
-              responsible: tempResponsible,
-              origin: "Manual",
-              reason: "Manual edit",
-              updatedAt: new Date().toISOString(),
-            },
-          })
-        );
-
-        // Guardar historial
-        const historyRef = doc(collection(firestore, "requirements", req.id, "history"));
-        await setDoc(historyRef, {
-          id: historyRef.id,
-          requirementId: req.id,
-          changedAt: Timestamp.now(),
-          changedBy: currentUser?.name || "Unknown user",
-          meetingId: "", // No hay meetingId en edición manual
-          origin: "Manual",
-          reason: "Manual edit",
-          previousState,
-          newState: {
-            id: req.id,
-            projectId: req.projectId,
+      // Actualizar el requerimiento sin modificar el reason
+      dispatch(
+        updateRequirement({
+          id: req.id,
+          updatedData: {
             title: tempTitle,
             description: tempDescription,
-            priority: tempPriority,
+            priority: tempPriority as Priority,
             status: tempStatus,
             responsible: tempResponsible,
-            createdAt: req.createdAt,
+            origin: "Manual",
+            // No incluimos reason aquí para mantener el original
             updatedAt: new Date().toISOString(),
           },
-        });
-      } else {
-        // Si no existe el documento, simplemente actualizamos sin historial
-        dispatch(
-          updateRequirement({
-            id: req.id,
-            updatedData: {
-              title: tempTitle,
-              description: tempDescription,
-              priority: tempPriority as Priority,
-              status: tempStatus,
-              responsible: tempResponsible,
-              origin: "Manual",
-              reason: "Manual edit",
-              updatedAt: new Date().toISOString(),
-            },
-          })
-        );
-      }
+          historyReason: "Manual edit" // Pasamos el reason para el historial
+        })
+      );
       
       setEditingId(null);
     } else {

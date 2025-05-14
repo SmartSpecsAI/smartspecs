@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Requirement, Status, Priority } from '@/smartspecs/app-lib/interfaces/requirement';
 
 interface RequirementRowProps {
@@ -36,6 +36,52 @@ const RequirementRow: React.FC<RequirementRowProps> = ({
   onEditClick,
   onDeleteClick,
 }) => {
+  const [showTooltip, setShowTooltip] = useState(false);
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const iconRef = useRef<HTMLDivElement>(null);
+  
+  // Calculate position on hover/click
+  useEffect(() => {
+    if (showTooltip && iconRef.current) {
+      const rect = iconRef.current.getBoundingClientRect();
+      setPosition({
+        x: rect.left - 320, // Position to the left of the icon
+        y: rect.top - 20
+      });
+    }
+  }, [showTooltip]);
+  
+  // Create tooltip directly in body using DOM API for maximum z-index control
+  useEffect(() => {
+    if (!showTooltip || !requirement.reason) return;
+    
+    // Create the tooltip element
+    const tooltipDiv = document.createElement('div');
+    tooltipDiv.className = 'requirement-tooltip';
+    tooltipDiv.style.left = `${position.x}px`;
+    tooltipDiv.style.top = `${position.y}px`;
+    
+    // Create title
+    const titleDiv = document.createElement('div');
+    titleDiv.className = 'font-medium text-gray-900 mb-2';
+    titleDiv.innerText = 'Reason:';
+    
+    // Create content
+    const contentDiv = document.createElement('div');
+    contentDiv.className = 'text-gray-700 text-sm max-h-60 overflow-y-auto whitespace-pre-wrap';
+    contentDiv.innerText = requirement.reason;
+    
+    // Append elements
+    tooltipDiv.appendChild(titleDiv);
+    tooltipDiv.appendChild(contentDiv);
+    document.body.appendChild(tooltipDiv);
+    
+    // Cleanup function
+    return () => {
+      document.body.removeChild(tooltipDiv);
+    };
+  }, [showTooltip, requirement.reason, position]);
+  
   return (
     <tr className="hover:bg-gray-50 text-sm">
       {/* # */}
@@ -91,10 +137,10 @@ const RequirementRow: React.FC<RequirementRowProps> = ({
                 : 'bg-green-100 text-green-800'
             }`}>
             {requirement.priority === Priority.HIGH
-              ? 'Alta'
+              ? 'High'
               : requirement.priority === Priority.MEDIUM
-                ? 'Media'
-                : 'Baja'}
+                ? 'Medium'
+                : 'Low'}
           </span>
         )}
       </td>
@@ -107,9 +153,9 @@ const RequirementRow: React.FC<RequirementRowProps> = ({
             value={tempStatus}
             onChange={(e) => onStatusChange(e.target.value as Status)}
           >
-            <option value={Status.IN_PROGRESS}>En Progreso</option>
-            <option value={Status.DONE}>Completado</option>
-            <option value={Status.PENDING}>Pendiente</option>
+            <option value={Status.IN_PROGRESS}>In Progress</option>
+            <option value={Status.DONE}>Done</option>
+            <option value={Status.PENDING}>Pending</option>
           </select>
         ) : (
           <span className={`inline-flex items-center px-2 py-0.5 rounded-full font-medium ${requirement.status === Status.DONE
@@ -119,10 +165,10 @@ const RequirementRow: React.FC<RequirementRowProps> = ({
                 : 'bg-red-100 text-red-800'
             }`}>
             {requirement.status === Status.DONE
-              ? 'Completado'
+              ? 'Done'
               : requirement.status === Status.IN_PROGRESS
-                ? 'En Progreso'
-                : 'Pendiente'}
+                ? 'In Progress'
+                : 'Pending'}
           </span>
         )}
       </td>
@@ -148,8 +194,21 @@ const RequirementRow: React.FC<RequirementRowProps> = ({
       </td>
 
       {/* Razón */}
-      <td className="px-2 py-2 text-gray-700">
-        {requirement.reason || <span className="italic text-gray-400">No reason</span>}
+      <td className="px-2 py-2 text-gray-700 tooltip-container">
+        {requirement.reason ? (
+          <div 
+            ref={iconRef}
+            className="cursor-pointer text-blue-500"
+            onMouseEnter={() => setShowTooltip(true)}
+            onMouseLeave={() => setShowTooltip(false)}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+        ) : (
+          <span className="italic text-gray-400">No reason</span>
+        )}
       </td>
 
       {/* Acciones */}
