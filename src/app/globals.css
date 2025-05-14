@@ -64,3 +64,28 @@ body {
   background-color: rgba(var(--primary), 0.9) !important;
 }
 
+/* Tooltip styles that break free from table constraints */
+.requirement-tooltip {
+  position: fixed !important;
+  z-index: 9999999 !important;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3) !important;
+  border-radius: 0.5rem !important;
+  background-color: white !important;
+  padding: 1rem !important;
+  border: 1px solid #e2e8f0 !important;
+  max-width: 400px !important;
+  width: 300px !important;
+  pointer-events: auto !important;
+}
+
+/* Ensure all tables allow overflow tooltips */
+table, tr, td, th {
+  overflow: visible !important;
+}
+
+/* For the container of the tooltip */
+.tooltip-container {
+  position: relative;
+  display: inline-block;
+}
+
