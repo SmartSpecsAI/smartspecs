@@ -12,8 +12,8 @@ export async function GET(request: Request) {
   try {
     console.log("📢 Enviando solicitud a Fireflies API...");
 
-    const FIRELIES_API_KEY = process.env.FIREFLIES_API_KEY;
-    if (!FIRELIES_API_KEY) {
+    const FIREFLIES_API_KEY = process.env.FIREFLIES_API_KEY;
+    if (!FIREFLIES_API_KEY) {
       console.error("🚨 Error: API Key no configurada");
       return NextResponse.json({ error: "API Key no configurada" }, { status: 500 });
     }
@@ -40,7 +40,7 @@ export async function GET(request: Request) {
     const response = await axios.post("https://api.fireflies.ai/graphql", data, {
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${FIRELIES_API_KEY}`,
+        Authorization: `Bearer ${FIREFLIES_API_KEY}`,
       },
     });
 

@@ -11,6 +11,7 @@ import {
 import { Meeting } from "@/smartspecs/app-lib/interfaces/meeting";
 import { processDifyWorkflow } from "@/smartspecs/app-lib/utils/difyProcessor";
 import { Requirement } from "@/smartspecs/app-lib/interfaces/requirement";
+import { toast } from "react-toastify";
 
 interface UseMeetingFormProps {
   meeting?: Meeting;
@@ -41,8 +42,11 @@ export const useMeetingForm = ({
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [transcription, setTranscription] = useState("");
+  const [firefliesTranscriptId, setFirefliesTranscriptId] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isLoadingFireflies, setIsLoadingFireflies] = useState(false);
+  const [isDataLoadedFromFireflies, setIsDataLoadedFromFireflies] = useState(false);
 
   useEffect(() => {
     if (meeting) {
@@ -51,6 +55,88 @@ export const useMeetingForm = ({
       setTranscription(meeting.transcription || "");
     }
   }, [meeting]);
+
+  // Función para cargar datos desde Fireflies
+  const handleLoadFromFireflies = async () => {
+    if (!firefliesTranscriptId.trim()) {
+      toast.error("Please enter a Fireflies transcript ID");
+      return;
+    }
+
+    setIsLoadingFireflies(true);
+    try {
+      toast.info("🔄 Loading meeting info...");
+      
+      const response = await fetch(`/api/fireflies/transcripts?id=${firefliesTranscriptId}`);
+      
+      if (!response.ok) {
+        if (response.status === 404) {
+          throw new Error("Transcript not found. Please check the ID and try again.");
+        } else if (response.status === 401) {
+          throw new Error("Invalid API key. Please check your Fireflies API configuration.");
+        } else if (response.status === 500) {
+          throw new Error("Server error. Please try again later.");
+        }
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      
+      // Verificar si hay datos de transcript disponibles, incluso con errores de plan
+      const transcript = data.data?.transcript;
+      if (!transcript) {
+        throw new Error("Transcript data not found in response");
+      }
+
+
+      // Extraer información básica disponible
+      const meetingTitle = transcript.title || "Meeting";
+      const meetingDate = transcript.dateString || transcript.date;
+      const participants = transcript.participants || [];
+      const sentences = transcript.sentences || [];
+      
+      // Construir la transcripción a partir de las sentences (si están disponibles)
+      let fullTranscription = "";
+      if (sentences && sentences.length > 0) {
+        fullTranscription = sentences
+          .map((sentence: any) => `${sentence.speaker_name || 'Speaker'}: ${sentence.text || ''}`)
+          .join('\n');
+      } else {
+        // Si no hay sentences disponibles debido al plan, crear un placeholder
+        fullTranscription = `Meeting: ${meetingTitle}\nDate: ${meetingDate}\nParticipants: ${participants.join(', ')}\n\n[Full transcription requires Fireflies paid plan - Please add manual transcription or upgrade your Fireflies plan]`;
+      }
+
+      // Construir descripción con información adicional
+      const descriptionParts = [];
+      if (meetingDate) {
+        const dateStr = typeof meetingDate === 'number' 
+          ? new Date(meetingDate).toLocaleString() 
+          : meetingDate;
+        descriptionParts.push(`Date: ${dateStr}`);
+      }
+      if (participants.length > 0) descriptionParts.push(`Participants: ${participants.join(', ')}`);
+      if (transcript.duration) descriptionParts.push(`Duration: ${Math.round(transcript.duration / 60)} minutes`);
+      if (transcript.host_email) descriptionParts.push(`Host: ${transcript.host_email}`);
+      
+      const meetingDescription = descriptionParts.join('\n');
+
+      // Actualizar los campos del formulario
+      setTitle(meetingTitle);
+      setDescription(meetingDescription);
+      setTranscription(fullTranscription);
+
+      setIsDataLoadedFromFireflies(true);
+      
+
+      toast.success("Meeting data loaded successfully!");
+      
+      
+    } catch (error) {
+      toast.error("❌ Error loading from Fireflies: " + (error instanceof Error ? error.message : 'Unknown error occurred'));
+    } finally {
+      setIsLoadingFireflies(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -68,12 +154,25 @@ export const useMeetingForm = ({
           onSaveSuccess?.();
           onCancel();
         } else {
-          console.error("Error actualizando la reunión");
+          toast.error("Error actualizando la reunión");
         }
       } else {
         // === Creación de reunión ===
         if (!projectId) {
-          console.error("No hay projectId para crear reunión");
+          toast.error("No hay projectId para crear reunión");
+          setIsLoading(false);
+          return;
+        }
+
+        // Validar que se haya cargado información desde Fireflies
+        if (!firefliesTranscriptId.trim() || !isDataLoadedFromFireflies) {
+          toast.error("Please enter a Fireflies transcript ID and load the data first");
+          setIsLoading(false);
+          return;
+        }
+
+        if (!title.trim()) {
+          toast.error("Please load meeting data from Fireflies before creating the meeting");
           setIsLoading(false);
           return;
         }
@@ -118,15 +217,16 @@ export const useMeetingForm = ({
           setTitle("");
           setDescription("");
           setTranscription("");
+          setFirefliesTranscriptId("");
 
           onSaveSuccess?.();
           onCancel();
         } else {
-          console.error("Error creando la reunión");
+          toast.error("Error creando la reunión");
         }
       }
     } catch (err) {
-      console.error("Error en handleSubmit:", err);
+      toast.error("Error en handleSubmit: " + err);
     } finally {
       setIsLoading(false);
       setIsProcessing(false);
@@ -140,8 +240,13 @@ export const useMeetingForm = ({
     setDescription,
     transcription,
     setTranscription,
+    firefliesTranscriptId,
+    setFirefliesTranscriptId,
     isLoading,
     isProcessing,
+    isLoadingFireflies,
+    isDataLoadedFromFireflies,
     handleSubmit,
+    handleLoadFromFireflies,
   };
 };
