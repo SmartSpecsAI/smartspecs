@@ -63,10 +63,10 @@ const MeetingForm: React.FC<MeetingFormProps> = ({
       onSubmit={handleSubmit}
       className="space-y-6 w-full mx-auto p-6 bg-white rounded-lg shadow-lg"
     >
-      {/* Campo para Fireflies Transcript ID - Ahora es el principal */}
+      {/* Campo para Fireflies Transcript ID - Ahora es opcional */}
       <div className="space-y-2">
         <label className="block text-sm font-medium text-gray-700">
-          Fireflies Transcript ID <span className="text-red-500">*</span>:
+          Fireflies Transcript ID (opcional):
         </label>
         <div className="flex gap-2">
           <input
@@ -75,7 +75,6 @@ const MeetingForm: React.FC<MeetingFormProps> = ({
             value={firefliesTranscriptId}
             onChange={(e) => setFirefliesTranscriptId(e.target.value)}
             placeholder="Enter Fireflies transcript ID (e.g., transcript_12345...)"
-            required
           />
           <button
             type="button"
@@ -86,6 +85,9 @@ const MeetingForm: React.FC<MeetingFormProps> = ({
             {isLoadingFireflies ? "Loading..." : "Load meeting data"}
           </button>
         </div>
+        <p className="text-sm text-gray-500">
+          Puedes cargar automáticamente la información desde Fireflies o llenar los campos manualmente a continuación.
+        </p>
         {transcription.includes("[Full transcription requires Fireflies paid plan") && (
           <div className="bg-yellow-50 border border-yellow-200 rounded-md p-3 mt-2">
             <div className="flex">
@@ -114,7 +116,7 @@ const MeetingForm: React.FC<MeetingFormProps> = ({
       </div>
 
       <div className="space-y-2">
-        <label className="block text-sm font-medium text-gray-700">Title:</label>
+        <label className="block text-sm font-medium text-gray-700">Title <span className="text-red-500">*</span>:</label>
         <div className="relative">
           <input
             type="text"
@@ -123,7 +125,7 @@ const MeetingForm: React.FC<MeetingFormProps> = ({
             }`}
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            placeholder="Meeting title (will be auto-filled from Fireflies)"
+            placeholder="Meeting title"
             required
           />
           {isDataLoadedFromFireflies && title && (
@@ -146,14 +148,14 @@ const MeetingForm: React.FC<MeetingFormProps> = ({
           }`}
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          placeholder="Meeting description (will be auto-filled with date, participants, and duration)"
+          placeholder="Meeting description"
           rows={3}
         />
       </div>
 
       <div className="space-y-2">
         <label className="block text-sm font-medium text-gray-700">
-          Transcription:
+          Transcription <span className="text-red-500">*</span>:
         </label>
         <div className="relative">
           <textarea
@@ -162,8 +164,9 @@ const MeetingForm: React.FC<MeetingFormProps> = ({
             }`}
             value={transcription}
             onChange={(e) => setTranscription(e.target.value)}
-            placeholder="Full meeting transcription (will be auto-filled from Fireflies)"
+            placeholder="Full meeting transcription"
             rows={8}
+            required
           />
           {isDataLoadedFromFireflies && transcription && (
             <div className="absolute right-2 top-2">
@@ -186,7 +189,7 @@ const MeetingForm: React.FC<MeetingFormProps> = ({
         <button
           type="submit"
           className="px-6 py-2 text-sm font-medium text-white bg-primary rounded-md hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-          disabled={isLoading || isLoadingFireflies || (!isDataLoadedFromFireflies && !isEditMode)}
+          disabled={isLoading || isLoadingFireflies || !title || !transcription}
         >
           {isLoading
             ? isEditMode
@@ -194,9 +197,7 @@ const MeetingForm: React.FC<MeetingFormProps> = ({
               : "Creating Meeting & Processing with Dify..."
             : isEditMode
             ? "Save Changes"
-            : isDataLoadedFromFireflies 
-            ? "Create Meeting"
-            : "Load meeting data first"}
+            : "Create Meeting"}
         </button>
       </div>
     </form>

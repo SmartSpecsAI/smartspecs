@@ -164,15 +164,15 @@ export const useMeetingForm = ({
           return;
         }
 
-        // Validar que se haya cargado información desde Fireflies
-        if (!firefliesTranscriptId.trim() || !isDataLoadedFromFireflies) {
-          toast.error("Please enter a Fireflies transcript ID and load the data first");
+        // Validar campos obligatorios
+        if (!title.trim()) {
+          toast.error("Please enter a meeting title");
           setIsLoading(false);
           return;
         }
 
-        if (!title.trim()) {
-          toast.error("Please load meeting data from Fireflies before creating the meeting");
+        if (!transcription.trim()) {
+          toast.error("Please enter the meeting transcription");
           setIsLoading(false);
           return;
         }
