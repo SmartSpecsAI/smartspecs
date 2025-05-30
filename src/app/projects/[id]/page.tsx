@@ -77,6 +77,10 @@ const ProjectDetail: React.FC = () => {
     setShowRequirementModal(false);
   };
 
+  const handleAddMeetingClick = () => {
+    setShowMeetingModal(true);
+  };
+
   if (loading) {
     return <LoadingSpinner />;
   }
@@ -137,7 +141,7 @@ const ProjectDetail: React.FC = () => {
             </button>
             <button
               className="bg-green-500 text-white px-4 py-2 rounded"
-              onClick={() => setShowMeetingModal(true)}
+              onClick={handleAddMeetingClick}
             >
               Add Meeting
             </button>

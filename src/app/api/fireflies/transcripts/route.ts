@@ -12,8 +12,8 @@ export async function GET(request: Request) {
   try {
     console.log("📢 Enviando solicitud a Fireflies API...");
 
-    const FIRELIES_API_KEY = process.env.FIREFLIES_API_KEY;
-    if (!FIRELIES_API_KEY) {
+    const FIREFLIES_API_KEY = process.env.FIREFLIES_API_KEY;
+    if (!FIREFLIES_API_KEY) {
       console.error("🚨 Error: API Key no configurada");
       return NextResponse.json({ error: "API Key no configurada" }, { status: 500 });
     }
@@ -21,7 +21,7 @@ export async function GET(request: Request) {
     const url = "https://api.fireflies.ai/graphql";
     const headers = {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${FIRELIES_API_KEY}`,
+      Authorization: `Bearer ${FIREFLIES_API_KEY}`,
     };
     const data = {
         query: `
@@ -37,41 +37,17 @@ export async function GET(request: Request) {
                     sentences {
                         index
                         speaker_name
-                        speaker_id
                         text
                         raw_text
                         start_time
                         end_time
-                        ai_filters {
-                            task
-                            pricing
-                            metric
-                            question
-                            date_and_time
-                            text_cleanup
-                            sentiment
-                        }
                     }
                     title
                     host_email
                     organizer_email
-                    calendar_id
-                    user {
-                        user_id
-                        email
-                        name
-                        num_transcripts
-                        recent_meeting
-                        minutes_consumed
-                        is_admin
-                        integrations
-                    }
-                    fireflies_users
                     participants
                     date
                     transcript_url
-                    audio_url
-                    video_url
                     duration
                     meeting_attendees {
                         displayName
@@ -80,33 +56,8 @@ export async function GET(request: Request) {
                         name
                         location
                     }
-                    summary {
-                        keywords
-                        action_items
-                        outline
-                        shorthand_bullet
-                        overview
-                        bullet_gist
-                        gist
-                        short_summary
-                        short_overview
-                        meeting_type
-                        topics_discussed
-                        transcript_chapters
-                    }
                     cal_id
                     calendar_type
-                    apps_preview {
-                        outputs {
-                            transcript_id
-                            user_id
-                            app_id
-                            created_at
-                            title
-                            prompt
-                            response
-                        }
-                    }
                     meeting_link
                 }
             }
