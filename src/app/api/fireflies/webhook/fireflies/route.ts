@@ -49,8 +49,7 @@ interface FirefliesTranscript {
 function verifyFirefliesSignature(payload: string, signature: string, secret: string): boolean {
   try {
     if (!signature || !secret) {
-      console.log("⚠️ Sin firma o secreto - omitiendo verificación");
-      return true; // Permitir si no hay configuración de seguridad
+      return true;
     }
 
     const expectedSignature = crypto
@@ -58,15 +57,12 @@ function verifyFirefliesSignature(payload: string, signature: string, secret: st
       .update(payload)
       .digest('hex');
     
-    // Fireflies envía la firma como "sha256=<hash>"
     const actualSignature = signature.replace('sha256=', '');
     
     const isValid = crypto.timingSafeEqual(
       Buffer.from(expectedSignature, 'hex'),
       Buffer.from(actualSignature, 'hex')
     );
-    
-    console.log("🔒 Verificación de firma:", isValid ? "✅ Válida" : "❌ Inválida");
     return isValid;
   } catch (error) {
     console.error("❌ Error verificando firma:", error);
@@ -79,7 +75,7 @@ async function getTranscriptionFromFireflies(transcriptId: string): Promise<Fire
   try {
     const FIREFLIES_API_KEY = process.env.FIREFLIES_API_KEY;
     if (!FIREFLIES_API_KEY) {
-      throw new Error("API Key no configurada");
+      throw new Error("API Key not configured");
     }
 
     const url = "https://api.fireflies.ai/graphql";
@@ -134,28 +130,23 @@ async function getTranscriptionFromFireflies(transcriptId: string): Promise<Fire
     return response.data?.data?.transcript || null;
 
   } catch (error: any) {
-    console.error("❌ Error al obtener transcripción:", error.response?.data || error.message);
+    console.error("❌ Error getting transcription:", error.response?.data || error.message);
     throw error;
   }
 }
 
 // Función para procesar la transcripción
 async function processTranscription(transcript: FirefliesTranscript, event: FirefliesWebhookEvent) {
-  console.log("🔄 Procesando transcripción:", transcript.id);
+  console.log("🔄 Processing transcription:", transcript.id);
   
   try {
     // 1. Extraer información básica
-    const title = transcript.title || `Reunión ${new Date(transcript.date).toLocaleDateString()}`;
+    const title = transcript.title || `Meeting ${new Date(transcript.date).toLocaleDateString()}`;
     const duration = transcript.duration;
     const participantEmails = transcript.meeting_attendees.map(attendee => attendee.email);
     const participantNames = transcript.meeting_attendees.map(attendee => attendee.displayName || attendee.name);
     const interviewDate = new Date(transcript.date);
-    
-    console.log("📋 Información extraída:");
-    console.log("  📝 Título:", title);
-    console.log("  ⏱️ Duración:", `${Math.round(duration / 60)} minutos`);
-    console.log("  📧 Participantes:", participantNames.join(", "));
-    console.log("  📅 Fecha:", interviewDate.toLocaleString());
+
     
     // 2. Procesar la transcripción completa
     let fullTranscript = "";
@@ -165,12 +156,8 @@ async function processTranscription(transcript: FirefliesTranscript, event: Fire
         .join("\n");
     }
     
-    // 3. Generar descripción/resumen básico
+    // 3. Generar descripción
     const description = generateDescription(transcript, participantNames);
-    
-    console.log("📄 Transcripción procesada:");
-    console.log("  📝 Descripción:", description);
-    console.log("  📜 Transcripción completa:", `${fullTranscript.length} caracteres`);
     
     // 4. Preparar datos para Dify
     const difyPayload = {
@@ -206,7 +193,7 @@ async function processTranscription(transcript: FirefliesTranscript, event: Fire
     */
     
     // RESPUESTA TEMPORAL SIN DIFY
-    console.log("✅ Transcripción procesada exitosamente ... ");
+    console.log("✅ Transcription processed successfully ... ");
     return {
       success: true,
       transcriptId: transcript.id,
@@ -217,7 +204,7 @@ async function processTranscription(transcript: FirefliesTranscript, event: Fire
     };
     
   } catch (error: any) {
-    console.error("❌ Error procesando transcripción:", error.message);
+    console.error("❌ Error processing transcription:", error.message);
     throw error;
   }
 }
@@ -226,10 +213,10 @@ async function processTranscription(transcript: FirefliesTranscript, event: Fire
 function generateDescription(transcript: FirefliesTranscript, participantNames: string[]): string {
   const date = new Date(transcript.date).toLocaleDateString();
   const duration = Math.round(transcript.duration / 60);
-  const participantsText = participantNames.length > 0 ? participantNames.join(", ") : "Participantes no especificados";
+  const participantsText = participantNames.length > 0 ? participantNames.join(", ") : "Participants not specified";
   
   // Descripción básica
-  let description = `Reunión realizada el ${date} con una duración de ${duration} minutos. Participantes: ${participantsText}.`;
+  let description = `Meeting held on ${date} with a duration of ${duration} minutes. Participants: ${participantsText}.`;
   
   // Si hay transcripción, agregar preview
   if (transcript.sentences && transcript.sentences.length > 0) {
@@ -239,9 +226,9 @@ function generateDescription(transcript: FirefliesTranscript, participantNames: 
       .join(" ");
     
     if (firstSentences.length > 100) {
-      description += ` Inicio de la conversación: "${firstSentences.substring(0, 200)}..."`;
+      description += ` Conversation start: "${firstSentences.substring(0, 200)}..."`;
     } else {
-      description += ` Inicio de la conversación: "${firstSentences}"`;
+      description += ` Conversation start: "${firstSentences}"`;
     }
   }
   
@@ -272,9 +259,6 @@ async function sendToDify(payload: any) {
       }
     });
     
-    console.log("✅ Datos enviados a Dify exitosamente");
-    console.log("📊 Respuesta de Dify:", response.data);
-    
     return {
       success: true,
       data: response.data,
@@ -282,9 +266,8 @@ async function sendToDify(payload: any) {
     };
     
   } catch (error: any) {
-    console.error("❌ Error enviando a Dify:", error.response?.data || error.message);
+    console.error("❌ Error sending to Dify:", error.response?.data || error.message);
     
-    // No lanzar error para no interrumpir el webhook
     return {
       success: false,
       error: error.message,
@@ -312,40 +295,28 @@ export async function GET(request: Request) {
 // Webhook POST endpoint (recibe los eventos de Fireflies)
 export async function POST(request: Request) {
   try {
-    console.log("🎯 Webhook recibido de Fireflies");
+    console.log("🎯 Webhook received from Fireflies");
     
     const body = await request.text();
     const event: FirefliesWebhookEvent = JSON.parse(body);
-    
-    console.log("📨 Evento recibido:", event);
-    
+
     // Verificación de origen y firma
     const userAgent = request.headers.get('user-agent');
     const signature = request.headers.get('x-hub-signature');
     const secret = process.env.FIREFLIES_WEBHOOK_SECRET;
     
-    console.log("🔍 User-Agent:", userAgent);
-    console.log("🔐 Signature presente:", !!signature);
-    console.log("🔑 Secret configurado:", !!secret);
-    console.log("🔑 Secret value (primeros 10 chars):", secret ? secret.substring(0, 10) + "..." : "no configurado");
-    
     // Verificar firma si está configurada (OPCIONAL - para mayor seguridad)
     if (secret && signature) {
-      console.log("🔒 Verificando firma del webhook...");
       const isValidSignature = verifyFirefliesSignature(body, signature, secret);
       if (!isValidSignature) {
-        console.error("❌ Firma del webhook inválida");
-        console.error("📝 Payload recibido:", body);
-        console.error("🔐 Signature recibida:", signature);
         return NextResponse.json({ 
           error: "Firma inválida" 
         }, { status: 401 });
       }
     } else if (signature && !secret) {
-      console.log("⚠️ Webhook tiene firma pero no hay FIREFLIES_WEBHOOK_SECRET configurado");
-      console.log("💡 Para mayor seguridad, configura FIREFLIES_WEBHOOK_SECRET en tu .env");
+      console.log("💡 Configure your Fireflies webhook secret");
     } else {
-      console.log("ℹ️ Webhook sin verificación de firma (configurar FIREFLIES_WEBHOOK_SECRET para mayor seguridad)");
+      console.log("ℹ️ Webhook without signature verification");
     }
     
     // Procesar diferentes tipos de eventos según documentación de Fireflies
