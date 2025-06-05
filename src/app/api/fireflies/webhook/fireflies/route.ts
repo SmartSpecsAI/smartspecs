@@ -2,6 +2,8 @@
 import { NextResponse } from "next/server";
 import axios from "axios";
 import crypto from "crypto";
+import { firestore } from "@/smartspecs/lib/config/firebase-settings";
+import { collection, addDoc } from "firebase/firestore";
 
 // Tipos para los eventos de Fireflies (según documentación oficial)
 interface FirefliesWebhookEvent {
@@ -144,10 +146,7 @@ async function processTranscription(transcript: FirefliesTranscript, event: Fire
     const title = transcript.title || `Meeting ${new Date(transcript.date).toLocaleDateString()}`;
     const duration = transcript.duration;
     const participantEmails = transcript.meeting_attendees.map(attendee => attendee.email);
-    const participantNames = transcript.meeting_attendees.map(attendee => attendee.displayName || attendee.name);
-    const interviewDate = new Date(transcript.date);
 
-    
     // 2. Procesar la transcripción completa
     let fullTranscript = "";
     if (transcript.sentences && transcript.sentences.length > 0) {
@@ -157,19 +156,20 @@ async function processTranscription(transcript: FirefliesTranscript, event: Fire
     }
     
     // 3. Generar descripción
-    const description = generateDescription(transcript, participantNames);
+    const description = generateDescription(transcript, participantEmails);
     
-    // 4. Preparar datos para Dify
-    const difyPayload = {
+    // 4. Guardar en Firebase - colección pending-meetings
+    const meetingData = {
       title: title,
       description: description,
-      transcript: fullTranscript,
+      transcription: fullTranscript,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
       metadata: {
         transcriptId: transcript.id,
         meetingId: event.meetingId,
         date: transcript.date,
         duration: duration,
-        participants: participantNames,
         participantEmails: participantEmails,
         host: transcript.host_email,
         organizer: transcript.organizer_email,
@@ -178,29 +178,20 @@ async function processTranscription(transcript: FirefliesTranscript, event: Fire
         clientReferenceId: event.clientReferenceId || null
       }
     };
-    
-    // 5. Enviar a Dify - COMENTADO TEMPORALMENTE PARA TESTING
-    /*
-    const difyResult = await sendToDify(difyPayload);
-    
-    console.log("✅ Transcripción procesada y enviada a Dify exitosamente");
+
+    // Guardar en la colección pending-meetings
+    const pendingMeetingsCollection = collection(firestore, "pending-meetings");
+    const docRef = await addDoc(pendingMeetingsCollection, meetingData);
+
     return {
       success: true,
       transcriptId: transcript.id,
-      title: title,
-      difyResult: difyResult
-    };
-    */
-    
-    // RESPUESTA TEMPORAL SIN DIFY
-    console.log("✅ Transcription processed successfully ... ");
-    return {
-      success: true,
-      transcriptId: transcript.id,
+      documentId: docRef.id,
       title: title,
       description: description,
-      duration: `${Math.round(duration / 60)} minutos`,
-      participants: participantNames,
+      duration: duration,
+      participants: participantEmails,
+      host: transcript.host_email,
     };
     
   } catch (error: any) {
@@ -210,71 +201,18 @@ async function processTranscription(transcript: FirefliesTranscript, event: Fire
 }
 
 // Función para generar descripción/resumen
-function generateDescription(transcript: FirefliesTranscript, participantNames: string[]): string {
+function generateDescription(transcript: FirefliesTranscript, participantEmails: string[]): string {
   const date = new Date(transcript.date).toLocaleDateString();
-  const duration = Math.round(transcript.duration / 60);
-  const participantsText = participantNames.length > 0 ? participantNames.join(", ") : "Participants not specified";
+  const duration = transcript.duration;
+  const participantsText = participantEmails.length > 0 ? participantEmails.join(", ") : "Participants not specified";
   
   // Descripción básica
   let description = `Meeting held on ${date} with a duration of ${duration} minutes. Participants: ${participantsText}.`;
-  
-  // Si hay transcripción, agregar preview
-  if (transcript.sentences && transcript.sentences.length > 0) {
-    const firstSentences = transcript.sentences
-      .slice(0, 3)
-      .map(s => s.text)
-      .join(" ");
-    
-    if (firstSentences.length > 100) {
-      description += ` Conversation start: "${firstSentences.substring(0, 200)}..."`;
-    } else {
-      description += ` Conversation start: "${firstSentences}"`;
-    }
-  }
+
   
   return description;
 }
 
-// Función para enviar datos a Dify usando el endpoint existente
-async function sendToDify(payload: any) {
-  try {
-    console.log("📤 Enviando datos a Dify usando endpoint interno...");
-    
-    const difyData = {
-      inputs: {
-        title: payload.title,
-        description: payload.description,
-        transcript: payload.transcript,
-        metadata: JSON.stringify(payload.metadata)
-      },
-      user: payload.metadata.host || "fireflies-webhook"
-      // workflow_id se usa el DEFAULT_WORKFLOW_ID del endpoint
-    };
-    
-    // Hacer request al endpoint interno
-    const baseUrl = process.env.APP_URL;
-    const response = await axios.post(`${baseUrl}/api/workflow`, difyData, {
-      headers: {
-        "Content-Type": "application/json"
-      }
-    });
-    
-    return {
-      success: true,
-      data: response.data,
-      difyWorkflowId: response.data?.workflow_run_id || null
-    };
-    
-  } catch (error: any) {
-    console.error("❌ Error sending to Dify:", error.response?.data || error.message);
-    
-    return {
-      success: false,
-      error: error.message,
-      details: error.response?.data
-    };
-  }
-}
 
 // Webhook GET endpoint (para verificación inicial de Fireflies)
 export async function GET(request: Request) {

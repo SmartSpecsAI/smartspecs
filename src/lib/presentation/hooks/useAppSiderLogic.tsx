@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import type { MenuProps } from "antd";
-import { FileDoneOutlined } from "@ant-design/icons";
+import { FileDoneOutlined, CalendarOutlined } from "@ant-design/icons";
 
 export const useAppSiderLogic = () => {
   const [collapsed, setCollapsed] = useState(false);
@@ -32,6 +32,12 @@ export const useAppSiderLogic = () => {
       icon: <FileDoneOutlined/>,
       label: "Projects",
       onClick: () => router.push("/projects"),
+    },
+    {
+      key: "pending-meetings",
+      icon: <CalendarOutlined/>,
+      label: "Pending Meetings",
+      onClick: () => router.push("/pending-meetings"),
     },
   ];
 
