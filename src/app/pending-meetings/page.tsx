@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { collection, getDocs, orderBy, query, deleteDoc, doc, addDoc, where, Timestamp } from "firebase/firestore";
 import { firestore } from "@/smartspecs/lib/config/firebase-settings";
-import { message } from "antd";
+import { toast } from "react-toastify";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState, AppDispatch } from "@/smartspecs/app-lib/redux/store";
 import { processDifyWorkflow } from "@/smartspecs/app-lib/utils/difyProcessor";
@@ -40,6 +40,8 @@ const PendingMeetingsView: React.FC = () => {
   const [meetings, setMeetings] = useState<PendingMeeting[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [acceptingMeetingId, setAcceptingMeetingId] = useState<string | null>(null);
+  const [deletingMeetingId, setDeletingMeetingId] = useState<string | null>(null);
   const { currentUser } = useSelector((state: RootState) => state.users);
   const dispatch = useDispatch<AppDispatch>();
 
@@ -104,10 +106,12 @@ const PendingMeetingsView: React.FC = () => {
 
   const acceptMeeting = async (meetingId: string) => {
     if (!currentUser) {
-      message.error("User not authenticated");
+      toast.error("User not authenticated");
       return;
     }
 
+    setAcceptingMeetingId(meetingId);
+    
     try {
       // 1. Find the first project for the current user (simplified query)
       const projectsCollection = collection(firestore, "projects");
@@ -119,7 +123,7 @@ const PendingMeetingsView: React.FC = () => {
       const projectsSnapshot = await getDocs(projectsQuery);
       
       if (projectsSnapshot.empty) {
-        message.error("No projects found. Please create a project first.");
+        toast.error("No projects found. Please create a project first.");
         return;
       }
 
@@ -149,7 +153,7 @@ const PendingMeetingsView: React.FC = () => {
       // 2. Get the pending meeting data
       const pendingMeeting = meetings.find(m => m.id === meetingId);
       if (!pendingMeeting) {
-        message.error("Meeting not found");
+        toast.error("Meeting not found");
         return;
       }
 
@@ -203,15 +207,19 @@ const PendingMeetingsView: React.FC = () => {
       // 7. Update local state
       setMeetings(prev => prev.filter(meeting => meeting.id !== meetingId));
 
-      message.success(`Meeting accepted, linked to project "${firstProject.title}" and processed with Dify!`);
+      toast.success(`Meeting accepted, linked to project "${firstProject.title}"`);
 
     } catch (err: any) {
       console.error("Error accepting meeting:", err);
-      message.error("Failed to accept meeting");
+      toast.error("Failed to accept meeting");
+    } finally {
+      setAcceptingMeetingId(null);
     }
   };
 
   const deleteMeeting = async (meetingId: string) => {
+    setDeletingMeetingId(meetingId);
+    
     try {
       const meetingRef = doc(firestore, "pending-meetings", meetingId);
       await deleteDoc(meetingRef);
@@ -219,10 +227,12 @@ const PendingMeetingsView: React.FC = () => {
       // Update local state to remove the deleted meeting
       setMeetings(prev => prev.filter(meeting => meeting.id !== meetingId));
       
-      message.success("Meeting deleted successfully");
+      toast.success("Meeting deleted successfully");
     } catch (err: any) {
       console.error("Error deleting meeting:", err);
-      message.error("Failed to delete meeting");
+      toast.error("Failed to delete meeting");
+    } finally {
+      setDeletingMeetingId(null);
     }
   };
 
@@ -243,7 +253,13 @@ const PendingMeetingsView: React.FC = () => {
       {meetings.length === 0 ? (
         <EmptyState />
       ) : (
-        <PendingMeetingsList meetings={meetings} onDelete={deleteMeeting} onAccept={acceptMeeting} />
+        <PendingMeetingsList 
+          meetings={meetings} 
+          onDelete={deleteMeeting} 
+          onAccept={acceptMeeting}
+          acceptingMeetingId={acceptingMeetingId}
+          deletingMeetingId={deletingMeetingId}
+        />
       )}
     </div>
   );

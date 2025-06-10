@@ -26,9 +26,17 @@ interface PendingMeetingsListProps {
   meetings: PendingMeeting[];
   onDelete: (meetingId: string) => void;
   onAccept: (meetingId: string) => void;
+  acceptingMeetingId: string | null;
+  deletingMeetingId: string | null;
 }
 
-const PendingMeetingsList: React.FC<PendingMeetingsListProps> = ({ meetings, onDelete, onAccept }) => {
+const PendingMeetingsList: React.FC<PendingMeetingsListProps> = ({ 
+  meetings, 
+  onDelete, 
+  onAccept, 
+  acceptingMeetingId,
+  deletingMeetingId 
+}) => {
   return (
     <div className="w-full max-w-6xl">
       <div className="grid gap-4">
@@ -38,6 +46,8 @@ const PendingMeetingsList: React.FC<PendingMeetingsListProps> = ({ meetings, onD
             meeting={meeting} 
             onDelete={onDelete}
             onAccept={onAccept}
+            isAccepting={acceptingMeetingId === meeting.id}
+            isDeleting={deletingMeetingId === meeting.id}
           />
         ))}
       </div>
