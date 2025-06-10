@@ -107,3 +107,50 @@ firebase deploy
 
 After deployment, go to Firebase Console → Hosting section. There you will find the deployment URL and additional deployment details.
 
+## Features
+
+SmartSpecs includes the following key functionalities:
+
+### 🔐 **User Management**
+- User registration and authentication
+- Secure login/logout system
+- Protected routes requiring authentication
+- User session management with Firebase Auth
+
+### 📋 **Project Management**
+- Create, edit, and delete projects
+
+### 🎙️ **Meeting Management**
+- Manual meeting creation with transcriptions
+- Meeting details including title, description, and transcription
+- Meeting history per project
+- Integration with audio transcription services
+
+### 📝 **Requirements Management**
+- Create and manage project requirements
+- Requirement approval/rejection workflow
+- Responsible assignment
+- Change history tracking
+
+### 🔗 **Fireflies Integration**
+- Automatic webhook integration with Fireflies.ai
+- Real-time meeting transcription processing
+- Automatic pending meeting creation from Fireflies webhooks
+- Host and participant email tracking
+- Meeting metadata preservation
+
+### ⏳ **Pending Meetings**
+- View meetings processed from Fireflies
+- Filter meetings by user participation (host or attendee)
+- Accept pending meetings to link them to projects
+- Delete unwanted pending meetings
+- Automatic assignment to user's first project
+
+### 🤖 **AI-Powered Requirements Generation**
+- Integration with Dify workflow platform
+- Automatic requirement generation from meeting transcriptions
+- Smart requirement updates based on meeting content
+- AI-powered analysis of project needs
+- Requirement history tracking with AI origins
+
+
