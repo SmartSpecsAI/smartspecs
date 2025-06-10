@@ -4,8 +4,10 @@ import React, { useState, useEffect } from "react";
 import { collection, getDocs, orderBy, query, deleteDoc, doc, addDoc, where, Timestamp } from "firebase/firestore";
 import { firestore } from "@/smartspecs/lib/config/firebase-settings";
 import { message } from "antd";
-import { useSelector } from "react-redux";
-import { RootState } from "@/smartspecs/app-lib/redux/store";
+import { useSelector, useDispatch } from "react-redux";
+import { RootState, AppDispatch } from "@/smartspecs/app-lib/redux/store";
+import { processDifyWorkflow } from "@/smartspecs/app-lib/utils/difyProcessor";
+import { Requirement } from "@/smartspecs/app-lib/interfaces/requirement";
 import PendingMeetingsHeader from "./components/PendingMeetingsHeader";
 import ErrorState from "./components/ErrorState";
 import EmptyState from "./components/EmptyState";
@@ -39,6 +41,7 @@ const PendingMeetingsView: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { currentUser } = useSelector((state: RootState) => state.users);
+  const dispatch = useDispatch<AppDispatch>();
 
   useEffect(() => {
     if (currentUser) {
@@ -126,6 +129,8 @@ const PendingMeetingsView: React.FC = () => {
         return {
           id: doc.id,
           title: data.title,
+          description: data.description,
+          client: data.client,
           createdAt: data.createdAt,
           ...data
         };
@@ -161,16 +166,44 @@ const PendingMeetingsView: React.FC = () => {
         updatedAt: now
       };
 
-      await addDoc(meetingsCollection, meetingData);
+      const meetingDocRef = await addDoc(meetingsCollection, meetingData);
+      const createdMeetingId = meetingDocRef.id;
 
-      // 4. Delete the pending meeting
+      // 4. Get existing requirements for the project
+      const requirementsCollection = collection(firestore, "requirements");
+      const requirementsQuery = query(
+        requirementsCollection,
+        where("projectId", "==", projectId)
+      );
+      const requirementsSnapshot = await getDocs(requirementsQuery);
+      
+      const existingRequirements = requirementsSnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      })) as Requirement[];
+
+      // 5. Process with Dify workflow
+      await processDifyWorkflow({
+        dispatch,
+        projectId: projectId,
+        meetingId: createdMeetingId,
+        projectTitle: firstProject.title || "",
+        projectDescription: firstProject.description || "",
+        projectClient: firstProject.client || "",
+        meetingTitle: pendingMeeting.title,
+        meetingDescription: pendingMeeting.description,
+        meetingTranscription: pendingMeeting.transcription,
+        requirementsList: existingRequirements,
+      });
+
+      // 6. Delete the pending meeting
       const pendingMeetingRef = doc(firestore, "pending-meetings", meetingId);
       await deleteDoc(pendingMeetingRef);
 
-      // 5. Update local state
+      // 7. Update local state
       setMeetings(prev => prev.filter(meeting => meeting.id !== meetingId));
 
-      message.success(`Meeting accepted and linked to project: ${firstProject.title}`);
+      message.success(`Meeting accepted, linked to project "${firstProject.title}" and processed with Dify!`);
 
     } catch (err: any) {
       console.error("Error accepting meeting:", err);
